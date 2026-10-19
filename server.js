@@ -45,23 +45,9 @@ const cache = require('./util/apicache').middleware;
  */
 
 /**
- * 全局唯一设备标识符（GUID）
- * 对随机生成的 GUID 字符串进行 MD5 哈希，作为默认的设备标识
- * @type {string}
- * @constant
- */
-const guid = cryptoMd5(getGuid());
-
-/**
- * 随机生成的 10 位大写字符串，用作默认的开发设备标识（DEV ID）
- * @type {string}
- * @constant
- */
-const serverDev = randomString(10).toUpperCase();
-
-/**
  * .env 环境变量配置文件路径
  * 优先从项目根目录加载，如果文件存在则通过 dotenv 读取其中的环境变量
+ * 需在生成默认设备标识之前加载，KUGOU_API_SEED 也可以写在 .env 里
  * @type {string}
  */
 const envPath = path.join(process.cwd(), '.env');
@@ -70,6 +56,42 @@ if (fs.existsSync(envPath)) {
   // 静默加载 .env 文件中的环境变量到 process.env，quiet 抑制加载日志
   dotenv.config({ path: envPath, quiet: true });
 }
+
+/**
+ * 默认设备标识的种子
+ *
+ * 未配置 KUGOU_API_GUID / KUGOU_API_DEV / KUGOU_API_WEBGL 时，默认值原本每个进程随机生成一次。
+ * Vercel 等无服务器平台每次冷启动、每个并发实例都是新进程，浏览器又常常拦下跨站 Cookie，
+ * 结果同一个账号的请求在不同实例上变成不同设备，酷狗会要求重新验证（20028）甚至让登录失效。
+ * 有稳定的种子时（KUGOU_API_SEED，或 Vercel 自动注入的 VERCEL_PROJECT_ID）由它推导默认值，
+ * 同一个部署始终是同一台设备；都没有时保持原来的随机行为。
+ * @type {string}
+ * @constant
+ */
+const deviceSeed = process.env.KUGOU_API_SEED || process.env.VERCEL_PROJECT_ID || '';
+
+/**
+ * 全局唯一设备标识符（GUID）
+ * 对 GUID 字符串进行 MD5 哈希，作为默认的设备标识（有种子时由种子推导）
+ * @type {string}
+ * @constant
+ */
+const guid = cryptoMd5(deviceSeed ? `guid:${deviceSeed}` : getGuid());
+
+/**
+ * 10 位大写字符串，用作默认的开发设备标识（DEV ID，有种子时由种子推导）
+ * @type {string}
+ * @constant
+ */
+const serverDev = deviceSeed ? cryptoMd5(`dev:${deviceSeed}`).slice(0, 10).toUpperCase() : randomString(10).toUpperCase();
+
+/**
+ * 默认的 WebGL 指纹哈希（uint64 十进制字符串，有种子时由种子推导）
+ * 每个进程只生成一次：客户端没有带回 KUGOU_API_WEBGL Cookie 时，不再每个请求换一个指纹
+ * @type {string}
+ * @constant
+ */
+const serverWebGL = deviceSeed ? BigInt(`0x${cryptoMd5(`webgl:${deviceSeed}`).slice(0, 16)}`).toString() : generateWebGLHash();
 
 /**
  * 动态扫描指定目录，获取所有 API 模块的定义信息
@@ -254,7 +276,7 @@ async function consturctServer(moduleDefs) {
     };
 
     // 获取 env guid
-    const env_guid = isUUIDv4(process.env.KUGOU_API_GUID) ? cryptoMd5(process.env.KUGOU_API_GUID) : process.env.KUGOU_API_GUID;
+    const env_guid = isUUIDv4(process.env.KUGOU_API_GUID) ? cryptoMd5(process.env.KUGOU_API_GUID) : process.env.KUGOU_API_GUID || undefined;
 
     // 计算设备 MID（基于 GUID 的衍生标识）
     const mid = calculateMid(env_guid ?? guid);
@@ -263,9 +285,9 @@ async function consturctServer(moduleDefs) {
     ensureCookie('KUGOU_API_PLATFORM', process.env.platform);
     ensureCookie('KUGOU_API_MID', mid);
     ensureCookie('KUGOU_API_GUID', env_guid ?? guid);
-    ensureCookie('KUGOU_API_DEV', (process.env.KUGOU_API_DEV ?? serverDev).toUpperCase());
-    ensureCookie('KUGOU_API_MAC', (process.env.KUGOU_API_MAC ?? '02:00:00:00:00:00').toUpperCase());
-    ensureCookie('KUGOU_API_WEBGL', process.env.KUGOU_API_WEBGL ?? generateWebGLHash());
+    ensureCookie('KUGOU_API_DEV', (process.env.KUGOU_API_DEV || serverDev).toUpperCase());
+    ensureCookie('KUGOU_API_MAC', (process.env.KUGOU_API_MAC || '02:00:00:00:00:00').toUpperCase());
+    ensureCookie('KUGOU_API_WEBGL', process.env.KUGOU_API_WEBGL || serverWebGL);
 
     // 将注入后的 cookies 回写到 req 对象上，供后续中间件和路由处理器使用
     req.cookies = cookies;
