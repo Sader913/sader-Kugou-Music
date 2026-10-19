@@ -25,7 +25,7 @@ const CryptoJS = require('crypto-js');
 const { signKey, signatureAndroidParams, signatureRegisterParams, signatureWebParams } = require('./helper');
 const { parseCookieString } = require('./util');
 const { appid, clientver, liteAppid, liteClientver } = require('./config.json');
-const { resolveProxy } = require('./runtime');
+const { resolveProxy, resolveTimeout } = require('./runtime');
 const { generateSimulate } = require('./generate_simulate');
 const { cryptoMd5, rsaEncrypt2, publicLiteRasKey, publicRasKey } = require('./crypto');
 
@@ -56,6 +56,23 @@ const CLOUDLIST_CONF = {
  */
 
 /**
+ * 包装 async 执行器的 Promise
+ *
+ * `new Promise(async (resolve, reject) => ...)` 里在 try 之外抛出的异常（例如签名时参数缺失）
+ * 不会传给外层 Promise：请求会一直挂起直到平台超时，Node 15+ 还会因为未处理的 rejection 退出进程。
+ * 这里把这类异常转成一次普通的 502 失败。
+ *
+ * @param {(resolve: Function, reject: Function) => Promise<void>} executor - async 执行器
+ * @returns {Promise<UseAxiosResponse>}
+ */
+const guardedPromise = (executor) =>
+  new Promise((resolve, reject) => {
+    executor(resolve, reject).catch((e) => {
+      reject({ status: 502, body: { status: 0, msg: e?.message || String(e) }, cookie: [], headers: {} });
+    });
+  });
+
+/**
  * 创建并发送 API 请求
  *
  * 完整流程：
@@ -82,10 +99,11 @@ const CLOUDLIST_CONF = {
  * @param {boolean} [options.notSignature] - 是否跳过签名
  * @param {string} [options.ip] - 客户端 IP
  * @param {string} [options.realIP] - 真实 IP（优先级高于 ip）
+ * @param {number} [options.timeout] - 上游请求超时（毫秒），默认见 runtime.resolveTimeout
  * @returns {Promise<UseAxiosResponse>} 统一格式的响应对象
  */
 const createRequest = (options) => {
-  return new Promise(async (resolve, reject) => {
+  return guardedPromise(async (resolve, reject) => {
     const isLite = process.env.platform === 'lite';
 
     // ========== 从 Cookie 中提取设备标识 ==========
@@ -180,6 +198,7 @@ const createRequest = (options) => {
         : Object.assign({}, options?.headers || {}, headers),
       withCredentials: true,               // 携带 Cookie
       responseType: options.responseType,  // 响应类型（如 'arraybuffer'）
+      timeout: options.timeout ?? resolveTimeout(), // 上游超时，见 runtime.resolveTimeout
     };
 
     // ========== 代理配置 ==========
@@ -284,7 +303,7 @@ const createRequest = (options) => {
  * @returns {Promise<UseAxiosResponse>} 统一格式的响应对象
  */
 const createCloudRequest = (options) => {
-  return new Promise(async (resolve, reject) => {
+  return guardedPromise(async (resolve, reject) => {
     const isLite = process.env.platform === 'lite';
     const conf = CLOUDLIST_CONF[isLite ? 'lite' : 'default'];
     const cookie = options?.cookie || {};
@@ -357,6 +376,7 @@ const createCloudRequest = (options) => {
       data: body,
       headers: Object.assign({ 'Content-Type': 'application/json;charset=utf-8' }, headers),
       responseType: 'arraybuffer',
+      timeout: options.timeout ?? resolveTimeout(),
     };
 
     const proxyConfig = resolveProxy();

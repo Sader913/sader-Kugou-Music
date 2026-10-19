@@ -179,4 +179,27 @@ function resolveProxy() {
   return cachedProxy;
 }
 
-module.exports = { applyCliOverrides, parseCliArgs, resolveProxy };
+/**
+ * 默认的上游请求超时（毫秒）
+ *
+ * 酷狗接口偶尔会卡住不回。不设上限时请求会一直挂到平台把函数掐掉（如 Vercel 的 504），
+ * 那时返回的错误页没有跨域头，前端只能看到一次说不清原因的网络错误。
+ * @type {number}
+ */
+const DEFAULT_REQUEST_TIMEOUT = 15000;
+
+/**
+ * 解析上游请求超时
+ *
+ * 读取 KUGOU_API_TIMEOUT（毫秒），0 表示不限制；未设置或不是非负数时使用默认值。
+ *
+ * @returns {number} 超时毫秒数
+ */
+function resolveTimeout() {
+  const raw = process.env.KUGOU_API_TIMEOUT;
+  if (raw === undefined || raw.trim() === '') return DEFAULT_REQUEST_TIMEOUT;
+  const timeout = Number(raw);
+  return Number.isFinite(timeout) && timeout >= 0 ? timeout : DEFAULT_REQUEST_TIMEOUT;
+}
+
+module.exports = { applyCliOverrides, parseCliArgs, resolveProxy, resolveTimeout };

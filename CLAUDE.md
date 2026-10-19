@@ -124,10 +124,12 @@ node app.js --proxy=http://127.0.0.1:7890 --platform=lite
 | `PORT` | 服务端口 | 3000 |
 | `HOST` | 监听地址 | 空（所有地址） |
 | `KUGOU_API_PROXY` | HTTP 代理地址 | 空 |
-| `KUGOU_API_GUID` | 设备 GUID（建议 UUID v4） | 自动生成 |
-| `KUGOU_API_DEV` | 开发设备标识（10位大写字符串） | 自动生成 |
+| `KUGOU_API_GUID` | 设备 GUID（建议 UUID v4） | 由 `KUGOU_API_SEED` 推导，没有种子时随机 |
+| `KUGOU_API_DEV` | 开发设备标识（10位大写字符串） | 由 `KUGOU_API_SEED` 推导，没有种子时随机 |
 | `KUGOU_API_MAC` | 设备 MAC 地址 | 02:00:00:00:00:00 |
-| `KUGOU_API_WEBGL` | WebGL 指纹哈希 | 自动生成随机值 |
+| `KUGOU_API_WEBGL` | WebGL 指纹哈希 | 由 `KUGOU_API_SEED` 推导，没有种子时每个进程随机 |
+| `KUGOU_API_SEED` | 默认设备标识的种子，让无服务器部署的每个实例都是同一台设备 | Vercel 上为 `VERCEL_PROJECT_ID`，否则空 |
+| `KUGOU_API_TIMEOUT` | 请求酷狗接口的超时（毫秒），0 表示不限制 | 15000 |
 
 ## 开发规范
 
