@@ -1,0 +1,3962 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Python 蟒蛇闯关</title>
+<meta name="description" content="从零开始学 Python 的闯关小游戏：26 关、125 道题，每关一张图示，打开就能玩。">
+<meta name="theme-color" content="#EEF3FA" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0B1322" media="(prefers-color-scheme: dark)">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="蟒蛇闯关">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="format-detection" content="telephone=no">
+<meta property="og:title" content="Python 蟒蛇闯关">
+<meta property="og:description" content="从零开始学 Python 的闯关小游戏，打开就能玩。">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<style>
+:root { color-scheme: light; padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
+html { height: 100%; }
+body { margin: 0; }
+img { max-width: 100%; }
+[hidden] { display: none !important; }
+/* 布局：单列手机应用。顶部状态条 + 滚动内容 + 底部固定大按钮；关卡地图是一条随通关变长的蛇。 */
+:root {
+  /* 颜色：取自 Python 的蓝和黄，中性色偏蓝 */
+  --bg: #EEF3FA;
+  --surface: #FFFFFF;
+  --tint: #E3EBF7;
+  --ink: #15233F;
+  --ink-2: #55637E;
+  --ink-3: #8D99B0;
+  --line: #D3DDEC;
+  --blue: #2C6CB5;
+  --blue-text: #2462A8;
+  --blue-soft: #DCE9F8;
+  --btn: #2C6CB5;
+  --btn-edge: #1D4C84;
+  --yellow: #FFCB3D;
+  --yellow-edge: #D79B00;
+  --on-yellow: #2A2205;
+  --good: #17805A;
+  --good-bg: #E1F5EA;
+  --bad: #C63D30;
+  --bad-bg: #FCEAE7;
+  --code-bg: #101C36;
+  --code-bg-2: #0A1326;
+  --code-fg: #E4ECF9;
+  --code-dim: #8C9BBA;
+  --code-key: #7CC0FF;
+  --code-str: #FFD666;
+  --code-num: #FFA86B;
+  --code-fn: #8FE3B0;
+  --shadow: 0 1px 2px rgba(21, 35, 63, .06), 0 8px 24px rgba(21, 35, 63, .08);
+  /* 字体：正文用系统中文黑体，数字和代码用等宽体 */
+  --font-body: "PingFang SC", "HarmonyOS Sans SC", "MiSans", "Noto Sans SC", "Source Han Sans SC", "Microsoft YaHei", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: ui-monospace, "SF Mono", "JetBrains Mono", "Cascadia Mono", Menlo, Consolas, "Roboto Mono", "Noto Sans Mono CJK SC", monospace;
+  --gutter-l: max(16px, env(safe-area-inset-left, 0px));
+  --gutter-r: max(16px, env(safe-area-inset-right, 0px));
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0B1322; --surface: #142038; --tint: #1D2C4B; --ink: #E7EEFA; --ink-2: #A9B6CF; --ink-3: #7382A0; --line: #293A5E;
+    --blue: #5C9BE6; --blue-text: #86B7F2; --blue-soft: #1C3359; --btn: #3476CA; --btn-edge: #1F4E8C;
+    --yellow: #FFCF4A; --yellow-edge: #C99200; --on-yellow: #2A2205;
+    --good: #55CC9B; --good-bg: #12362B; --bad: #F58476; --bad-bg: #3D1E1D;
+    --code-bg: #070D1B; --code-bg-2: #040812;
+    --shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 8px 24px rgba(0, 0, 0, .35);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0B1322; --surface: #142038; --tint: #1D2C4B; --ink: #E7EEFA; --ink-2: #A9B6CF; --ink-3: #7382A0; --line: #293A5E;
+  --blue: #5C9BE6; --blue-text: #86B7F2; --blue-soft: #1C3359; --btn: #3476CA; --btn-edge: #1F4E8C;
+  --yellow: #FFCF4A; --yellow-edge: #C99200; --on-yellow: #2A2205;
+  --good: #55CC9B; --good-bg: #12362B; --bad: #F58476; --bad-bg: #3D1E1D;
+  --code-bg: #070D1B; --code-bg-2: #040812;
+  --shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 8px 24px rgba(0, 0, 0, .35);
+  color-scheme: dark;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+body {
+  background: var(--bg); color: var(--ink);
+  font-family: var(--font-body); font-size: 17px; line-height: 1.7;
+  /* 关掉连字：== != >= 这些符号必须按原样显示 */
+  font-variant-ligatures: none; font-feature-settings: "liga" 0, "calt" 0;
+  -webkit-font-smoothing: antialiased; -webkit-tap-highlight-color: transparent;
+  overflow-x: hidden;
+}
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 30; background: var(--bg); }
+button { font: inherit; color: inherit; background: none; border: 0; padding: 0; margin: 0; cursor: pointer; touch-action: manipulation; }
+button:focus-visible, input:focus-visible, a:focus-visible { outline: 3px solid var(--blue); outline-offset: 2px; }
+h1, h2, h3, p, ul, ol, figure { margin: 0; }
+ul, ol { padding: 0; list-style: none; }
+.ic { width: 1.25em; height: 1.25em; flex: none; display: block; }
+.num { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+
+.app { max-width: 560px; margin: 0 auto; padding-left: var(--gutter-l); padding-right: var(--gutter-r); padding-block: 0 112px; }
+.bar-in { max-width: 560px; margin: 0 auto; padding-left: var(--gutter-l); padding-right: var(--gutter-r); }
+
+/* ---------- 顶部状态条 ---------- */
+.top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; background: var(--bg); margin: 0 calc(var(--gutter-r) * -1) 0 calc(var(--gutter-l) * -1); padding: 10px var(--gutter-r) 10px var(--gutter-l); display: flex; align-items: center; gap: 12px; min-height: 60px; }
+.rank { flex: 1; min-width: 0; display: flex; align-items: center; gap: 10px; text-align: left; }
+.rank-badge { flex: none; width: 44px; height: 44px; border-radius: 14px; background: var(--btn); color: #fff; display: grid; place-items: center; font-family: var(--font-mono); font-weight: 800; font-size: 20px; line-height: 1; box-shadow: 0 3px 0 var(--btn-edge); align-content: center; justify-items: center; gap: 1px; }
+.rank-badge small { font-size: 10px; font-weight: 700; opacity: .85; line-height: 1; letter-spacing: .04em; }
+.rank-main { min-width: 0; flex: 1; display: grid; gap: 5px; }
+.rank-name { font-weight: 700; font-size: 15px; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.xpbar { height: 8px; border-radius: 4px; background: var(--tint); overflow: hidden; }
+.xpbar > i { display: block; height: 100%; border-radius: 4px; background: var(--yellow); transition: width .5s ease; }
+.stat { flex: none; display: flex; align-items: center; gap: 4px; font-family: var(--font-mono); font-weight: 800; font-size: 17px; font-variant-numeric: tabular-nums; line-height: 1; }
+.stat .ic { width: 22px; height: 22px; }
+.stat-star .ic { color: var(--yellow); stroke: var(--yellow-edge); }
+.stat-fire .ic { color: var(--bad); }
+.stat-fire.is-zero { color: var(--ink-3); } .stat-fire.is-zero .ic { color: var(--ink-3); }
+
+.top-nav { justify-content: space-between; }
+.icon-btn { width: 48px; height: 48px; border-radius: 14px; display: grid; place-items: center; background: var(--surface); border: 1.5px solid var(--line); color: var(--ink-2); flex: none; }
+.icon-btn .ic { width: 22px; height: 22px; }
+.top-title { flex: 1; min-width: 0; font-weight: 700; font-size: 16px; color: var(--ink-2); text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.top-spacer { width: 48px; flex: none; }
+
+/* ---------- 底部固定条 ---------- */
+.tabbar, .actionbar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 25; background: var(--surface); border-top: 1.5px solid var(--line); padding-bottom: env(safe-area-inset-bottom, 0px); }
+.tabbar .bar-in { display: grid; grid-template-columns: repeat(3, 1fr); }
+.tab { position: relative; min-height: 64px; display: grid; justify-items: center; align-content: center; gap: 2px; font-size: 13px; font-weight: 700; color: var(--ink-3); line-height: 1.2; }
+.tab .ic { width: 26px; height: 26px; }
+.tab.is-on { color: var(--blue-text); }
+.tab-badge { position: absolute; top: 8px; left: calc(50% + 6px); min-width: 20px; height: 20px; padding: 0 5px; border-radius: 10px; background: var(--bad); color: #fff; font-family: var(--font-mono); font-size: 12px; font-weight: 800; line-height: 20px; text-align: center; }
+.actionbar .bar-in { padding-top: 12px; padding-bottom: 12px; display: grid; gap: 10px; }
+
+.btn { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; min-height: 56px; padding: 10px 20px; border-radius: 16px; font-size: 18px; font-weight: 800; line-height: 1.25; text-align: center; background: var(--btn); color: #fff; box-shadow: 0 4px 0 var(--btn-edge); transition: transform .08s ease, box-shadow .08s ease; }
+.btn:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--btn-edge); }
+.btn[disabled] { background: var(--tint); color: var(--ink-3); box-shadow: 0 4px 0 var(--line); cursor: default; transform: none; }
+.btn-ghost { background: var(--surface); color: var(--blue-text); box-shadow: 0 4px 0 var(--line); border: 1.5px solid var(--line); }
+.btn-ghost:active { box-shadow: 0 1px 0 var(--line); }
+.btn-good { background: var(--good); box-shadow: 0 4px 0 color-mix(in srgb, var(--good) 70%, #000); }
+.btn-good:active { box-shadow: 0 1px 0 color-mix(in srgb, var(--good) 70%, #000); }
+.btn-bad { background: var(--bad); box-shadow: 0 4px 0 color-mix(in srgb, var(--bad) 70%, #000); }
+.btn-bad:active { box-shadow: 0 1px 0 color-mix(in srgb, var(--bad) 70%, #000); }
+.btn-good, .btn-bad { color: var(--surface); }
+.btn-text { min-height: 48px; width: 100%; font-weight: 700; font-size: 16px; color: var(--ink-2); border-radius: 12px; }
+.btn-sm { min-height: 44px; width: auto; padding: 6px 16px; font-size: 15px; border-radius: 12px; box-shadow: 0 3px 0 var(--btn-edge); }
+.btn-sm.btn-ghost { box-shadow: 0 3px 0 var(--line); }
+
+/* ---------- 地图 ---------- */
+.hello { margin-top: 4px; padding: 14px 16px; border-radius: 16px; background: var(--blue-soft); color: var(--ink); font-size: 16px; line-height: 1.6; }
+.hello b { font-weight: 800; }
+.map { position: relative; margin-top: 8px; container-type: inline-size; }
+.snake { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.snake path { fill: none; vector-effect: non-scaling-stroke; stroke-linecap: round; stroke-linejoin: round; }
+.snake .trail { stroke: var(--line); stroke-width: 8px; stroke-dasharray: 2 16; }
+.snake .body { stroke: var(--btn); stroke-width: 26px; }
+.snake .belly { stroke: var(--yellow); stroke-width: 6px; stroke-dasharray: 1 18; }
+.snake .tail { stroke: var(--btn); stroke-width: 12px; }
+.chap { position: absolute; left: 0; right: 0; height: 64px; display: flex; align-items: center; gap: 12px; padding: 0 2px; background: var(--bg); }
+.chap-no { flex: none; font-family: var(--font-mono); font-size: 13px; font-weight: 800; color: var(--blue-text); background: var(--blue-soft); border-radius: 8px; padding: 4px 8px; line-height: 1.2; }
+.chap-main { flex: 1; min-width: 0; display: grid; }
+.chap-title { font-size: 20px; font-weight: 800; line-height: 1.25; }
+.chap-sub { font-size: 14px; color: var(--ink-2); line-height: 1.35; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.chap-prog { flex: none; font-family: var(--font-mono); font-size: 14px; font-weight: 700; color: var(--ink-2); }
+
+.node { position: absolute; width: 64px; height: 64px; margin: -32px 0 0 -32px; border-radius: 50%; display: grid; place-items: center; }
+.node-dot { width: 64px; height: 64px; border-radius: 50%; display: grid; place-items: center; font-family: var(--font-mono); font-weight: 800; font-size: 22px; line-height: 1; }
+.node.is-done .node-dot { background: var(--btn); color: #fff; border: 4px solid var(--surface); box-shadow: 0 0 0 3px var(--btn); }
+.node.is-locked .node-dot { background: var(--surface); color: var(--ink-3); border: 2px dashed var(--ink-3); }
+.node.is-locked .node-dot .ic { width: 24px; height: 24px; }
+.node.is-current { width: 84px; height: 84px; margin: -42px 0 0 -42px; z-index: 2; }
+.head { width: 84px; height: 100px; position: absolute; left: 0; top: 0; overflow: visible; }
+.head .skin { fill: var(--btn); stroke: var(--surface); stroke-width: 4; }
+.head .eye { fill: #fff; } .head .pupil { fill: #15233F; }
+.head .tongue { fill: none; stroke: var(--bad); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+.head .ring { fill: none; stroke: var(--yellow); stroke-width: 4; transform-origin: 42px 42px; animation: ring 1.8s ease-out infinite; }
+@keyframes ring { 0% { transform: scale(.92); opacity: .9; } 100% { transform: scale(1.28); opacity: 0; } }
+.node-label { position: absolute; top: 50%; transform: translateY(-50%); width: max-content; max-width: 46vw; max-width: calc(72cqw - 60px); display: grid; gap: 2px; text-align: left; background: var(--bg); padding: 4px 8px; border-radius: 12px; }
+.node.on-left .node-label { left: calc(100% + 8px); }
+.node.on-right .node-label { right: calc(100% + 8px); text-align: right; justify-items: end; }
+.node-no { font-family: var(--font-mono); font-size: 13px; font-weight: 700; color: var(--ink-2); line-height: 1.2; }
+.node-title { font-size: 17px; font-weight: 800; line-height: 1.3; }
+.node.is-locked .node-title, .node.is-locked .node-no { color: var(--ink-3); }
+.node-stars { display: flex; gap: 2px; }
+.node-stars .ic { width: 17px; height: 17px; color: var(--yellow); stroke: var(--yellow-edge); }
+.node-stars .ic.off { color: transparent; stroke: var(--ink-3); }
+.node-go { display: inline-flex; align-items: center; gap: 4px; background: var(--yellow); color: var(--on-yellow); font-size: 14px; font-weight: 800; border-radius: 10px; padding: 3px 10px; line-height: 1.4; box-shadow: 0 2px 0 var(--yellow-edge); }
+.finish { margin-top: 12px; padding: 20px 16px; border-radius: 20px; background: var(--yellow); color: var(--on-yellow); text-align: center; display: grid; gap: 4px; justify-items: center; }
+.finish b { font-size: 22px; font-weight: 800; line-height: 1.3; }
+.finish .ic { width: 40px; height: 40px; }
+
+/* ---------- 讲解 ---------- */
+.lesson-head { padding-top: 6px; display: grid; gap: 6px; }
+.eyebrow { font-family: var(--font-mono); font-size: 14px; font-weight: 800; color: var(--blue-text); letter-spacing: .04em; }
+h1 { font-size: 30px; font-weight: 800; line-height: 1.25; text-wrap: balance; }
+.hook { font-size: 18px; color: var(--ink-2); line-height: 1.5; }
+.fig { margin-top: 18px; background: var(--surface); border: 1.5px solid var(--line); border-radius: 18px; padding: 14px 12px 12px; }
+.fig svg { display: block; width: 100%; height: auto; }
+.fig figcaption { margin-top: 10px; padding: 10px 4px 0; border-top: 1.5px dashed var(--line); font-size: 15px; line-height: 1.55; color: var(--ink-2); }
+.sec { margin-top: 26px; display: grid; gap: 10px; }
+.sec-tag { justify-self: start; font-size: 15px; font-weight: 800; line-height: 1.2; color: var(--blue-text); background: var(--blue-soft); padding: 6px 12px; border-radius: 10px; }
+.sec p { font-size: 17px; }
+.sec ul { display: grid; gap: 8px; }
+.sec li { position: relative; padding-left: 20px; font-size: 17px; line-height: 1.65; }
+.sec li::before { content: ""; position: absolute; left: 3px; top: .72em; width: 8px; height: 8px; border-radius: 50%; background: var(--yellow); box-shadow: 0 0 0 1.5px var(--yellow-edge); }
+.sec-tip { background: var(--surface); border: 1.5px solid var(--line); border-radius: 16px; padding: 14px 16px; }
+.sec-tip .sec-tag { color: var(--on-yellow); background: var(--yellow); }
+code { font-family: var(--font-mono); font-size: .9em; background: var(--tint); color: var(--ink); padding: 2px 6px; border-radius: 6px; overflow-wrap: anywhere; }
+strong, b { font-weight: 800; }
+
+.code { margin: 0; background: var(--code-bg); color: var(--code-fg); border-radius: 14px; padding: 14px 16px; overflow-x: auto; -webkit-overflow-scrolling: touch; font-family: var(--font-mono); font-size: 14px; line-height: 1.7; white-space: pre; tab-size: 4; }
+@media (min-width: 400px) { .code { font-size: 15px; } }
+.c-key { color: var(--code-key); } .c-str { color: var(--code-str); } .c-num { color: var(--code-num); } .c-fn { color: var(--code-fn); } .c-com { color: var(--code-dim); }
+.blank { display: inline-block; min-width: 3.2em; text-align: center; border-radius: 6px; background: var(--yellow); color: var(--on-yellow); font-weight: 800; padding: 0 6px; line-height: 1.45; }
+.blank.is-right { background: #2FB37E; color: #fff; }
+.demo { border-radius: 16px; overflow: hidden; background: var(--code-bg); }
+.demo .code { border-radius: 0; }
+.demo-bar { display: flex; gap: 10px; padding: 10px 12px; background: var(--code-bg-2); align-items: center; }
+.demo-btn { min-height: 44px; padding: 6px 16px; border-radius: 12px; font-size: 16px; font-weight: 800; display: inline-flex; align-items: center; gap: 6px; line-height: 1.2; }
+.demo-run { background: var(--yellow); color: var(--on-yellow); box-shadow: 0 3px 0 var(--yellow-edge); }
+.demo-run:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--yellow-edge); }
+.demo-copy { color: var(--code-fg); border: 1.5px solid #3A4B72; margin-left: auto; font-weight: 700; font-size: 15px; }
+.demo-out { border-top: 1.5px dashed #3A4B72; padding: 12px 16px 14px; background: var(--code-bg-2); }
+.demo-out-label { font-size: 13px; font-weight: 700; color: var(--code-dim); line-height: 1.4; }
+.demo-out pre { margin: 4px 0 0; font-family: var(--font-mono); font-size: 15px; line-height: 1.7; color: var(--code-fg); white-space: pre-wrap; overflow-wrap: anywhere; min-height: 1.7em; }
+.demo-out .typed { color: var(--code-str); font-weight: 700; }
+.demo-out .ln-in { display: block; animation: lineIn .22s ease both; }
+@keyframes lineIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+.demo-note { font-size: 14px; color: var(--ink-2); line-height: 1.5; }
+
+/* 图示里的 SVG 元素 */
+.fig text { font-family: var(--font-body); }
+.fig .t { font-size: 13px; fill: var(--ink); }
+.fig .ts { font-size: 12px; fill: var(--ink-2); }
+.fig .tm { font-family: var(--font-mono); font-size: 12.5px; fill: var(--ink); white-space: pre; }
+.fig .tl { font-family: var(--font-mono); font-size: 17px; font-weight: 800; fill: var(--ink); }
+.fig .tc { font-family: var(--font-mono); font-size: 12.5px; fill: var(--code-fg); white-space: pre; }
+.fig .tb { font-weight: 800; }
+.fig .tc-key { fill: var(--code-key); } .fig .tc-dim { fill: var(--code-dim); }
+.fig .t-blue { fill: var(--blue-text); } .fig .t-good { fill: var(--good); } .fig .t-bad { fill: var(--bad); } .fig .t-mute { fill: var(--ink-3); } .fig .t-ink { fill: var(--ink); }
+.fig .on-yel { fill: var(--on-yellow); } .fig .on-blue { fill: #fff; }
+.fig .box { fill: var(--surface); stroke: var(--ink-3); stroke-width: 1.5; }
+.fig .box-soft { fill: var(--tint); stroke: none; }
+.fig .box-yel { fill: var(--yellow); stroke: var(--yellow-edge); }
+.fig .box-blue { fill: var(--btn); stroke: none; }
+.fig .box-code { fill: var(--code-bg); stroke: none; }
+.fig .box-good { fill: var(--good-bg); stroke: var(--good); }
+.fig .box-bad { fill: var(--bad-bg); stroke: var(--bad); }
+.fig .box-hi { fill: var(--blue-soft); stroke: var(--blue); }
+.fig .box-dash { fill: none; stroke: var(--ink-3); stroke-width: 1.5; stroke-dasharray: 4 3; }
+.fig .dot { fill: var(--ink-2); } .fig .dot-blue { fill: var(--btn); } .fig .dot-yel { fill: var(--yellow); stroke: var(--yellow-edge); stroke-width: 1.5; }
+.fig .ln { fill: none; stroke: var(--ink-2); stroke-width: 1.5; }
+.fig .ln-blue { stroke: var(--blue); } .fig .ln-good { stroke: var(--good); } .fig .ln-bad { stroke: var(--bad); }
+.fig .ln-yel { stroke: var(--yellow-edge); stroke-width: 2.5; stroke-linecap: round; }
+.fig .ln-thick { stroke-width: 2.5; stroke-linecap: round; }
+.fig .ln-faint { stroke: var(--line); }
+.fig .hd { fill: var(--ink-2); } .fig .hd-blue { fill: var(--blue); } .fig .hd-good { fill: var(--good); } .fig .hd-bad { fill: var(--bad); }
+.fig .venn-a { fill: var(--blue); fill-opacity: .2; stroke: var(--blue); stroke-width: 1.5; }
+.fig .venn-b { fill: var(--yellow); fill-opacity: .32; stroke: var(--yellow-edge); stroke-width: 1.5; }
+
+/* ---------- 答题 ---------- */
+.progress { flex: 1; display: flex; gap: 5px; min-width: 0; }
+.progress i { flex: 1; height: 10px; border-radius: 5px; background: var(--tint); }
+.progress i.is-right { background: var(--good); } .progress i.is-wrong { background: var(--bad); } .progress i.is-now { background: var(--yellow); box-shadow: 0 0 0 1.5px var(--yellow-edge); }
+.quiz { padding-top: 6px; display: grid; gap: 16px; }
+.q-meta { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.q-type { font-size: 14px; font-weight: 800; line-height: 1.2; padding: 5px 10px; border-radius: 8px; background: var(--blue-soft); color: var(--blue-text); }
+.q-from { font-size: 14px; color: var(--ink-2); line-height: 1.2; }
+.q-stem { font-size: 21px; font-weight: 800; line-height: 1.45; text-wrap: pretty; }
+.q-stem code { font-size: .86em; }
+.opts { display: grid; gap: 12px; }
+.opt { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 62px; padding: 12px 14px; text-align: left; background: var(--surface); border: 2px solid var(--line); border-radius: 16px; box-shadow: 0 3px 0 var(--line); font-size: 17px; line-height: 1.5; transition: transform .08s ease; }
+.opt:active:not([disabled]) { transform: translateY(2px); box-shadow: 0 1px 0 var(--line); }
+.opt-key { flex: none; width: 32px; height: 32px; border-radius: 10px; display: grid; place-items: center; background: var(--tint); color: var(--ink-2); font-family: var(--font-mono); font-weight: 800; font-size: 15px; line-height: 1; }
+.opt-key .ic { width: 18px; height: 18px; }
+.opt-body { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.opt-body pre { margin: 0; font-family: var(--font-mono); font-size: 16px; line-height: 1.5; white-space: pre-wrap; overflow-wrap: anywhere; }
+.opt-body code { background: none; padding: 0; font-size: 16px; }
+.opt-body .opt-note { color: var(--ink-2); font-weight: 700; }
+.opt.is-picked { border-color: var(--blue); background: var(--blue-soft); box-shadow: 0 3px 0 var(--blue); }
+.opt.is-picked .opt-key { background: var(--btn); color: #fff; }
+.opt[disabled] { cursor: default; }
+.opt.is-dim { opacity: .5; box-shadow: none; }
+.opt.is-right { border-color: var(--good); background: var(--good-bg); box-shadow: 0 3px 0 var(--good); }
+.opt.is-right .opt-key { background: var(--good); color: var(--surface); }
+.opt.is-wrong { border-color: var(--bad); background: var(--bad-bg); box-shadow: 0 3px 0 var(--bad); }
+.opt.is-wrong .opt-key { background: var(--bad); color: var(--surface); }
+
+.fill { display: grid; gap: 10px; }
+.fill-label { font-size: 15px; font-weight: 700; color: var(--ink-2); }
+.fill-input { width: 100%; height: 60px; padding: 0 16px; border-radius: 16px; border: 2px solid var(--line); background: var(--surface); color: var(--ink); font-family: var(--font-mono); font-size: 22px; font-weight: 700; }
+.fill-input::placeholder { color: var(--ink-3); font-weight: 400; font-size: 17px; font-family: var(--font-body); }
+.fill-input:focus { border-color: var(--blue); outline: none; box-shadow: 0 0 0 4px var(--blue-soft); }
+.fill-input.is-right { border-color: var(--good); background: var(--good-bg); }
+.fill-input.is-wrong { border-color: var(--bad); background: var(--bad-bg); }
+.keys { display: flex; gap: 8px; overflow-x: auto; padding: 2px 0 6px; margin-right: calc(var(--gutter-r) * -1); padding-right: var(--gutter-r); scrollbar-width: none; }
+.keys::-webkit-scrollbar { display: none; }
+.key { flex: none; min-width: 46px; height: 46px; border-radius: 12px; background: var(--surface); border: 1.5px solid var(--line); box-shadow: 0 2px 0 var(--line); font-family: var(--font-mono); font-size: 19px; font-weight: 700; color: var(--ink); line-height: 1; }
+.key:active { transform: translateY(2px); box-shadow: none; }
+
+.fb { border-radius: 18px; padding: 16px; display: grid; gap: 12px; scroll-margin-bottom: 120px; animation: fbIn .25s ease both; }
+@keyframes fbIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+.fb.good { background: var(--good-bg); }
+.fb.bad { background: var(--bad-bg); }
+.fb-head { display: flex; align-items: center; gap: 10px; font-size: 21px; font-weight: 800; line-height: 1.3; }
+.fb.good .fb-head { color: var(--good); } .fb.bad .fb-head { color: var(--bad); }
+.fb-head .ic { width: 30px; height: 30px; }
+.fb-gain { margin-left: auto; font-family: var(--font-mono); font-size: 18px; }
+.fb-streak { font-size: 15px; font-weight: 700; color: var(--good); display: flex; align-items: center; gap: 4px; line-height: 1.3; }
+.fb-streak .ic { width: 18px; height: 18px; }
+.fb-block { display: grid; gap: 2px; }
+.fb-label { font-size: 14px; font-weight: 800; line-height: 1.4; color: var(--ink-2); }
+.fb.bad .fb-label.is-why { color: var(--bad); }
+.fb-block p { font-size: 17px; line-height: 1.65; }
+.fb-ans { font-family: var(--font-mono); font-size: 16px; font-weight: 700; white-space: pre-wrap; overflow-wrap: anywhere; line-height: 1.5; }
+.fb-ans.plain { font-family: var(--font-body); }
+.fb-note { font-size: 15px; color: var(--ink-2); line-height: 1.55; }
+
+/* ---------- 结算 ---------- */
+.result { padding-top: 28px; display: grid; gap: 18px; justify-items: center; text-align: center; }
+.stars { display: flex; gap: 10px; align-items: flex-end; height: 92px; }
+.stars .ic { width: 68px; height: 68px; color: var(--yellow); stroke: var(--yellow-edge); animation: pop .45s cubic-bezier(.2, 1.6, .4, 1) both; }
+.stars .ic:nth-child(2) { width: 88px; height: 88px; animation-delay: .15s; }
+.stars .ic:nth-child(3) { animation-delay: .3s; }
+.stars .ic.off { color: var(--tint); stroke: var(--ink-3); animation: none; }
+@keyframes pop { from { transform: scale(0) rotate(-30deg); opacity: 0; } to { transform: none; opacity: 1; } }
+.result h1 { font-size: 32px; }
+.result-sub { font-size: 17px; color: var(--ink-2); max-width: 30em; }
+.tiles { width: 100%; display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.tile { background: var(--surface); border: 1.5px solid var(--line); border-radius: 16px; padding: 12px 6px; display: grid; gap: 2px; min-width: 0; }
+.tile b { font-family: var(--font-mono); font-size: 24px; font-weight: 800; line-height: 1.2; font-variant-numeric: tabular-nums; }
+.tile span { font-size: 13px; color: var(--ink-2); line-height: 1.3; }
+.levelup { width: 100%; background: var(--yellow); color: var(--on-yellow); border-radius: 18px; padding: 14px 16px; display: grid; gap: 2px; box-shadow: 0 4px 0 var(--yellow-edge); animation: pop .5s .4s cubic-bezier(.2, 1.4, .4, 1) both; }
+.levelup small { font-size: 14px; font-weight: 800; letter-spacing: .08em; }
+.levelup b { font-size: 22px; line-height: 1.3; }
+.result-actions { width: 100%; display: grid; gap: 12px; margin-top: 4px; }
+.result-note { font-size: 15px; color: var(--ink-2); }
+
+/* ---------- 错题本 / 我的 ---------- */
+.page-head { padding-top: 8px; display: grid; gap: 4px; }
+.page-head h1 { font-size: 28px; }
+.page-head p { color: var(--ink-2); font-size: 16px; }
+.empty { margin-top: 24px; padding: 28px 20px; border: 2px dashed var(--line); border-radius: 20px; text-align: center; display: grid; gap: 8px; justify-items: center; color: var(--ink-2); }
+.empty .ic { width: 44px; height: 44px; color: var(--ink-3); }
+.empty b { color: var(--ink); font-size: 19px; }
+.book-cta { margin-top: 16px; }
+.book-group { margin-top: 22px; display: grid; gap: 10px; }
+.book-group h2 { font-size: 15px; font-weight: 800; color: var(--ink-2); line-height: 1.3; }
+.wq { background: var(--surface); border: 1.5px solid var(--line); border-radius: 16px; padding: 14px; display: grid; gap: 10px; }
+.wq-top { display: flex; align-items: center; gap: 8px; }
+.wq-n { margin-left: auto; font-size: 14px; font-weight: 700; color: var(--bad); }
+.wq-stem { font-size: 17px; font-weight: 700; line-height: 1.5; }
+.wq .code { font-size: 13px; padding: 10px 12px; border-radius: 10px; max-height: 9.5em; }
+.wq .btn { justify-self: start; }
+
+.card { margin-top: 16px; background: var(--surface); border: 1.5px solid var(--line); border-radius: 20px; padding: 16px; display: grid; gap: 12px; }
+.card h2 { font-size: 18px; font-weight: 800; line-height: 1.3; }
+.card p { font-size: 16px; color: var(--ink-2); line-height: 1.6; }
+.me-rank { display: flex; align-items: center; gap: 14px; }
+.me-rank .rank-badge { width: 64px; height: 64px; border-radius: 20px; font-size: 28px; }
+.me-rank .rank-badge small { font-size: 12px; }
+.me-rank-main { flex: 1; min-width: 0; display: grid; gap: 6px; }
+.me-rank-name { font-size: 22px; font-weight: 800; line-height: 1.25; }
+.me-rank-next { font-size: 14px; color: var(--ink-2); line-height: 1.3; }
+.me-rank .xpbar { height: 12px; border-radius: 6px; }
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.chap-rows { display: grid; gap: 12px; }
+.chap-row { display: grid; grid-template-columns: 1fr auto; gap: 4px 10px; align-items: center; font-size: 16px; }
+.chap-row b { font-weight: 700; }
+.chap-row span { font-family: var(--font-mono); font-size: 14px; color: var(--ink-2); }
+.chap-row .xpbar { grid-column: 1 / -1; }
+.chap-row .xpbar > i { background: var(--btn); }
+.steps { display: grid; gap: 8px; counter-reset: s; }
+.steps li { counter-increment: s; position: relative; padding-left: 34px; font-size: 16px; line-height: 1.6; color: var(--ink); }
+.steps li::before { content: counter(s); position: absolute; left: 0; top: .15em; width: 24px; height: 24px; border-radius: 8px; background: var(--blue-soft); color: var(--blue-text); font-family: var(--font-mono); font-weight: 800; font-size: 14px; display: grid; place-items: center; line-height: 1; }
+.confirm { display: grid; gap: 10px; padding: 14px; border-radius: 14px; background: var(--bad-bg); }
+.confirm p { color: var(--ink); }
+.confirm-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.warn { padding: 12px 14px; border-radius: 14px; background: var(--bad-bg); color: var(--ink); font-size: 15px; line-height: 1.55; }
+
+.toast { position: fixed; left: 50%; bottom: calc(96px + env(safe-area-inset-bottom, 0px)); transform: translate(-50%, 12px); z-index: 40; max-width: calc(100% - 32px); background: var(--ink); color: var(--bg); font-size: 16px; font-weight: 700; line-height: 1.4; padding: 12px 18px; border-radius: 14px; opacity: 0; pointer-events: none; transition: opacity .2s ease, transform .2s ease; text-align: center; }
+.toast.is-on { opacity: 1; transform: translate(-50%, 0); }
+.float-gain { position: fixed; z-index: 41; left: 50%; top: 26%; transform: translateX(-50%); font-family: var(--font-mono); font-size: 34px; font-weight: 800; color: var(--good); pointer-events: none; animation: floatUp .9s ease-out both; text-shadow: 0 2px 0 var(--surface); }
+@keyframes floatUp { 0% { opacity: 0; transform: translate(-50%, 16px) scale(.7); } 25% { opacity: 1; transform: translate(-50%, 0) scale(1.1); } 100% { opacity: 0; transform: translate(-50%, -56px) scale(1); } }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+  .head .ring { display: none; }
+}
+</style>
+</head>
+<body>
+<div class="app" id="view"></div>
+<div id="bar"></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<noscript><p style="padding:24px;font-size:18px">这个游戏需要开启 JavaScript 才能运行。</p></noscript>
+<script>
+(function () {
+/* ===== 关卡内容（第一、二章）===== */
+var py = String.raw;
+var OUT_Q = '这段代码运行后，屏幕上显示什么？';
+var CHAPTERS = [
+  { id: 'c1', title: '起步', sub: '让 Python 开口说话' },
+  { id: 'c2', title: '判断', sub: '让程序学会做选择' },
+  { id: 'c3', title: '列表与循环', sub: '一次处理一大批数据' },
+  { id: 'c4', title: '更多容器', sub: '元组、字典、集合各有所长' },
+  { id: 'c5', title: '函数与字符串', sub: '把代码打包起来反复用' },
+  { id: 'c6', title: '进阶', sub: '排错、存文件、借工具、造对象' },
+];
+var LEVELS = [];
+function L(level) { LEVELS.push(level); }
+
+/* ---------- 第一章 起步 ---------- */
+
+L({
+  id: 'print', ch: 'c1', title: 'print 输出', hook: '让 Python 把话显示到屏幕上',
+  syntax: py`print("你好")
+print(123)
+print("年龄", 18)`,
+  how: [
+    '`print` 后面跟一对英文圆括号 `()`，要显示的内容放在括号里。',
+    '文字要用引号包起来，单引号、双引号都可以；数字不用引号。',
+    '用逗号隔开，可以一次显示多个内容，它们之间会自动加一个空格。',
+  ],
+  mean: 'print 是“打印”的意思。Python 运行到这一行，就把括号里的内容显示在屏幕上，然后自动换到下一行。',
+  use: '程序算出的结果，不 print 出来你就看不到。它也是找错误最常用的办法：在可疑的地方 print 一下，看看值对不对。',
+  example: {
+    code: py`print("你好，Python！")
+print(2026)
+print("我今年", 18, "岁")
+# 以 # 开头的是注释，Python 会跳过它`,
+    out: '你好，Python！\n2026\n我今年 18 岁',
+  },
+  tip: '括号、引号、逗号都必须是英文符号。写成中文的 `（）`、`“”`、`，` 会报错。',
+  questions: [
+    {
+      id: 'print-1', type: 'choice', q: '下面哪一行能在屏幕上显示 你好？',
+      opts: [
+        { t: '`print("你好")`', ok: true },
+        { t: '`print(你好)`', why: '没有引号，Python 会把 你好 当成一个变量名去找，找不到就报错。文字必须加引号。' },
+        { t: '`Print("你好")`', why: 'Python 区分大小写，`Print` 和 `print` 不是同一个东西。必须全部小写。' },
+        { t: '`print "你好"`', why: '少了括号。print 后面必须跟一对圆括号 `()`。' },
+      ],
+      explain: '正确写法有三个要点：`print` 全小写、后面有圆括号、文字用引号包起来。',
+      checks: [
+        { code: py`print(你好)`, err: 'NameError' },
+        { code: py`Print("你好")`, err: 'NameError' },
+        { code: py`print "你好"`, err: 'SyntaxError' },
+      ],
+    },
+    {
+      id: 'print-2', type: 'output', q: OUT_Q,
+      code: py`print("1 + 1")
+print(1 + 1)`,
+      opts: [
+        { t: '1 + 1\n2', ok: true },
+        { t: '2\n2', why: '第一行的 1 + 1 在引号里。引号里的内容是文字，会原样显示，不会被计算。' },
+        { t: '1 + 1\n1 + 1', why: '第二行没有引号，Python 会先算出 1 + 1 的结果 2，再显示出来。' },
+        { t: '1 + 12', why: '每个 print 显示完都会自动换行，所以两次输出在两行，不会连在一起。' },
+      ],
+      explain: '有引号：原样显示。没引号：先计算，再显示结果。',
+    },
+    {
+      id: 'print-3', type: 'fill', q: '补全代码，让屏幕显示 Hello',
+      code: py`____("Hello")`,
+      answers: ['print'], expect: 'Hello',
+      hints: {
+        'Print': 'Python 区分大小写，要全部小写：print。',
+        'PRINT': 'Python 区分大小写，要全部小写：print。',
+        'printf': 'printf 是 C 语言的写法，Python 里是 print。',
+        'echo': 'echo 是别的语言的写法，Python 里是 print。',
+      },
+      explain: '显示内容用 `print`，全小写。',
+    },
+    {
+      id: 'print-4', type: 'output', q: OUT_Q,
+      code: py`print("苹果", "香蕉")`,
+      opts: [
+        { t: '苹果 香蕉', ok: true },
+        { t: '苹果香蕉', why: '用逗号隔开的内容，显示时中间会自动加一个空格。' },
+        { t: '苹果,香蕉', why: '这里的逗号只是分隔符，告诉 print 有两个内容，它本身不会被显示。' },
+        { t: '苹果\n香蕉', why: '它们在同一个 print 里，所以显示在同一行。写两个 print 才会分成两行。' },
+      ],
+      explain: '一个 print 里用逗号隔开多个内容：显示在同一行，中间自动加空格。',
+    },
+    {
+      id: 'print-5', type: 'output', q: OUT_Q,
+      code: py`# print("第一行")
+print("第二行")`,
+      opts: [
+        { t: '第二行', ok: true },
+        { t: '第一行\n第二行', why: '第一行以 # 开头，整行都是注释。注释是写给人看的，Python 不会执行它。' },
+        { t: '# print("第一行")\n第二行', why: '注释既不会被执行，也不会被显示出来。' },
+        { none: true, why: '第二行没有 #，是正常的代码，会被执行。' },
+      ],
+      explain: '`#` 后面的内容是注释，Python 直接跳过。常用来写说明，或者暂时“关掉”一行代码。',
+    },
+  ],
+});
+
+L({
+  id: 'var', ch: 'c1', title: '变量', hook: '给数据起个名字，存起来以后用',
+  syntax: py`age = 18
+name = "小明"
+age = age + 1`,
+  how: [
+    '写法是 `名字 = 值`。`=` 的意思是“把右边的值存起来，贴上左边的名字”，它不是数学里的“等于”。',
+    '变量名可以用字母、数字和下划线，不能以数字开头，不能有空格。大小写算不同的名字。',
+    '对同一个变量再赋值，旧的值就被新的值换掉。',
+  ],
+  mean: '变量像一个贴了标签的盒子。`age = 18` 就是把 18 放进贴着 age 标签的盒子里。以后写 age，Python 就取出盒子里的值来用。',
+  use: '数据存进变量，才能反复使用、随时修改。游戏里的分数、血量、玩家名字，都是变量。',
+  example: {
+    code: py`name = "小明"
+age = 18
+print(name, "今年", age, "岁")
+age = age + 1
+print("明年", age, "岁")`,
+    out: '小明 今年 18 岁\n明年 19 岁',
+  },
+  tip: '`age = age + 1` 要从右往左读：先算右边的 18 + 1，再把结果 19 存回 age。',
+  questions: [
+    {
+      id: 'var-1', type: 'output', q: OUT_Q,
+      code: py`x = 5
+x = x + 2
+print(x)`,
+      opts: [
+        { t: '7', ok: true },
+        { t: '5', why: '第二行已经把 x 更新了：先算 5 + 2，再把 7 存回 x。原来的 5 被换掉了。' },
+        { t: 'x + 2', why: 'print(x) 里没有引号，显示的是 x 里存的值，不是文字。' },
+        { t: '52', why: '5 和 2 都是数字，`+` 做的是加法，得到 7。只有文字相加才会接在一起。' },
+      ],
+      explain: '`x = x + 2`：先取出 x 的值 5，加 2 得 7，再存回 x。',
+    },
+    {
+      id: 'var-2', type: 'choice', q: '下面哪个是合法的变量名？',
+      opts: [
+        { t: '`my_score`', ok: true },
+        { t: '`2name`', why: '变量名不能以数字开头。可以改成 `name2`。' },
+        { t: '`my score`', why: '变量名里不能有空格。想分开两个词，用下划线：`my_score`。' },
+        { t: '`my-score`', why: '减号会被 Python 当成减法，变成“my 减 score”。要用下划线。' },
+      ],
+      explain: '变量名只能用字母、数字、下划线，而且不能以数字开头。',
+      checks: [
+        { code: py`my_score = 1
+print(my_score)`, out: '1' },
+        { code: py`2name = 1`, err: 'SyntaxError' },
+        { code: py`my score = 1`, err: 'SyntaxError' },
+        { code: py`my-score = 1`, err: 'SyntaxError' },
+      ],
+    },
+    {
+      id: 'var-3', type: 'choice', q: '`name = "小明"` 这行代码做了什么？',
+      opts: [
+        { t: '把 "小明" 存进名叫 name 的变量', ok: true },
+        { t: '判断 name 是不是等于 "小明"', why: '一个 `=` 是赋值，不是判断。判断相等要用两个等号 `==`，后面的关卡会学。' },
+        { t: '在屏幕上显示 小明', why: '赋值只是把数据存起来，不会显示任何东西。要显示得用 print。' },
+        { t: '把变量 name 改名叫 小明', why: '`=` 左边是名字，右边是要存的值。这里是把值存进 name，名字没有变。' },
+      ],
+      explain: '`=` 是赋值：把右边的值存到左边的变量里。',
+    },
+    {
+      id: 'var-4', type: 'fill', q: '补全代码，让它显示 10',
+      code: py`score = 7
+score = score ____ 3
+print(score)`,
+      answers: ['+'], expect: '10',
+      hints: {
+        '-': '7 - 3 是 4，不是 10。',
+        '=': '这里需要一个运算符，让 7 和 3 算出 10。',
+        '*': '7 * 3 是 21，不是 10。',
+      },
+      explain: '7 + 3 = 10，再把 10 存回 score。',
+    },
+    {
+      id: 'var-5', type: 'output', q: OUT_Q,
+      code: py`a = 3
+b = a
+a = 10
+print(b)`,
+      opts: [
+        { t: '3', ok: true },
+        { t: '10', why: '`b = a` 是把当时 a 里的值 3 抄一份给 b。之后 a 再怎么变，b 都不会跟着变。' },
+        { t: 'a', why: 'b 里存的是 a 当时的值 3，不是 a 这个名字。' },
+        { t: '13', why: '这段代码里没有做加法，只是在赋值。' },
+      ],
+      explain: '`b = a` 之后 b 是 3。第三行只改了 a，b 还是 3。',
+    },
+  ],
+});
+
+L({
+  id: 'num', ch: 'c1', title: '数字', hook: '整数和小数，是两种不同的类型',
+  syntax: py`count = 10      # 整数 int
+price = 3.5     # 小数 float
+type(count)     # 查看类型`,
+  how: [
+    '不带小数点的是整数，类型叫 `int`。带小数点的是小数，类型叫 `float`（浮点数）。',
+    '`type(x)` 能告诉你 x 是什么类型。',
+    '整数和小数一起算，结果是小数。除法 `/` 的结果永远是小数。',
+  ],
+  mean: 'Python 给每个数据都分了“类型”。10 和 10.0 大小一样，但一个是 int，一个是 float。',
+  use: '数个数、排名次用整数。价格、身高、平均分用小数。',
+  example: {
+    code: py`apples = 3
+price = 2.5
+total = apples * price
+print(total)
+print(type(apples))
+print(type(total))
+print(10 / 2)`,
+    out: "7.5\n<class 'int'>\n<class 'float'>\n5.0",
+  },
+  tip: '小数计算偶尔有极小的误差，比如 `0.1 + 0.2` 得到 0.30000000000000004。这是计算机保存小数的方式造成的。可以用 `round(x, 2)` 保留两位小数。',
+  checks: [
+    { code: py`print(0.1 + 0.2)`, out: '0.30000000000000004' },
+    { code: py`print(round(0.1 + 0.2, 2))`, out: '0.3' },
+  ],
+  questions: [
+    {
+      id: 'num-1', type: 'choice', q: '`3.0` 是什么类型？',
+      opts: [
+        { t: 'float（小数）', ok: true },
+        { t: 'int（整数）', why: '只要写了小数点，就是 float，哪怕小数部分是 0。' },
+        { t: 'str（字符串）', why: '字符串要有引号。`3.0` 没有引号，是数字。' },
+        { t: '不是合法的数字', why: '`3.0` 是合法的，它就是小数形式的 3。' },
+      ],
+      explain: '有小数点就是 float。`3` 是 int，`3.0` 是 float。',
+      checks: [{ code: py`print(type(3.0))`, out: "<class 'float'>" }],
+    },
+    {
+      id: 'num-2', type: 'output', q: OUT_Q,
+      code: py`print(6 / 2)`,
+      opts: [
+        { t: '3.0', ok: true },
+        { t: '3', why: '除法 `/` 的结果永远是小数，就算能整除也会带上 .0。' },
+        { t: '3.00', why: 'Python 显示小数时不会多补零，3.0 就显示成 3.0。' },
+        { t: '6 / 2', why: '没有引号，Python 会计算出结果再显示。' },
+      ],
+      explain: '`/` 的结果一定是 float，所以是 3.0。',
+    },
+    {
+      id: 'num-3', type: 'output', q: OUT_Q,
+      code: py`a = 2
+b = 0.5
+print(a + b)`,
+      opts: [
+        { t: '2.5', ok: true },
+        { t: '2', why: '整数和小数相加，结果是小数，不会把 0.5 丢掉。' },
+        { t: '3', why: 'Python 不会自动四舍五入，2 + 0.5 就是 2.5。' },
+        { t: '20.5', why: 'a 和 b 都是数字，`+` 做的是加法，不是把它们接在一起。' },
+      ],
+      explain: 'int + float 的结果是 float：2 + 0.5 = 2.5。',
+    },
+    {
+      id: 'num-4', type: 'fill', q: '补全代码，查看 3.14 的类型',
+      code: py`print(____(3.14))`,
+      answers: ['type'], expect: "<class 'float'>",
+      hints: {
+        'typeof': 'typeof 是 JavaScript 的写法，Python 里是 type。',
+        'float': 'float(3.14) 得到的还是 3.14 这个数，不是它的类型。',
+      },
+      explain: '`type(数据)` 返回这个数据的类型。',
+    },
+  ],
+});
+
+L({
+  id: 'str', ch: 'c1', title: '字符串', hook: '用引号包起来的一串文字',
+  syntax: py`s = "Python"
+s[0]            # 第 1 个字符
+len(s)          # 有几个字符
+"你好" + "呀"    # 拼接
+f"我叫{s}"       # 把变量放进文字里`,
+  how: [
+    '引号里的内容就是字符串，类型叫 `str`。',
+    '`+` 把两个字符串接在一起，`*` 把字符串重复几遍。',
+    '每个字符都有编号，叫索引，从 0 开始数。`s[0]` 是第一个字符，`s[-1]` 是最后一个。',
+    '`len(s)` 得到字符的个数。',
+    '字符串前面加一个 `f`，就可以在花括号 `{}` 里直接放变量。',
+  ],
+  mean: '字符串就是一串字符排成一队，每个字符都有自己的位置编号。',
+  use: '名字、聊天消息、网页上的文字，全都是字符串。',
+  example: {
+    code: py`name = "Python"
+print(name[0])
+print(name[-1])
+print(len(name))
+print("我爱" + name)
+print("哈" * 3)
+print(f"{name} 有 {len(name)} 个字母")`,
+    out: 'P\nn\n6\n我爱Python\n哈哈哈\nPython 有 6 个字母',
+  },
+  tip: '`"5"` 是字符串，`5` 是数字。`"5" + "5"` 得到 "55"，`5 + 5` 才是 10。',
+  questions: [
+    {
+      id: 'str-1', type: 'output', q: OUT_Q,
+      code: py`print("5" + "5")`,
+      opts: [
+        { t: '55', ok: true },
+        { t: '10', why: '两个 5 都带引号，是字符串。字符串的 `+` 是拼接，不是加法。' },
+        { t: '5 + 5', why: '加号在引号外面，Python 会执行它，把两个字符串接起来。' },
+        { err: true, why: '两个字符串可以用 `+` 拼接，不会报错。字符串加数字才会报错。' },
+      ],
+      explain: '字符串 + 字符串 = 接在一起。"5" 和 "5" 接起来是 "55"。',
+    },
+    {
+      id: 'str-2', type: 'output', q: OUT_Q,
+      code: py`word = "hello"
+print(word[1])`,
+      opts: [
+        { t: 'e', ok: true },
+        { t: 'h', why: '索引从 0 开始数。`word[0]` 才是 h，`word[1]` 是第二个字符。' },
+        { t: 'l', why: 'l 的索引是 2 和 3。索引 1 对应的是 e。' },
+        { t: 'hello', why: '方括号里写了索引，取出的只是那一个位置的字符。' },
+      ],
+      explain: 'h 是 0，e 是 1，l 是 2……索引从 0 开始。',
+    },
+    {
+      id: 'str-3', type: 'fill', q: '补全代码，让它显示 "apple" 有几个字符（结果是 5）',
+      code: py`print(____("apple"))`,
+      answers: ['len'], expect: '5',
+      hints: {
+        'length': 'Python 里求长度的函数叫 len，是 length 的缩写。',
+        'size': 'Python 里求长度的函数叫 len。',
+        'count': 'count 是用来数某个字符出现几次的。求总长度用 len。',
+      },
+      explain: '`len()` 返回字符串的字符个数。',
+    },
+    {
+      id: 'str-4', type: 'output', q: OUT_Q,
+      code: py`name = "小红"
+print(f"你好，{name}！")`,
+      opts: [
+        { t: '你好，小红！', ok: true },
+        { t: '你好，{name}！', why: '字符串前面有 f，花括号里的 name 会被换成变量的值。没有 f 才会原样显示。' },
+        { t: '你好，name！', why: '`{name}` 整个会被换成变量 name 的值，也就是 小红。' },
+        { err: true, why: '这是正确的 f-string 写法，不会报错。' },
+      ],
+      explain: 'f 字符串会把 `{变量}` 换成变量的值。',
+      checks: [{ code: py`name = "小红"
+print("你好，{name}！")`, out: '你好，{name}！' }],
+    },
+    {
+      id: 'str-5', type: 'output', q: OUT_Q,
+      code: py`print("ab" * 3)`,
+      opts: [
+        { t: 'ababab', ok: true },
+        { t: 'ab3', why: '`*` 不是拼接。字符串乘以数字，是把字符串重复那么多遍。' },
+        { t: 'aaabbb', why: '是把 "ab" 整个重复 3 遍，不是每个字母各重复 3 遍。' },
+        { err: true, why: '字符串可以乘以整数，表示重复，不会报错。' },
+      ],
+      explain: '字符串 * 3：整个字符串重复 3 遍。',
+    },
+  ],
+});
+
+L({
+  id: 'arith', ch: 'c1', title: '算术运算符', hook: '加减乘除之外，还有整除、取余和乘方',
+  syntax: py`7 + 2    # 加      9
+7 - 2    # 减      5
+7 * 2    # 乘      14
+7 / 2    # 除      3.5
+7 // 2   # 整除    3
+7 % 2    # 取余数  1
+2 ** 3   # 乘方    8`,
+  how: [
+    '`/` 是普通除法，结果是小数。`//` 是整除，只留下商的整数部分。',
+    '`%` 得到除法的余数。`**` 是乘方，`2 ** 3` 就是 2 的 3 次方。',
+    '先算乘除，后算加减。有括号先算括号里的。',
+    '`x += 1` 是 `x = x + 1` 的简写。`-=`、`*=` 同理。',
+  ],
+  mean: '运算符就是让 Python 做计算的符号。7 个苹果每 2 个装一袋：能装 3 袋（`7 // 2`），还剩 1 个（`7 % 2`）。',
+  use: '`%` 常用来判断奇偶：`n % 2` 等于 0 就是偶数。`//` 和 `%` 配合能把 130 分钟换算成 2 小时 10 分钟。',
+  example: {
+    code: py`minutes = 130
+print(minutes // 60, "小时")
+print(minutes % 60, "分钟")
+print(2 ** 10)
+print(2 + 3 * 4)
+print((2 + 3) * 4)`,
+    out: '2 小时\n10 分钟\n1024\n14\n20',
+  },
+  tip: '乘号是 `*`，不是 x。除号是 `/`，不是 ÷。',
+  questions: [
+    {
+      id: 'arith-1', type: 'output', q: OUT_Q,
+      code: py`print(17 % 5)`,
+      opts: [
+        { t: '2', ok: true },
+        { t: '3', why: '3 是 `17 // 5` 的结果，是商。`%` 要的是余数。' },
+        { t: '3.4', why: '3.4 是 `17 / 5` 的结果。`%` 要的是除不尽剩下的那部分。' },
+        { t: '12', why: '`%` 不是减法。它算的是 17 除以 5 的余数。' },
+      ],
+      explain: '17 ÷ 5 = 3 余 2。`%` 取的是余数 2。',
+    },
+    {
+      id: 'arith-2', type: 'output', q: OUT_Q,
+      code: py`print(17 // 5)`,
+      opts: [
+        { t: '3', ok: true },
+        { t: '3.4', why: '3.4 是普通除法 `/` 的结果。`//` 只保留整数部分。' },
+        { t: '2', why: '2 是余数，是 `17 % 5` 的结果。' },
+        { t: '4', why: '整除是直接去掉小数部分，不是四舍五入。' },
+      ],
+      explain: '17 ÷ 5 = 3 余 2。`//` 取的是商的整数部分 3。',
+    },
+    {
+      id: 'arith-3', type: 'output', q: OUT_Q,
+      code: py`print(2 + 3 * 2)`,
+      opts: [
+        { t: '8', ok: true },
+        { t: '10', why: '不是从左往右算。乘法比加法优先，要先算 3 * 2。' },
+        { t: '12', why: '这里只有一个乘号，先算 3 * 2 = 6，再加 2。' },
+        { t: '7', why: '`*` 是乘法，3 * 2 = 6，再加 2 得 8。' },
+      ],
+      explain: '先乘除后加减：3 * 2 = 6，2 + 6 = 8。',
+    },
+    {
+      id: 'arith-4', type: 'fill', q: '补全代码，算出 2 的 4 次方（结果是 16）',
+      code: py`print(2 ____ 4)`,
+      answers: ['**'], expect: '16',
+      hints: {
+        '*': '一个 * 是乘法，2 * 4 = 8。乘方要用两个星号。',
+        '^': '在 Python 里 ^ 不是乘方。乘方用两个星号 **。',
+        'x': '乘方的符号是两个星号 **。',
+      },
+      explain: '`**` 是乘方：2 ** 4 = 2 × 2 × 2 × 2 = 16。',
+    },
+    {
+      id: 'arith-5', type: 'output', q: OUT_Q,
+      code: py`x = 10
+x += 5
+print(x)`,
+      opts: [
+        { t: '15', ok: true },
+        { t: '10', why: '`x += 5` 已经把 x 改了，它等于 `x = x + 5`。' },
+        { t: '5', why: '`+=` 是在原来的基础上加，不是直接换成 5。' },
+        { t: '105', why: 'x 和 5 都是数字，做的是加法，不是把它们接在一起。' },
+      ],
+      explain: '`x += 5` 就是 `x = x + 5`：10 + 5 = 15。',
+    },
+  ],
+});
+
+L({
+  id: 'input', ch: 'c1', title: '输入和类型转换', hook: '让用户打字，再把文字变成数字',
+  syntax: py`name = input("提示文字")
+int("18")      # 字符串 → 整数
+float("3.5")   # 字符串 → 小数
+str(18)        # 数字 → 字符串`,
+  how: [
+    '`input()` 会让程序停下来等用户打字，按回车后把输入的内容交给变量。',
+    '`input()` 得到的永远是字符串，哪怕用户输入的是数字。',
+    '要拿它做计算，先用 `int()` 或 `float()` 转成数字。',
+    '`str()` 把数字变成字符串，这样才能用 `+` 和别的字符串拼接。',
+  ],
+  mean: '类型转换就是给数据“换身份”：`"18"` 是文字，`int("18")` 把它变成可以计算的数字 18。',
+  use: '有了 input，程序才能和人互动：问名字、问年龄、接收答案。',
+  example: {
+    code: py`age = input("你几岁了？")
+age = int(age) + 1
+print("明年你 " + str(age) + " 岁")`,
+    stdin: ['18'],
+    out: '你几岁了？«18»\n明年你 19 岁',
+    note: '这里假设用户输入了 18。',
+  },
+  tip: '`"18" + 1` 会报错：字符串和数字不能直接相加。要么 `int("18") + 1`，要么 `"18" + str(1)`。',
+  checks: [
+    { code: py`print("18" + 1)`, err: 'TypeError' },
+    { code: py`print(int("18") + 1)`, out: '19' },
+    { code: py`print("18" + str(1))`, out: '181' },
+  ],
+  questions: [
+    {
+      id: 'input-1', type: 'choice', q: '运行 `x = input()` 时用户输入了 5。x 是什么类型？',
+      opts: [
+        { t: 'str（字符串）', ok: true },
+        { t: 'int（整数）', why: 'input() 不会猜你想要什么类型。不管输入什么，它交回来的都是字符串 "5"。' },
+        { t: 'float（小数）', why: 'input() 得到的永远是字符串，不会自动变成数字。' },
+        { t: '要看用户输入了什么', why: '不管输入的是字母还是数字，input() 得到的都是字符串。' },
+      ],
+      explain: 'input() 得到的永远是 str。要当数字用，必须自己转换。',
+    },
+    {
+      id: 'input-2', type: 'output', q: OUT_Q,
+      code: py`a = "3"
+b = "4"
+print(a + b)`,
+      opts: [
+        { t: '34', ok: true },
+        { t: '7', why: 'a 和 b 的值带引号，是字符串。字符串相加是拼接，不是算术加法。' },
+        { t: 'a + b', why: 'print 里没有引号，显示的是 a + b 算出来的结果。' },
+        { err: true, why: '两个字符串可以用 `+` 拼接，不会报错。' },
+      ],
+      explain: '"3" + "4" 是两个字符串拼接，得到 "34"。',
+    },
+    {
+      id: 'input-3', type: 'fill', q: '补全代码，把字符串转成整数再计算，让它显示 7',
+      code: py`a = "3"
+print(____(a) + 4)`,
+      answers: ['int'], expect: '7',
+      hints: {
+        'float': 'float(a) + 4 得到的是 7.0，不是 7。这里要转成整数。',
+        'str': 'a 本来就是字符串。要转成整数才能和 4 相加。',
+        'Int': 'Python 区分大小写，要全部小写：int。',
+      },
+      explain: '`int("3")` 把字符串 "3" 变成整数 3，3 + 4 = 7。',
+    },
+    {
+      id: 'input-4', type: 'choice', q: '下面哪一行会报错？',
+      opts: [
+        { t: '`print("年龄：" + 18)`', ok: true },
+        { t: '`print("年龄：" + str(18))`', why: 'str(18) 把数字变成了字符串 "18"，两个字符串可以拼接，不会报错。' },
+        { t: '`print("年龄：", 18)`', why: '用逗号隔开时，print 可以同时显示字符串和数字，不会报错。' },
+        { t: '`print("年龄：" + "18")`', why: '两边都是字符串，可以用 + 拼接，不会报错。' },
+      ],
+      explain: '字符串和数字不能直接用 `+` 相加。要先用 str() 把数字转成字符串。',
+      checks: [
+        { code: py`print("年龄：" + 18)`, err: 'TypeError' },
+        { code: py`print("年龄：" + str(18))`, out: '年龄：18' },
+        { code: py`print("年龄：", 18)`, out: '年龄： 18' },
+        { code: py`print("年龄：" + "18")`, out: '年龄：18' },
+      ],
+    },
+    {
+      id: 'input-5', type: 'output', q: OUT_Q,
+      code: py`print(int("12") * 2)`,
+      opts: [
+        { t: '24', ok: true },
+        { t: '1212', why: '1212 是 `"12" * 2` 的结果。这里先用 int() 转成了整数，所以是数学乘法。' },
+        { t: '122', why: '这里不是拼接。int("12") 是整数 12，乘以 2 得 24。' },
+        { err: true, why: '"12" 是数字组成的字符串，可以正常转成整数。' },
+      ],
+      explain: 'int("12") 得到整数 12，12 * 2 = 24。',
+      checks: [{ code: py`print("12" * 2)`, out: '1212' }],
+    },
+  ],
+});
+
+/* ---------- 第二章 判断 ---------- */
+
+L({
+  id: 'bool', ch: 'c2', title: '布尔值', hook: '只有两个值：True 和 False',
+  syntax: py`is_sunny = True
+game_over = False`,
+  how: [
+    '布尔值只有两个：`True`（真）和 `False`（假）。',
+    '首字母必须大写，不加引号。',
+    '比较的结果就是布尔值，比如 `3 > 2` 得到 True。',
+    '类型名叫 `bool`。',
+  ],
+  mean: '布尔值用来表示“是或不是”“成立或不成立”，就像一盏灯只有开和关两种状态。',
+  use: '程序里所有的判断都靠它：登录了没有、游戏结束了没有、分数够不够。',
+  example: {
+    code: py`is_sunny = True
+print(is_sunny)
+print(type(is_sunny))
+print(3 > 2)
+print(3 > 5)`,
+    out: "True\n<class 'bool'>\nTrue\nFalse",
+  },
+  tip: '`True` 是布尔值，`"True"` 是字符串，`true` 什么都不是，会报错。',
+  checks: [{ code: py`print(true)`, err: 'NameError' }],
+  questions: [
+    {
+      id: 'bool-1', type: 'choice', q: '下面哪个是布尔值？',
+      opts: [
+        { t: '`True`', ok: true },
+        { t: '`"True"`', why: '加了引号就是字符串，只是一段内容为 True 的文字。' },
+        { t: '`true`', why: '首字母必须大写。小写的 true Python 不认识，会报错。' },
+        { t: '`1`', why: '1 是整数，类型是 int。' },
+      ],
+      explain: '布尔值只有 `True` 和 `False`，首字母大写，不加引号。',
+    },
+    {
+      id: 'bool-2', type: 'output', q: OUT_Q,
+      code: py`print(10 > 3)`,
+      opts: [
+        { t: 'True', ok: true },
+        { t: 'False', why: '10 确实比 3 大，这个比较是成立的。' },
+        { t: '10 > 3', why: '没有引号，Python 会算出比较的结果再显示。' },
+        { t: '7', why: '`>` 是比大小，不是减法。比较的结果是 True 或 False。' },
+      ],
+      explain: '10 大于 3 成立，所以结果是 True。',
+    },
+    {
+      id: 'bool-3', type: 'fill', q: '补全代码，把布尔值“假”存进变量',
+      code: py`game_over = ____
+print(type(game_over))`,
+      answers: ['False'], expect: "<class 'bool'>",
+      hints: {
+        'false': '首字母要大写：False。',
+        'FALSE': '只有首字母大写：False。',
+        '"False"': '加了引号就成了字符串，不是布尔值。',
+        "'False'": '加了引号就成了字符串，不是布尔值。',
+        '假': 'Python 里“假”写作 False。',
+        '0': '0 是整数。布尔值的“假”写作 False。',
+      },
+      explain: '布尔值“假”写作 `False`，首字母大写，不加引号。',
+    },
+    {
+      id: 'bool-4', type: 'output', q: OUT_Q,
+      code: py`a = 5 > 8
+print(a)`,
+      opts: [
+        { t: 'False', ok: true },
+        { t: 'True', why: '5 并不比 8 大，这个比较不成立。' },
+        { t: '5 > 8', why: 'a 里存的是比较的结果，不是这个式子本身。' },
+        { err: true, why: '比较的结果是布尔值，可以像别的数据一样存进变量。' },
+      ],
+      explain: '5 > 8 不成立，结果是 False，这个 False 被存进了 a。',
+    },
+  ],
+});
+
+L({
+  id: 'cmp', ch: 'c2', title: '比较运算符', hook: '问 Python 一个问题，答案是 True 或 False',
+  syntax: py`a == b   # 等于
+a != b   # 不等于
+a > b    # 大于
+a < b    # 小于
+a >= b   # 大于或等于
+a <= b   # 小于或等于`,
+  how: [
+    '比较运算符比较两边的值，结果是布尔值。',
+    '判断相等用两个等号 `==`。一个等号 `=` 是赋值，意思完全不同。',
+    '`>=` 表示“大于或者等于”，两种情况有一种成立就是 True。',
+    '字符串也能比较是否相等，大小写不同就不相等。',
+  ],
+  mean: '比较就是向 Python 提问：“age 等于 18 吗？”Python 回答 True 或 False。',
+  use: '判断密码对不对、分数及格没有、库存够不够，都要用比较。',
+  example: {
+    code: py`age = 18
+print(age == 18)
+print(age != 18)
+print(age > 20)
+print(age >= 18)
+print("abc" == "ABC")`,
+    out: 'True\nFalse\nFalse\nTrue\nFalse',
+  },
+  tip: '最容易犯的错：想判断相等，却只写了一个 `=`。',
+  questions: [
+    {
+      id: 'cmp-1', type: 'choice', q: '要判断 a 和 b 是否相等，应该怎么写？',
+      opts: [
+        { t: '`a == b`', ok: true },
+        { t: '`a = b`', why: '一个等号是赋值，会把 b 的值存进 a，而不是比较它们。' },
+        { t: '`a === b`', why: '三个等号是 JavaScript 的写法，Python 里没有。' },
+        { t: '`a equals b`', why: 'Python 没有 equals 这个写法，判断相等用 `==`。' },
+      ],
+      explain: '`==` 判断相等，`=` 赋值。',
+    },
+    {
+      id: 'cmp-2', type: 'output', q: OUT_Q,
+      code: py`print(5 >= 5)`,
+      opts: [
+        { t: 'True', ok: true },
+        { t: 'False', why: '`>=` 是“大于或等于”。5 等于 5，满足“等于”这一半，所以成立。' },
+        { t: '5', why: '比较的结果是布尔值 True 或 False，不是数字。' },
+        { err: true, why: '`>=` 是合法的运算符，不会报错。' },
+      ],
+      explain: '5 等于 5，“大于或等于”成立，结果是 True。',
+    },
+    {
+      id: 'cmp-3', type: 'output', q: OUT_Q,
+      code: py`print(3 != 3)`,
+      opts: [
+        { t: 'False', ok: true },
+        { t: 'True', why: '`!=` 问的是“不相等吗？”。3 和 3 是相等的，所以答案是 False。' },
+        { t: '3', why: '比较的结果是布尔值，不是数字。' },
+        { err: true, why: '`!=` 是合法的运算符，意思是“不等于”。' },
+      ],
+      explain: '`!=` 是“不等于”。3 和 3 相等，所以“不等于”不成立。',
+    },
+    {
+      id: 'cmp-4', type: 'fill', q: '填一个表示“小于”的运算符，让它显示 True',
+      code: py`print(7 ____ 10)`,
+      answers: ['<'], expect: 'True',
+      hints: {
+        '>': '> 是大于。7 大于 10 不成立，会显示 False。',
+        '<=': '<= 也能得到 True，但它是“小于或等于”。只表示“小于”的是 <。',
+        '=': '一个 = 是赋值，这里要的是比较大小的符号。',
+        '!=': '!= 也能得到 True，但它是“不等于”。表示“小于”的是 <。',
+      },
+      explain: '`<` 是小于。7 小于 10 成立，结果是 True。',
+    },
+    {
+      id: 'cmp-5', type: 'output', q: OUT_Q,
+      code: py`x = 4
+print(x * 2 == 8)`,
+      opts: [
+        { t: 'True', ok: true },
+        { t: 'False', why: 'x * 2 是 8，8 == 8 成立。' },
+        { t: '8', why: '先算出 x * 2 = 8，再和 8 比较。显示的是比较的结果。' },
+        { t: 'x * 2 == 8', why: '没有引号，Python 会先计算，再显示结果。' },
+      ],
+      explain: '先算 4 * 2 = 8，再判断 8 == 8，成立，结果是 True。',
+    },
+  ],
+});
+
+L({
+  id: 'logic', ch: 'c2', title: '逻辑运算符', hook: '用 and、or、not 把条件组合起来',
+  syntax: py`a and b   # 两个都成立，才成立
+a or b    # 有一个成立，就成立
+not a     # 取反`,
+  how: [
+    '`and`（并且）：两边都是 True，结果才是 True。',
+    '`or`（或者）：只要有一边是 True，结果就是 True。',
+    '`not`（不是）：把 True 变成 False，把 False 变成 True。',
+  ],
+  mean: 'and 像两道门串在一起，都打开才能通过。or 像两扇并排的门，开任意一扇都能通过。',
+  use: '现实里的规则经常有多个条件：“成年 **并且** 有票才能进场”“周六 **或者** 周日不上班”。',
+  example: {
+    code: py`age = 20
+has_ticket = True
+print(age >= 18 and has_ticket)
+print(age < 18 or has_ticket)
+print(not has_ticket)`,
+    out: 'True\nTrue\nFalse',
+  },
+  tip: '想表示“x 在 1 到 10 之间”，要写成 `x >= 1 and x <= 10`，两个条件都要写完整。',
+  questions: [
+    {
+      id: 'logic-1', type: 'output', q: OUT_Q,
+      code: py`print(True and False)`,
+      opts: [
+        { t: 'False', ok: true },
+        { t: 'True', why: 'and 要求两边都是 True。这里右边是 False，所以结果是 False。' },
+        { t: 'True and False', why: '没有引号，Python 会算出结果再显示。' },
+      ],
+      explain: 'and：两边都是 True 才是 True。有一边是 False，结果就是 False。',
+    },
+    {
+      id: 'logic-2', type: 'output', q: OUT_Q,
+      code: py`print(True or False)`,
+      opts: [
+        { t: 'True', ok: true },
+        { t: 'False', why: 'or 只要有一边是 True 就够了。这里左边是 True，所以结果是 True。' },
+        { t: 'True or False', why: '没有引号，Python 会算出结果再显示。' },
+      ],
+      explain: 'or：只要有一边是 True，结果就是 True。',
+    },
+    {
+      id: 'logic-3', type: 'output', q: OUT_Q,
+      code: py`age = 15
+print(age > 12 and age < 18)`,
+      opts: [
+        { t: 'True', ok: true },
+        { t: 'False', why: '15 > 12 成立，15 < 18 也成立。两边都是 True，and 的结果就是 True。' },
+        { t: '15', why: '逻辑运算的结果是布尔值，不是数字。' },
+      ],
+      explain: '15 大于 12，并且 15 小于 18。两个条件都成立，结果是 True。',
+    },
+    {
+      id: 'logic-4', type: 'fill', q: '填一个逻辑运算符，把 True 取反，让它显示 False',
+      code: py`print(____ True)`,
+      answers: ['not'], expect: 'False',
+      hints: {
+        '!': '用 ! 取反是别的语言的写法，Python 里用单词 not。',
+        'Not': 'Python 区分大小写，要全部小写：not。',
+        'no': '取反的关键字是 not。',
+      },
+      explain: '`not True` 就是 False。',
+    },
+    {
+      id: 'logic-5', type: 'choice', q: '游乐场规定：身高超过 120，或者有家长陪同，就可以玩。哪个条件写对了？',
+      opts: [
+        { t: '`height > 120 or with_parent`', ok: true },
+        { t: '`height > 120 and with_parent`', why: 'and 要求两个条件同时满足，就变成了“又要够高，又要有家长”，比规定更严。' },
+        { t: '`not height > 120`', why: '这表示“身高不超过 120”，和规定正好相反，而且没有考虑家长。' },
+        { t: '`height > 120 or not with_parent`', why: '`not with_parent` 表示“没有家长陪同”，和规定的意思相反。' },
+      ],
+      explain: '“或者”对应 `or`：两个条件满足一个就行。',
+    },
+  ],
+});
+
+L({
+  id: 'if', ch: 'c2', title: 'if 条件判断', hook: '条件成立才执行，不成立就走另一条路',
+  syntax: py`if 条件:
+    条件成立时执行
+elif 另一个条件:
+    前面不成立、这个成立时执行
+else:
+    都不成立时执行`,
+  how: [
+    '条件后面要写英文冒号 `:`。',
+    '下一行向右缩进 4 个空格。缩进的代码属于这个 if，条件成立才执行。',
+    '`elif` 可以写很多个，`else` 最多一个，放在最后。两者都可以不写。',
+    'Python 从上往下检查，遇到第一个成立的条件就执行它，后面的分支不再看。',
+  ],
+  mean: 'if 就是“如果”。如果条件是 True，就执行缩进的那几行，否则跳过。',
+  use: '有了 if，程序才能根据情况做不同的事：分数够了显示“及格”，不够显示“再加油”。',
+  example: {
+    code: py`score = 85
+if score >= 90:
+    print("优秀")
+elif score >= 60:
+    print("及格")
+else:
+    print("再加油")
+print("判断结束")`,
+    out: '及格\n判断结束',
+  },
+  tip: '缩进不是为了好看。Python 靠缩进来判断哪些代码属于 if。没有缩进的代码，不管条件成不成立都会执行。',
+  questions: [
+    {
+      id: 'if-1', type: 'output', q: OUT_Q,
+      code: py`n = 7
+if n > 5:
+    print("大")
+else:
+    print("小")`,
+      opts: [
+        { t: '大', ok: true },
+        { t: '小', why: '7 > 5 成立，执行的是 if 下面的代码。else 只在条件不成立时执行。' },
+        { t: '大\n小', why: 'if 和 else 是二选一，只会执行其中一个。' },
+        { none: true, why: 'if 和 else 两条路一定会走其中一条。' },
+      ],
+      explain: '7 > 5 是 True，执行 if 下面的 print("大")，跳过 else。',
+    },
+    {
+      id: 'if-2', type: 'output', q: OUT_Q,
+      code: py`t = 30
+if t > 35:
+    print("很热")
+elif t > 25:
+    print("有点热")
+elif t > 15:
+    print("舒服")`,
+      opts: [
+        { t: '有点热', ok: true },
+        { t: '很热', why: '30 > 35 不成立，所以不会显示“很热”。' },
+        { t: '有点热\n舒服', why: '30 > 15 确实也成立，但前面已经有一个分支执行过了，后面的分支不会再检查。' },
+        { t: '舒服', why: '从上往下检查，`t > 25` 先成立，执行它之后整个判断就结束了。' },
+      ],
+      explain: '从上往下，第一个成立的是 `t > 25`。执行它，后面的 elif 全部跳过。',
+    },
+    {
+      id: 'if-3', type: 'fill', q: 'if 这一行的末尾少了一个符号，把它补上',
+      code: py`age = 20
+if age >= 18____
+    print("成年")`,
+      answers: [':'], expect: '成年',
+      hints: {
+        ';': '分号是别的语言用的。Python 的 if 后面要写冒号。',
+        '{': '花括号是别的语言用的。Python 用冒号加缩进。',
+        'then': 'Python 不写 then，直接用冒号。',
+      },
+      explain: 'if、elif、else 这几行的末尾都要有英文冒号 `:`。',
+    },
+    {
+      id: 'if-4', type: 'output', q: OUT_Q,
+      code: py`x = 3
+if x > 5:
+    print("A")
+print("B")`,
+      opts: [
+        { t: 'B', ok: true },
+        { t: 'A\nB', why: '3 > 5 不成立，所以缩进的 print("A") 被跳过了。' },
+        { t: 'A', why: '3 > 5 不成立，不会显示 A。' },
+        { none: true, why: 'print("B") 没有缩进，不属于 if。不管条件成不成立，它都会执行。' },
+      ],
+      explain: '只有缩进的代码属于 if。`print("B")` 顶格写，一定会执行。',
+    },
+  ],
+});
+
+/* ===== 关卡内容（第三、四章）===== */
+
+/* ---------- 第三章 列表与循环 ---------- */
+
+L({
+  id: 'list', ch: 'c3', title: '列表', hook: '把很多数据按顺序装在一起',
+  syntax: py`fruits = ["苹果", "香蕉", "橙子"]
+fruits[0]         # 取第 1 个
+fruits[-1]        # 取最后一个
+fruits[1] = "梨"   # 修改第 2 个
+len(fruits)       # 有几个元素
+fruits[0:2]       # 切片：前两个`,
+  how: [
+    '用方括号 `[]` 把数据包起来，数据之间用逗号隔开。里面的每个数据叫“元素”。',
+    '和字符串一样，用索引取元素，从 0 开始数。',
+    '可以通过索引修改某个元素。',
+    '切片 `[开始:结束]` 一次取出一段，包含开始位置，不包含结束位置。',
+    '`x in 列表` 检查 x 在不在列表里，结果是 True 或 False。',
+  ],
+  mean: '列表像一列火车，每节车厢装一个数据，车厢从 0 开始编号。',
+  use: '一个变量只能存一个值。全班的成绩、购物车里的商品、待办事项，都适合放进列表。',
+  example: {
+    code: py`fruits = ["苹果", "香蕉", "橙子"]
+print(fruits[0])
+print(fruits[-1])
+print(len(fruits))
+fruits[1] = "梨"
+print(fruits)
+print(fruits[0:2])
+print("梨" in fruits)`,
+    out: "苹果\n橙子\n3\n['苹果', '梨', '橙子']\n['苹果', '梨']\nTrue",
+  },
+  tip: '3 个元素的列表，索引是 0、1、2。写 `fruits[3]` 会报错：IndexError（索引超出范围）。',
+  checks: [{ code: py`fruits = ["苹果", "香蕉", "橙子"]
+print(fruits[3])`, err: 'IndexError' }],
+  questions: [
+    {
+      id: 'list-1', type: 'output', q: OUT_Q,
+      code: py`nums = [10, 20, 30]
+print(nums[1])`,
+      opts: [
+        { t: '20', ok: true },
+        { t: '10', why: '索引从 0 开始。`nums[0]` 才是 10，`nums[1]` 是第二个元素。' },
+        { t: '30', why: '30 的索引是 2。索引 1 对应第二个元素 20。' },
+        { t: '[10, 20]', why: '`nums[1]` 只取出一个元素。取一段要用切片，比如 `nums[0:2]`。' },
+      ],
+      explain: '索引 0 是 10，索引 1 是 20，索引 2 是 30。',
+    },
+    {
+      id: 'list-2', type: 'fill', q: '填一个索引，取出最后一个元素 30',
+      code: py`nums = [10, 20, 30]
+print(nums[____])`,
+      answers: ['2', '-1'], expect: '30',
+      hints: {
+        '3': '索引从 0 开始，3 个元素的索引是 0、1、2。nums[3] 会报错。',
+        '30': '方括号里要写位置编号，不是元素的值。',
+        '1': 'nums[1] 是第二个元素 20。',
+      },
+      explain: '最后一个元素的索引是 2，也可以写成 -1（倒数第一个）。',
+    },
+    {
+      id: 'list-3', type: 'output', q: OUT_Q,
+      code: py`a = [1, 2, 3]
+a[0] = 9
+print(a)`,
+      opts: [
+        { t: '[9, 2, 3]', ok: true },
+        { t: '[1, 2, 3]', why: '`a[0] = 9` 已经把第一个元素改成了 9。列表里的元素是可以修改的。' },
+        { t: '[9, 1, 2, 3]', why: '`a[0] = 9` 是替换第一个元素，不是在前面插入一个新的。' },
+        { t: '9', why: 'print(a) 显示的是整个列表，不只是被修改的那个元素。' },
+      ],
+      explain: '`a[0] = 9` 把索引 0 位置的 1 换成了 9。',
+    },
+    {
+      id: 'list-4', type: 'output', q: OUT_Q,
+      code: py`print(len([5, 6, 7, 8]))`,
+      opts: [
+        { t: '4', ok: true },
+        { t: '3', why: '3 是最后一个元素的索引。len 数的是元素个数，一共 4 个。' },
+        { t: '8', why: 'len 返回的是元素的个数，不是最后一个元素的值。' },
+        { t: '26', why: 'len 不是求和，它只数有几个元素。' },
+      ],
+      explain: '`len()` 数元素的个数：5、6、7、8 一共 4 个。',
+    },
+    {
+      id: 'list-5', type: 'output', q: OUT_Q,
+      code: py`a = [1, 2, 3, 4, 5]
+print(a[1:3])`,
+      opts: [
+        { t: '[2, 3]', ok: true },
+        { t: '[1, 2, 3]', why: '索引从 0 开始，`a[1]` 是 2，所以切片从 2 开始，不包括 1。' },
+        { t: '[2, 3, 4]', why: '切片包含开始位置，但不包含结束位置。索引 3 上的 4 不在里面。' },
+        { t: '[1, 2]', why: '切片从索引 1 开始，索引 1 上是 2，不是 1。' },
+      ],
+      explain: '`a[1:3]` 取索引 1 和 2 上的元素：2 和 3。结束位置 3 不包含。',
+    },
+  ],
+});
+
+L({
+  id: 'for', ch: 'c3', title: 'for 循环', hook: '把一组东西挨个拿出来，各做一遍',
+  syntax: py`for 变量 in 一组东西:
+    要重复执行的代码
+
+for i in range(3):     # 0, 1, 2
+for i in range(1, 4):  # 1, 2, 3`,
+  how: [
+    '`for 变量 in 列表:` 会把列表里的元素一个一个交给变量，每交一个，就执行一遍缩进的代码。',
+    '末尾要有冒号，循环里的代码要缩进。',
+    '`range(3)` 产生 0、1、2：从 0 开始，不包含 3。',
+    '`range(1, 4)` 产生 1、2、3：从 1 开始，不包含 4。',
+  ],
+  mean: 'for 循环像流水线：东西一个个送过来，对每一个都做同样的处理。东西送完，循环结束。',
+  use: '同样的事要做很多遍时，不用把代码抄很多遍。给全班每人发一条消息，写一个循环就够了。',
+  example: {
+    code: py`fruits = ["苹果", "香蕉", "橙子"]
+for fruit in fruits:
+    print("我喜欢", fruit)
+
+total = 0
+for i in range(1, 4):
+    total = total + i
+print("1+2+3 =", total)`,
+    out: '我喜欢 苹果\n我喜欢 香蕉\n我喜欢 橙子\n1+2+3 = 6',
+  },
+  tip: '`range(3)` 是 3 个数，但最大只到 2。想要 1 到 3，写 `range(1, 4)`。',
+  questions: [
+    {
+      id: 'for-1', type: 'output', q: OUT_Q,
+      code: py`for i in range(3):
+    print(i)`,
+      opts: [
+        { t: '0\n1\n2', ok: true },
+        { t: '1\n2\n3', why: 'range(3) 从 0 开始数，不是从 1 开始。' },
+        { t: '0\n1\n2\n3', why: 'range(3) 不包含 3，只到 2 为止，一共 3 个数。' },
+        { t: '3', why: 'range(3) 不是数字 3，而是 0、1、2 这三个数。循环会执行 3 次。' },
+      ],
+      explain: '`range(3)` 产生 0、1、2，循环执行 3 次，每次显示当前的 i。',
+    },
+    {
+      id: 'for-2', type: 'choice', q: '这段代码会显示几次“嗨”？',
+      code: py`for i in range(4):
+    print("嗨")`,
+      opts: [
+        { t: '4 次', ok: true },
+        { t: '3 次', why: 'range(4) 是 0、1、2、3，一共 4 个数，所以循环 4 次。' },
+        { t: '5 次', why: 'range(4) 不包含 4，是 0 到 3 这 4 个数。' },
+        { t: '1 次', why: 'print 在循环里面（有缩进），每一轮都会执行一次。' },
+      ],
+      explain: '`range(4)` 有 4 个数，循环体就执行 4 次。',
+      checks: [{ code: py`for i in range(4):
+    print("嗨")`, out: '嗨\n嗨\n嗨\n嗨' }],
+    },
+    {
+      id: 'for-3', type: 'output', q: OUT_Q,
+      code: py`total = 0
+for n in [1, 2, 3]:
+    total = total + n
+print(total)`,
+      opts: [
+        { t: '6', ok: true },
+        { t: '3', why: '3 只是最后一轮的 n。total 把每一轮的 n 都加了进去：1 + 2 + 3。' },
+        { t: '1\n3\n6', why: 'print 没有缩进，不在循环里。它等循环全部结束后才执行一次。' },
+        { t: '0', why: '循环里每一轮都在更新 total，它不再是 0 了。' },
+      ],
+      explain: 'total 依次变成 1、3、6。循环结束后显示 6。',
+    },
+    {
+      id: 'for-4', type: 'fill', q: '补全 for 循环，让它依次显示两个名字',
+      code: py`for name ____ ["小明", "小红"]:
+    print(name)`,
+      answers: ['in'], expect: '小明\n小红',
+      hints: {
+        'of': 'for…of 是 JavaScript 的写法，Python 里是 for…in。',
+        '=': 'for 循环用 in 连接变量和列表。',
+        ':': '冒号在这一行的最后。变量和列表之间用 in。',
+      },
+      explain: '写法是 `for 变量 in 列表:`。',
+    },
+    {
+      id: 'for-5', type: 'output', q: OUT_Q,
+      code: py`for i in range(1, 4):
+    print(i * 2)`,
+      opts: [
+        { t: '2\n4\n6', ok: true },
+        { t: '0\n2\n4', why: 'range(1, 4) 从 1 开始，不是从 0 开始。' },
+        { t: '2\n4\n6\n8', why: 'range(1, 4) 不包含 4，i 只会是 1、2、3。' },
+        { t: '1\n2\n3', why: 'print 里显示的是 i * 2，不是 i 本身。' },
+      ],
+      explain: 'i 依次是 1、2、3，乘以 2 后显示 2、4、6。',
+    },
+  ],
+});
+
+L({
+  id: 'while', ch: 'c3', title: 'while 循环', hook: '只要条件成立，就一直重复',
+  syntax: py`while 条件:
+    要重复执行的代码`,
+  how: [
+    '每一轮开始前先检查条件。是 True 就执行一遍缩进的代码，然后回来再检查。',
+    '条件变成 False 时，循环结束，继续执行后面的代码。',
+    '循环里必须有能让条件变成 False 的代码，否则会永远停不下来，这叫“死循环”。',
+  ],
+  mean: 'while 是“当……的时候”。`while n > 0:` 就是“当 n 还大于 0 的时候，继续做”。',
+  use: '知道要重复几次，用 for。不知道几次、只知道什么时候该停，用 while。比如“一直问，直到用户输入正确的密码”。',
+  example: {
+    code: py`n = 3
+while n > 0:
+    print(n)
+    n = n - 1
+print("发射！")`,
+    out: '3\n2\n1\n发射！',
+  },
+  tip: '写 while 时先问自己：条件什么时候会变成 False？如果答不上来，多半是死循环。',
+  questions: [
+    {
+      id: 'while-1', type: 'output', q: OUT_Q,
+      code: py`i = 0
+while i < 3:
+    print(i)
+    i += 1`,
+      opts: [
+        { t: '0\n1\n2', ok: true },
+        { t: '1\n2\n3', why: '每一轮是先 print(i)，再给 i 加 1。所以第一次显示的是 0。' },
+        { t: '0\n1\n2\n3', why: 'i 变成 3 时，条件 3 < 3 不成立，循环结束，3 不会被显示。' },
+        { t: '0\n0\n0\n0\n0', why: '循环里有 `i += 1`，i 每一轮都会变大，不会一直是 0。' },
+      ],
+      explain: 'i 从 0 开始，每轮先显示再加 1。到 3 时条件不成立，循环结束。',
+    },
+    {
+      id: 'while-2', type: 'choice', q: '这段代码有什么问题？',
+      code: py`n = 1
+while n < 5:
+    print(n)`,
+      opts: [
+        { t: 'n 一直是 1，条件永远成立，会无限循环下去', ok: true },
+        { t: '只会显示一次 1 就结束', why: 'while 每一轮结束后都会回去重新检查条件。条件一直是 True，所以不会结束。' },
+        { t: '有语法错误，无法运行', why: '语法没有问题，可以运行。问题在于它停不下来。' },
+        { t: '什么都不会显示', why: '1 < 5 成立，会进入循环并显示 1，而且会一直显示。' },
+      ],
+      explain: '循环里没有改变 n 的代码，`n < 5` 永远是 True，这就是死循环。加一行 `n += 1` 就好了。',
+    },
+    {
+      id: 'while-3', type: 'output', q: OUT_Q,
+      code: py`n = 10
+while n > 0:
+    n = n - 4
+print(n)`,
+      opts: [
+        { t: '-2', ok: true },
+        { t: '2', why: 'n 是 2 的时候，2 > 0 仍然成立，所以还会再减一次 4。' },
+        { t: '0', why: 'n 的变化是 10 → 6 → 2 → -2，不会正好停在 0。' },
+        { t: '6\n2\n-2', why: 'print 没有缩进，不在循环里。它只在循环结束后执行一次。' },
+      ],
+      explain: 'n：10 → 6 → 2 → -2。到 -2 时条件 -2 > 0 不成立，循环结束，显示 -2。',
+    },
+    {
+      id: 'while-4', type: 'fill', q: '补全代码，让 count 一直加到 3 为止（显示 3）',
+      code: py`count = 0
+____ count < 3:
+    count += 1
+print(count)`,
+      answers: ['while'], expect: '3',
+      hints: {
+        'if': 'if 只判断一次，count 只会加到 1。要重复执行得用 while。',
+        'for': 'for 的写法是 for…in…。这里是“只要条件成立就重复”，用 while。',
+        'While': 'Python 区分大小写，要全部小写：while。',
+      },
+      explain: '`while count < 3:` 让循环一直执行，直到 count 变成 3。',
+      checks: [{ code: py`count = 0
+if count < 3:
+    count += 1
+print(count)`, out: '1' }],
+    },
+  ],
+});
+
+L({
+  id: 'brk', ch: 'c3', title: 'break 和 continue', hook: '提前结束循环，或者跳过这一轮',
+  syntax: py`for n in 一组东西:
+    if 条件:
+        break      # 结束整个循环
+    if 条件:
+        continue   # 跳过这一轮`,
+  how: [
+    '`break`：马上跳出循环，后面的轮次都不执行了。',
+    '`continue`：这一轮剩下的代码不执行了，直接进入下一轮。',
+    '它们通常写在 if 里面：满足某个条件时才跳。',
+    'for 和 while 循环里都能用。',
+  ],
+  mean: 'break 是“不干了，收工”。continue 是“这个跳过，下一个”。',
+  use: '在列表里找东西，找到就可以 break，不用看剩下的。处理数据时遇到不想要的，用 continue 跳过。',
+  example: {
+    code: py`for n in range(1, 8):
+    if n == 3:
+        continue
+    if n == 6:
+        break
+    print(n)
+print("结束")`,
+    out: '1\n2\n4\n5\n结束',
+  },
+  tip: '`while True:` 是一个永远成立的循环，必须靠里面的 break 才能出来。',
+  questions: [
+    {
+      id: 'brk-1', type: 'output', q: OUT_Q,
+      code: py`for i in range(5):
+    if i == 2:
+        break
+    print(i)`,
+      opts: [
+        { t: '0\n1', ok: true },
+        { t: '0\n1\n3\n4', why: '这是 continue 的效果。break 会让整个循环结束，后面的 3 和 4 不会出现。' },
+        { t: '0\n1\n2', why: 'i 等于 2 时先遇到 break，循环立刻结束，还没来得及执行 print。' },
+        { t: '2', why: 'i 等于 2 时循环直接结束了，2 不会被显示。' },
+      ],
+      explain: 'i 是 0、1 时正常显示。i 是 2 时遇到 break，整个循环结束。',
+    },
+    {
+      id: 'brk-2', type: 'output', q: OUT_Q,
+      code: py`for i in range(5):
+    if i == 2:
+        continue
+    print(i)`,
+      opts: [
+        { t: '0\n1\n3\n4', ok: true },
+        { t: '0\n1', why: '这是 break 的效果。continue 只跳过这一轮，循环还会继续。' },
+        { t: '0\n1\n2\n3\n4', why: 'i 等于 2 时遇到 continue，这一轮的 print 被跳过了。' },
+        { t: '2', why: 'continue 跳过的正是 i 等于 2 的这一轮，2 不会被显示。' },
+      ],
+      explain: 'i 是 2 时遇到 continue，跳过 print，直接进入下一轮。',
+    },
+    {
+      id: 'brk-3', type: 'choice', q: '在列表里找到目标后，想让循环立刻停下来，用哪个？',
+      opts: [
+        { t: '`break`', ok: true },
+        { t: '`continue`', why: 'continue 只是跳过这一轮，循环还会继续往后走。' },
+        { t: '`stop`', why: 'Python 没有 stop 这个关键字。结束循环用 break。' },
+        { t: '`end`', why: 'Python 没有 end 这个关键字。结束循环用 break。' },
+      ],
+      explain: '`break` 让循环立刻结束。',
+    },
+    {
+      id: 'brk-4', type: 'fill', q: '补全代码，让循环在 n 等于 3 时结束（显示 3）',
+      code: py`n = 0
+while True:
+    n += 1
+    if n == 3:
+        ____
+print(n)`,
+      answers: ['break'], expect: '3',
+      hints: {
+        'continue': 'continue 只会跳回循环开头。这是 while True，永远不会结束。',
+        'stop': 'Python 里结束循环的关键字是 break。',
+        'exit': '结束循环用 break。',
+        'Break': 'Python 区分大小写，要全部小写：break。',
+      },
+      explain: '`while True` 只能靠 break 跳出来。n 加到 3 时 break，然后显示 3。',
+    },
+    {
+      id: 'brk-5', type: 'output', q: OUT_Q,
+      code: py`total = 0
+for n in [1, 2, 3, 4]:
+    if n % 2 == 0:
+        continue
+    total += n
+print(total)`,
+      opts: [
+        { t: '4', ok: true },
+        { t: '6', why: '6 是偶数 2 + 4 的和。代码里遇到偶数是 continue，跳过了它们。' },
+        { t: '10', why: '偶数那几轮遇到 continue，没有执行到 `total += n`。' },
+        { t: '1', why: 'continue 只跳过当前这一轮，循环会继续，3 也被加进去了。' },
+      ],
+      explain: '`n % 2 == 0` 判断偶数。2 和 4 被跳过，只加了 1 和 3，结果是 4。',
+    },
+  ],
+});
+
+/* ---------- 第四章 更多容器 ---------- */
+
+L({
+  id: 'listm', ch: 'c4', title: '列表常用方法', hook: '增加、删除、排序，列表自带的本领',
+  syntax: py`a.append(x)     # 在末尾加一个
+a.insert(i, x)  # 在位置 i 插入
+a.pop()         # 取走最后一个
+a.remove(x)     # 删掉第一个 x
+a.sort()        # 从小到大排序
+a.reverse()     # 前后颠倒`,
+  how: [
+    '“方法”是数据自带的功能，写法是 `数据.方法名()`，中间是英文句点。',
+    '这些方法会直接改动列表本身。',
+    '`pop()` 取走最后一个元素，同时把它交还给你，可以存进变量。',
+    '`remove(x)` 按值删除，`pop(i)` 按位置删除。',
+  ],
+  mean: '列表像一个可以随时增减的清单：加一项、划掉一项、重新排个序。',
+  use: '购物车加商品、待办清单完成一项、排行榜排序，都是这些方法在干活。',
+  example: {
+    code: py`todo = ["作业", "跑步"]
+todo.append("看书")
+print(todo)
+todo.insert(0, "早饭")
+print(todo)
+last = todo.pop()
+print(last, todo)
+nums = [3, 1, 2]
+nums.sort()
+print(nums)`,
+    out: "['作业', '跑步', '看书']\n['早饭', '作业', '跑步', '看书']\n看书 ['早饭', '作业', '跑步']\n[1, 2, 3]",
+  },
+  tip: '`a.sort()` 直接把 a 排好，不用再写 `a = a.sort()`。那样写反而会把 a 变成 None。',
+  checks: [{ code: py`a = [3, 1, 2]
+a = a.sort()
+print(a)`, out: 'None' }],
+  questions: [
+    {
+      id: 'listm-1', type: 'output', q: OUT_Q,
+      code: py`a = [1, 2]
+a.append(3)
+print(a)`,
+      opts: [
+        { t: '[1, 2, 3]', ok: true },
+        { t: '[3, 1, 2]', why: 'append 是加在末尾。想加在开头要用 `insert(0, 3)`。' },
+        { t: '[1, 2]', why: 'append 会直接改动列表 a，3 已经加进去了。' },
+        { t: '[1, 2, [3]]', why: 'append(3) 加进去的是数字 3 本身，不会多套一层方括号。' },
+      ],
+      explain: '`append(3)` 把 3 加到列表的末尾。',
+    },
+    {
+      id: 'listm-2', type: 'output', q: OUT_Q,
+      code: py`a = [5, 6, 7]
+x = a.pop()
+print(x)`,
+      opts: [
+        { t: '7', ok: true },
+        { t: '5', why: 'pop() 括号里不写位置时，取走的是最后一个，不是第一个。' },
+        { t: '[5, 6]', why: '[5, 6] 是 pop 之后 a 剩下的样子。x 里存的是被取走的那个元素。' },
+        { t: '6', why: 'pop() 取走的是最后一个元素 7。' },
+      ],
+      explain: '`pop()` 取走最后一个元素 7，并把它交给 x。',
+    },
+    {
+      id: 'listm-3', type: 'fill', q: '补全代码，把列表从小到大排序',
+      code: py`nums = [3, 1, 2]
+nums.____()
+print(nums)`,
+      answers: ['sort'], expect: '[1, 2, 3]',
+      hints: {
+        'sorted': 'sorted 是一个函数，写法是 sorted(nums)。列表的方法叫 sort。',
+        'reverse': 'reverse 是前后颠倒，会得到 [2, 1, 3]。排序用 sort。',
+        'order': '排序的方法叫 sort。',
+      },
+      explain: '`nums.sort()` 把列表从小到大排好。',
+    },
+    {
+      id: 'listm-4', type: 'output', q: OUT_Q,
+      code: py`a = ["a", "b", "c"]
+a.remove("b")
+print(len(a))`,
+      opts: [
+        { t: '2', ok: true },
+        { t: '3', why: 'remove 已经把 "b" 从列表里删掉了，现在只剩 2 个元素。' },
+        { t: "['a', 'c']", why: '这是 a 现在的样子，但 print 的是 len(a)，也就是元素的个数。' },
+        { t: '1', why: 'remove("b") 只删掉了一个元素，3 - 1 = 2。' },
+      ],
+      explain: '删掉 "b" 后剩下 "a" 和 "c"，长度是 2。',
+    },
+    {
+      id: 'listm-5', type: 'choice', q: '想把 "牛奶" 加到购物清单 cart 的最后，哪个写法对？',
+      opts: [
+        { t: '`cart.append("牛奶")`', ok: true },
+        { t: '`cart.add("牛奶")`', why: 'add 是集合的方法，列表没有 add。列表在末尾添加用 append。' },
+        { t: '`cart + "牛奶"`', why: '列表不能和字符串直接相加，会报错。' },
+        { t: '`append(cart, "牛奶")`', why: 'append 是列表自带的方法，要写在列表后面：`cart.append(...)`。' },
+      ],
+      explain: '在列表末尾添加元素：`列表.append(元素)`。',
+      checks: [
+        { code: py`cart = ["面包"]
+cart.add("牛奶")`, err: 'AttributeError' },
+        { code: py`cart = ["面包"]
+cart + "牛奶"`, err: 'TypeError' },
+        { code: py`cart = ["面包"]
+append(cart, "牛奶")`, err: 'NameError' },
+      ],
+    },
+  ],
+});
+
+L({
+  id: 'tuple', ch: 'c4', title: '元组', hook: '一旦创建就不能修改的列表',
+  syntax: py`point = (3, 5)
+point[0]         # 取值和列表一样
+x, y = point     # 一次拆给两个变量`,
+  how: [
+    '用圆括号 `()` 创建，元素之间用逗号隔开。',
+    '可以用索引取值、用 len 数个数、用 for 遍历，这些和列表一样。',
+    '创建之后不能修改、不能添加、不能删除。',
+    '`x, y = point` 叫“拆包”：把元组里的值按顺序分给几个变量。',
+  ],
+  mean: '元组是上了锁的列表：能看，不能改。',
+  use: '坐标、生日、颜色这类不该被改动的数据，放进元组更安全，不会被不小心改掉。',
+  example: {
+    code: py`point = (3, 5)
+print(point[0])
+print(len(point))
+x, y = point
+print(x + y)
+for c in ("红", "绿", "蓝"):
+    print(c)`,
+    out: '3\n2\n8\n红\n绿\n蓝',
+  },
+  tip: '修改元组会报错：`point[0] = 9` → TypeError。只有一个元素的元组要多写一个逗号：`(5,)`。',
+  checks: [
+    { code: py`point = (3, 5)
+point[0] = 9`, err: 'TypeError' },
+    { code: py`print(type((5,)))
+print(type((5)))`, out: "<class 'tuple'>\n<class 'int'>" },
+  ],
+  questions: [
+    {
+      id: 'tuple-1', type: 'choice', q: '元组和列表最大的区别是什么？',
+      opts: [
+        { t: '元组创建后不能修改', ok: true },
+        { t: '元组不能用索引取值', why: '元组可以用索引取值，写法和列表一样，比如 `t[0]`。' },
+        { t: '元组里只能放数字', why: '元组和列表一样，什么类型的数据都能放。' },
+        { t: '元组里的元素没有顺序', why: '元组是有顺序的，所以才能用索引取值。' },
+      ],
+      explain: '列表可以改，元组不能改。这是它们最主要的区别。',
+    },
+    {
+      id: 'tuple-2', type: 'output', q: OUT_Q,
+      code: py`t = (10, 20, 30)
+print(t[1])`,
+      opts: [
+        { t: '20', ok: true },
+        { t: '10', why: '索引从 0 开始。`t[0]` 才是 10。' },
+        { t: '30', why: '30 的索引是 2。' },
+        { err: true, why: '元组不能修改，但是可以用索引读取。' },
+      ],
+      explain: '元组的索引用法和列表一样：t[1] 是第二个元素 20。',
+    },
+    {
+      id: 'tuple-3', type: 'choice', q: '已经有 `t = (1, 2, 3)`，下面哪一行会报错？',
+      opts: [
+        { t: '`t[0] = 5`', ok: true },
+        { t: '`print(t[0])`', why: '读取元组里的值没有问题。' },
+        { t: '`print(len(t))`', why: 'len 只是数个数，不会改动元组。' },
+        { t: '`a, b, c = t`', why: '这是拆包，把三个值分给三个变量，没有改动元组。' },
+      ],
+      explain: '元组不能修改。`t[0] = 5` 想改第一个元素，会报 TypeError。',
+      checks: [
+        { code: py`t = (1, 2, 3)
+t[0] = 5`, err: 'TypeError' },
+        { code: py`t = (1, 2, 3)
+print(t[0])
+print(len(t))
+a, b, c = t
+print(a, b, c)`, out: '1\n3\n1 2 3' },
+      ],
+    },
+    {
+      id: 'tuple-4', type: 'fill', q: '补全代码，把元组 pos 拆给 x 和 y（显示 7）',
+      code: py`pos = (4, 7)
+x, y = ____
+print(y)`,
+      answers: ['pos'], expect: '7',
+      hints: {
+        '(4, 7)': '这样也能得到 7，不过题目要拆的是变量 pos。',
+        '(4,7)': '这样也能得到 7，不过题目要拆的是变量 pos。',
+        'pos[1]': 'pos[1] 只是一个数 7，没法拆给两个变量。直接写 pos。',
+      },
+      explain: '`x, y = pos` 把 4 给 x，把 7 给 y。',
+    },
+  ],
+});
+
+L({
+  id: 'dict', ch: 'c4', title: '字典', hook: '用名字找数据，不用记位置',
+  syntax: py`d = {"name": "小明", "age": 18}
+d["name"]          # 按键取值
+d["age"] = 19      # 修改
+d["city"] = "北京"  # 新增
+"age" in d         # 有没有这个键
+d.items()          # 所有的键值对`,
+  how: [
+    '用花括号 `{}` 创建，每一项写成 `键: 值`，项与项之间用逗号隔开。',
+    '`d[键]` 取出对应的值。',
+    '`d[键] = 值`：键已经存在就是修改，不存在就是新增。',
+    '键不能重复，通常用字符串。',
+    '`for k, v in d.items():` 可以把每一对键和值都走一遍。',
+  ],
+  mean: '字典像一本通讯录：按名字（键）查，就能找到对应的电话（值）。列表靠位置找，字典靠名字找。',
+  use: '一个学生有姓名、年龄、城市；一件商品有名称、价格、库存。这种“一个东西有多项信息”的数据，最适合用字典。',
+  example: {
+    code: py`d = {"name": "小明", "age": 18}
+print(d["name"])
+d["age"] = 19
+d["city"] = "北京"
+print(d)
+print(len(d))
+for k, v in d.items():
+    print(k, "→", v)`,
+    out: "小明\n{'name': '小明', 'age': 19, 'city': '北京'}\n3\nname → 小明\nage → 19\ncity → 北京",
+  },
+  tip: '取一个不存在的键会报错：KeyError。不确定有没有，可以先用 `in` 检查，或者用 `d.get("键")`，没有时得到 None。',
+  checks: [
+    { code: py`d = {"name": "小明"}
+print(d["tel"])`, err: 'KeyError' },
+    { code: py`d = {"name": "小明"}
+print(d.get("tel"))`, out: 'None' },
+  ],
+  questions: [
+    {
+      id: 'dict-1', type: 'output', q: OUT_Q,
+      code: py`d = {"a": 1, "b": 2}
+print(d["b"])`,
+      opts: [
+        { t: '2', ok: true },
+        { t: 'b', why: '`d["b"]` 取出的是键 "b" 对应的值，不是键本身。' },
+        { t: '1', why: '1 是键 "a" 对应的值。字典按键查找，"b" 对应的是 2。' },
+        { t: "{'b': 2}", why: '`d["b"]` 只取出值，不会连键一起取出来。' },
+      ],
+      explain: '字典按键取值：键 "b" 对应的值是 2。',
+    },
+    {
+      id: 'dict-2', type: 'output', q: OUT_Q,
+      code: py`d = {"x": 1}
+d["y"] = 5
+d["x"] = 9
+print(d)`,
+      opts: [
+        { t: "{'x': 9, 'y': 5}", ok: true },
+        { t: "{'x': 1, 'y': 5}", why: '键 "x" 已经存在，`d["x"] = 9` 会把它的值从 1 改成 9。' },
+        { t: "{'x': 1, 'y': 5, 'x': 9}", why: '字典的键不能重复。给已有的键赋值是修改，不会多出一项。' },
+        { err: true, why: '给不存在的键赋值不会报错，而是新增一项。' },
+      ],
+      explain: '`d["y"] = 5` 是新增，`d["x"] = 9` 是修改。',
+    },
+    {
+      id: 'dict-3', type: 'fill', q: '填上键，取出小红的分数（显示 88）。键是字符串，记得加引号',
+      code: py`score = {"小明": 90, "小红": 88}
+print(score[____])`,
+      answers: ['"小红"', "'小红'"], expect: '88',
+      hints: {
+        '小红': '键是字符串，要加引号："小红"。',
+        '1': '字典不按位置取值，要写键："小红"。',
+        '88': '方括号里写的是键，不是值。',
+      },
+      explain: '`score["小红"]` 取出键 "小红" 对应的值 88。',
+    },
+    {
+      id: 'dict-4', type: 'output', q: OUT_Q,
+      code: py`d = {"a": 1, "b": 2, "c": 3}
+print(len(d))`,
+      opts: [
+        { t: '3', ok: true },
+        { t: '6', why: '一个键加一个值算一项，不是分开数。一共 3 项。' },
+        { t: '2', why: '字典里有 "a"、"b"、"c" 三项。' },
+        { err: true, why: 'len 可以用在字典上，数的是有几项。' },
+      ],
+      explain: '字典的长度是键值对的数量：3 对。',
+    },
+    {
+      id: 'dict-5', type: 'output', q: OUT_Q,
+      code: py`score = {"小明": 90}
+print("小红" in score)`,
+      opts: [
+        { t: 'False', ok: true },
+        { t: 'True', why: '字典里只有 "小明" 这一个键，没有 "小红"。' },
+        { err: true, why: '`in` 只是检查有没有这个键，没有也不会报错，只会得到 False。' },
+        { t: '90', why: '`in` 的结果是 True 或 False，不会取出值。' },
+      ],
+      explain: '`键 in 字典` 检查这个键存不存在。"小红" 不在里面，结果是 False。',
+    },
+  ],
+});
+
+L({
+  id: 'set', ch: 'c4', title: '集合', hook: '不会有重复元素的一堆数据',
+  syntax: py`s = {1, 2, 3}
+s.add(4)          # 添加
+s.remove(1)       # 删除
+2 in s            # 在不在里面
+set([1, 1, 2])    # 列表去重
+a & b   # 交集：两边都有的
+a | b   # 并集：合在一起
+a - b   # 差集：a 有、b 没有的`,
+  how: [
+    '用花括号创建，但里面只有值，没有 `键: 值`。',
+    '集合会自动去掉重复的元素。',
+    '集合没有顺序，不能用索引取值。',
+    '空集合要写 `set()`。只写 `{}` 得到的是空字典。',
+  ],
+  mean: '集合像一个袋子：东西放进去没有先后顺序，同样的东西放两次也只算一个。',
+  use: '去掉重复数据（比如统计有多少个不同的访客），或者比较两组数据（哪些人两个社团都参加了）。',
+  example: {
+    code: py`nums = [1, 2, 2, 3, 3, 3]
+unique = set(nums)
+print(unique)
+print(len(unique))
+a = {1, 2, 3}
+b = {2, 3, 4}
+print(a & b)
+print(a | b)
+print(a - b)`,
+    out: '{1, 2, 3}\n3\n{2, 3}\n{1, 2, 3, 4}\n{1}',
+  },
+  tip: '列表添加用 `append`，集合添加用 `add`。集合没有“末尾”，所以不叫 append。',
+  checks: [
+    { code: py`print(type({}))
+print(type(set()))`, out: "<class 'dict'>\n<class 'set'>" },
+    { code: py`s = {1, 2, 3}
+print(s[0])`, err: 'TypeError' },
+    { code: py`s = {1, 2}
+s.append(3)`, err: 'AttributeError' },
+  ],
+  questions: [
+    {
+      id: 'set-1', type: 'output', q: OUT_Q,
+      code: py`print(len({1, 1, 2, 2, 3}))`,
+      opts: [
+        { t: '3', ok: true },
+        { t: '5', why: '集合会自动去掉重复的元素。重复的 1 和 2 各只保留一个。' },
+        { t: '2', why: '去重后还剩 1、2、3 三个不同的元素。' },
+        { t: '9', why: 'len 是数个数，不是求和。' },
+      ],
+      explain: '去重后是 {1, 2, 3}，一共 3 个元素。',
+    },
+    {
+      id: 'set-2', type: 'output', q: OUT_Q,
+      code: py`a = {1, 2, 3}
+b = {3, 4}
+print(a & b)`,
+      opts: [
+        { t: '{3}', ok: true },
+        { t: '{1, 2, 3, 4}', why: '这是并集 `a | b` 的结果。`&` 是交集，只要两边都有的。' },
+        { t: '{1, 2}', why: '这是差集 `a - b` 的结果。`&` 要的是两边都有的元素。' },
+        { t: '{3, 3}', why: '集合里不会有重复的元素，3 只会出现一次。' },
+      ],
+      explain: '`&` 是交集：a 和 b 都有的只有 3。',
+    },
+    {
+      id: 'set-3', type: 'fill', q: '补全代码，往集合里添加 3',
+      code: py`s = {1, 2}
+s.____(3)
+print(len(s))`,
+      answers: ['add'], expect: '3',
+      hints: {
+        'append': 'append 是列表的方法。集合没有“末尾”，添加用 add。',
+        'insert': 'insert 是列表的方法。集合添加用 add。',
+        'push': 'push 是别的语言的写法。集合添加用 add。',
+      },
+      explain: '集合用 `add()` 添加元素。',
+    },
+    {
+      id: 'set-4', type: 'choice', q: '关于集合，下面哪个说法是对的？',
+      opts: [
+        { t: '集合里不会有重复的元素', ok: true },
+        { t: '可以用 `s[0]` 取出第一个元素', why: '集合没有顺序，也就没有“第一个”，不能用索引取值。' },
+        { t: '`{}` 创建的是空集合', why: '`{}` 创建的是空字典。空集合要写 `set()`。' },
+        { t: '集合会按添加的先后顺序保存元素', why: '集合不记录顺序，这是它和列表的重要区别。' },
+      ],
+      explain: '集合的特点：不重复、没有顺序。',
+    },
+    {
+      id: 'set-5', type: 'output', q: OUT_Q,
+      code: py`names = ["小明", "小红", "小明"]
+print(len(set(names)))`,
+      opts: [
+        { t: '2', ok: true },
+        { t: '3', why: 'set() 把列表变成集合时会去掉重复的。"小明" 出现了两次，只算一个。' },
+        { t: '1', why: '去重后还有 "小明" 和 "小红" 两个不同的名字。' },
+        { err: true, why: 'set() 可以把列表变成集合，不会报错。' },
+      ],
+      explain: '去重后剩 "小明" 和 "小红"，一共 2 个。',
+    },
+  ],
+});
+
+/* ===== 关卡内容（第五、六章）===== */
+
+/* ---------- 第五章 函数与字符串 ---------- */
+
+L({
+  id: 'func', ch: 'c5', title: '函数定义和调用', hook: '把一段代码打包，起个名字，随时叫它干活',
+  syntax: py`def 函数名():
+    函数里的代码
+
+函数名()     # 调用`,
+  how: [
+    '用 `def` 开头，后面是函数名、一对圆括号和冒号。',
+    '函数里的代码要缩进。',
+    '定义函数时，里面的代码不会执行，Python 只是记住了它。',
+    '写 `函数名()` 才是调用，这时里面的代码才执行。可以调用很多次。',
+    '必须先定义，后调用。',
+  ],
+  mean: '函数像一张写好的菜谱。写菜谱（定义）的时候并没有做菜，照着菜谱做（调用）才真正开火。',
+  use: '同一段代码要用很多次时，写成函数，用的时候只要一行。要修改也只改一个地方。其实 print、len 都是别人写好的函数。',
+  example: {
+    code: py`def say_hi():
+    print("你好！")
+    print("欢迎学习 Python")
+
+say_hi()
+say_hi()`,
+    out: '你好！\n欢迎学习 Python\n你好！\n欢迎学习 Python',
+  },
+  tip: '调用时别忘了括号。只写 `say_hi` 不带括号，函数不会执行。',
+  questions: [
+    {
+      id: 'func-1', type: 'output', q: OUT_Q,
+      code: py`def hello():
+    print("嗨")
+
+print("开始")
+hello()`,
+      opts: [
+        { t: '开始\n嗨', ok: true },
+        { t: '嗨\n开始', why: '定义函数时，里面的 print("嗨") 不会执行。要等到下面调用 hello() 时才执行。' },
+        { t: '开始', why: '最后一行 hello() 调用了函数，所以“嗨”会被显示。' },
+        { t: '嗨', why: 'print("开始") 是一行正常的代码，会被执行。' },
+      ],
+      explain: '定义不执行。先执行 print("开始")，再调用 hello() 显示“嗨”。',
+    },
+    {
+      id: 'func-2', type: 'output', q: OUT_Q,
+      code: py`def hello():
+    print("嗨")`,
+      opts: [
+        { none: true, ok: true },
+        { t: '嗨', why: '这里只是定义了函数，没有调用它。函数里的代码要调用才会执行。' },
+        { t: 'hello', why: '函数名不会被显示出来。而且这里没有调用函数，什么都不会发生。' },
+        { err: true, why: '只定义不调用完全合法，不会报错，只是什么都不会发生。' },
+      ],
+      explain: '只定义、不调用，函数里的代码一行都不会执行。',
+    },
+    {
+      id: 'func-3', type: 'fill', q: '补全代码，定义一个函数',
+      code: py`____ greet():
+    print("早上好")
+
+greet()`,
+      answers: ['def'], expect: '早上好',
+      hints: {
+        'function': 'function 是 JavaScript 的写法。Python 用 def。',
+        'func': 'Python 定义函数的关键字是 def。',
+        'define': 'Python 用的是缩写：def。',
+        'Def': 'Python 区分大小写，要全部小写：def。',
+      },
+      explain: '定义函数用 `def`，是 define（定义）的缩写。',
+    },
+    {
+      id: 'func-4', type: 'output', q: OUT_Q,
+      code: py`def cheer():
+    print("加油")
+
+cheer()
+cheer()
+cheer()`,
+      opts: [
+        { t: '加油\n加油\n加油', ok: true },
+        { t: '加油', why: '函数被调用了 3 次，每调用一次，里面的代码就执行一遍。' },
+        { t: '加油加油加油', why: '每次 print 显示完都会换行，所以是三行。' },
+        { none: true, why: '下面三行 cheer() 都是在调用函数，会显示内容。' },
+      ],
+      explain: '调用 3 次，函数里的代码执行 3 遍。',
+    },
+    {
+      id: 'func-5', type: 'choice', q: '已经定义了函数 jump，怎样调用它？',
+      opts: [
+        { t: '`jump()`', ok: true },
+        { t: '`jump`', why: '不加括号只是提到了这个函数，并不会执行它。' },
+        { t: '`def jump()`', why: 'def 是用来定义函数的，不是调用。' },
+        { t: '`call jump`', why: 'Python 没有 call 这个写法。调用就是函数名加一对括号。' },
+      ],
+      explain: '调用函数：函数名后面加一对圆括号。',
+    },
+  ],
+});
+
+L({
+  id: 'ret', ch: 'c5', title: '参数和返回值', hook: '给函数送数据进去，再把结果拿回来',
+  syntax: py`def 函数名(参数1, 参数2):
+    ...
+    return 结果
+
+变量 = 函数名(值1, 值2)`,
+  how: [
+    '参数是函数的入口。调用时括号里的值，会按顺序交给参数。',
+    '`return` 是函数的出口：把结果送回调用它的地方，同时函数立刻结束。',
+    '返回的结果可以存进变量，也可以直接拿来计算。',
+    '参数可以有默认值：`def greet(name="朋友")`，调用时不给就用默认值。',
+    '没有写 return 的函数，返回的是 `None`（表示“什么都没有”）。',
+  ],
+  mean: '函数像一台加工机器：从入口放进原料（参数），机器加工，从出口吐出成品（返回值）。',
+  use: '有了参数，同一个函数能处理不同的数据。有了返回值，函数的结果才能被后面的代码继续使用。',
+  example: {
+    code: py`def add(a, b):
+    return a + b
+
+result = add(3, 5)
+print(result)
+print(add(10, 20) * 2)
+
+def greet(name="朋友"):
+    return "你好，" + name
+
+print(greet("小明"))
+print(greet())`,
+    out: '8\n60\n你好，小明\n你好，朋友',
+  },
+  tip: 'print 和 return 不一样。print 只是把内容显示给人看；return 是把值交回给程序，这样才能存进变量继续用。',
+  questions: [
+    {
+      id: 'ret-1', type: 'output', q: OUT_Q,
+      code: py`def double(n):
+    return n * 2
+
+print(double(4))`,
+      opts: [
+        { t: '8', ok: true },
+        { t: '4', why: '4 是送进去的参数。函数返回的是 n * 2，也就是 8。' },
+        { t: 'n * 2', why: '调用时 n 已经变成了 4，返回的是算出来的结果。' },
+        { t: 'None', why: '这个函数写了 return，会把结果 8 返回来。没写 return 才是 None。' },
+      ],
+      explain: '调用 double(4) 时，n 是 4，返回 4 * 2 = 8。',
+    },
+    {
+      id: 'ret-2', type: 'output', q: OUT_Q,
+      code: py`def area(w, h):
+    return w * h
+
+print(area(2, 3) + 1)`,
+      opts: [
+        { t: '7', ok: true },
+        { t: '6', why: '6 只是 area(2, 3) 的返回值，后面还加了 1。' },
+        { t: '23', why: '2 和 3 分别交给了 w 和 h，函数算的是 w * h。' },
+        { err: true, why: '函数的返回值是数字 6，可以直接参与计算。' },
+      ],
+      explain: 'area(2, 3) 返回 6，6 + 1 = 7。返回值可以直接拿来算。',
+    },
+    {
+      id: 'ret-3', type: 'output', q: OUT_Q,
+      code: py`def add(a, b):
+    print(a + b)
+
+x = add(1, 2)
+print(x)`,
+      opts: [
+        { t: '3\nNone', ok: true },
+        { t: '3\n3', why: '函数里只是 print 了 3，并没有 return。没有 return 的函数交回来的是 None，所以 x 是 None。' },
+        { t: '3', why: '最后一行 print(x) 也会执行，会多显示一行。' },
+        { t: 'None', why: '调用 add(1, 2) 时，函数里的 print(a + b) 会先显示 3。' },
+      ],
+      explain: '函数里的 print 显示了 3，但函数没有 return，所以 x 是 None。',
+    },
+    {
+      id: 'ret-4', type: 'fill', q: '补全代码，让函数把 n * n 的结果交回来（显示 25）',
+      code: py`def square(n):
+    ____ n * n
+
+print(square(5))`,
+      answers: ['return'], expect: '25',
+      hints: {
+        'print': '用 print 的话，函数只是显示了 25，交回来的是 None，最后会多显示一行 None。',
+        'Return': 'Python 区分大小写，要全部小写：return。',
+        'back': '把结果交回来的关键字是 return。',
+      },
+      explain: '`return` 把结果送回调用的地方。',
+    },
+    {
+      id: 'ret-5', type: 'output', q: OUT_Q,
+      code: py`def greet(name="同学"):
+    print("你好，" + name)
+
+greet()`,
+      opts: [
+        { t: '你好，同学', ok: true },
+        { err: true, why: '参数 name 有默认值。调用时不给值，就自动使用默认值，不会报错。' },
+        { t: '你好，name', why: '函数里的 name 是变量，显示的是它的值。' },
+        { t: '你好，', why: '没有传值时，name 用的是默认值 "同学"，不是空的。' },
+      ],
+      explain: '调用时没有给 name 传值，所以用默认值 "同学"。',
+    },
+  ],
+});
+
+L({
+  id: 'strm', ch: 'c5', title: '字符串常用方法', hook: '大小写、去空格、替换、切开、拼起来',
+  syntax: py`s.upper()          # 变大写
+s.lower()          # 变小写
+s.strip()          # 去掉两头空格
+s.replace("a", "b")  # 把 a 换成 b
+s.split(",")       # 切开，得到列表
+"-".join(列表)      # 拼成字符串
+s.startswith("x")  # 以 x 开头吗
+s.count("x")       # x 出现几次`,
+  how: [
+    '写法是 `字符串.方法名()`。',
+    '这些方法不会改动原来的字符串，而是交回一个新的字符串。',
+    '想保存结果，要赋值：`s = s.upper()`。',
+    '方法可以连着用：`s.strip().upper()` 先去空格，再变大写。',
+  ],
+  mean: '字符串方法是处理文字的小工具：换大小写、清理空格、查找、切开、拼接。',
+  use: '用户输入的内容经常带多余的空格、大小写不统一，要先清理。把一行 "红,绿,蓝" 这样的文字拆成一个个数据也靠它。',
+  example: {
+    code: py`s = "  Hello  "
+print(s.strip())
+print(s.strip().upper())
+msg = "我爱吃苹果"
+print(msg.replace("苹果", "香蕉"))
+words = "红,绿,蓝".split(",")
+print(words)
+print("-".join(words))
+print(msg.startswith("我"))
+print("banana".count("a"))`,
+    out: "Hello\nHELLO\n我爱吃香蕉\n['红', '绿', '蓝']\n红-绿-蓝\nTrue\n3",
+  },
+  tip: '只写 `s.upper()` 而不接住结果，s 不会变。字符串和元组一样，创建之后就不能改。',
+  questions: [
+    {
+      id: 'strm-1', type: 'output', q: OUT_Q,
+      code: py`print("Hello".upper())`,
+      opts: [
+        { t: 'HELLO', ok: true },
+        { t: 'hello', why: '全部变小写是 lower()。upper() 是全部变大写。' },
+        { t: 'Hello', why: 'upper() 会交回一个全部大写的新字符串，print 显示的是它。' },
+        { t: 'Hello.upper()', why: '`.upper()` 在引号外面，是会被执行的代码。' },
+      ],
+      explain: '`upper()` 把所有字母变成大写。',
+    },
+    {
+      id: 'strm-2', type: 'output', q: OUT_Q,
+      code: py`s = "abc"
+s.upper()
+print(s)`,
+      opts: [
+        { t: 'abc', ok: true },
+        { t: 'ABC', why: 'upper() 不会改动原来的 s，它只是交回一个新字符串。这里没有把结果存起来，所以 s 还是 "abc"。' },
+        { err: true, why: '这段代码可以运行，只是第二行的结果没有被保存。' },
+        { t: 'Abc', why: 'upper() 是全部变大写，而且在这里它的结果被丢掉了，s 没有变。' },
+      ],
+      explain: '字符串方法不改原字符串。要让 s 变大写，得写 `s = s.upper()`。',
+    },
+    {
+      id: 'strm-3', type: 'output', q: OUT_Q,
+      code: py`print("a-b-c".split("-"))`,
+      opts: [
+        { t: "['a', 'b', 'c']", ok: true },
+        { t: 'a b c', why: 'split 切开之后得到的是一个列表，不是用空格隔开的字符串。' },
+        { t: "['a-b-c']", why: 'split("-") 会在每个 - 的位置切开，所以是 3 个元素。' },
+        { t: 'abc', why: 'split 是切开，不是删除。切开的各段会放进一个列表里。' },
+      ],
+      explain: '`split("-")` 在每个 - 的位置切开，得到一个列表。',
+    },
+    {
+      id: 'strm-4', type: 'fill', q: '补全代码，去掉两头的空格（显示 hi）',
+      code: py`print("  hi  ".____())`,
+      answers: ['strip'], expect: 'hi',
+      hints: {
+        'trim': 'trim 是别的语言的叫法。Python 里叫 strip。',
+        'remove': '去掉两头空格的方法叫 strip。',
+        'replace': 'replace 需要写出旧内容和新内容。去掉两头的空格用 strip 最方便。',
+      },
+      explain: '`strip()` 去掉字符串开头和结尾的空格。',
+    },
+    {
+      id: 'strm-5', type: 'output', q: OUT_Q,
+      code: py`words = ["我", "爱", "编程"]
+print("".join(words))`,
+      opts: [
+        { t: '我爱编程', ok: true },
+        { t: '我 爱 编程', why: 'join 前面的字符串是连接符。这里是空字符串 ""，所以中间什么都不加。' },
+        { t: "['我', '爱', '编程']", why: 'join 会把列表拼成一个字符串，结果不再是列表。' },
+        { t: '我,爱,编程', why: '连接符是 ""（空的），不是逗号。' },
+      ],
+      explain: '`"".join(列表)` 用空字符串当连接符，把各元素直接连在一起。',
+    },
+  ],
+});
+
+/* ---------- 第六章 进阶 ---------- */
+
+L({
+  id: 'try', ch: 'c6', title: '异常处理 try/except', hook: '出错了也不崩溃，换一条路继续走',
+  syntax: py`try:
+    可能出错的代码
+except 错误类型:
+    出错时执行的代码
+finally:
+    不管出不出错，最后都执行`,
+  how: [
+    'Python 先尝试执行 try 里的代码。',
+    '一旦出错，立刻跳到 except。try 里剩下的代码不再执行。',
+    '没出错，就跳过 except。',
+    '`finally` 可以不写。写了的话，不管有没有出错，它都会执行。',
+    '常见的错误类型：`ValueError`（值不合适）、`ZeroDivisionError`（除以 0）、`IndexError`（索引超出范围）、`KeyError`（字典里没有这个键）。',
+  ],
+  mean: '程序运行时出的错叫“异常”。不处理的话，程序会直接停掉。try/except 相当于提前准备好备用方案。',
+  use: '用户可能输入乱七八糟的东西，文件可能不存在，网络可能断开。好的程序要能接住这些意外，给出友好的提示。',
+  example: {
+    code: py`try:
+    n = int("abc")
+    print("转换成功", n)
+except ValueError:
+    print("这不是数字")
+
+try:
+    print(10 / 0)
+except ZeroDivisionError:
+    print("不能除以 0")
+finally:
+    print("程序继续运行")`,
+    out: '这不是数字\n不能除以 0\n程序继续运行',
+  },
+  tip: '看懂报错信息是重要的本领。最后一行会告诉你错误类型和原因，比如 `ZeroDivisionError: division by zero`。',
+  checks: [{ code: py`print(10 / 0)`, err: 'ZeroDivisionError: division by zero' }],
+  questions: [
+    {
+      id: 'try-1', type: 'output', q: OUT_Q,
+      code: py`try:
+    print(1 / 0)
+except ZeroDivisionError:
+    print("出错了")
+print("继续")`,
+      opts: [
+        { t: '出错了\n继续', ok: true },
+        { t: '出错了', why: '异常被 except 处理之后，程序会接着往下走，最后一行 print("继续") 也会执行。' },
+        { t: '继续', why: '1 / 0 会出错，所以 except 里的 print("出错了") 会执行。' },
+        { err: true, why: '错误已经被 except 接住了，程序不会崩溃。' },
+      ],
+      explain: '除以 0 出错 → 跳到 except 显示“出错了” → 程序继续，显示“继续”。',
+    },
+    {
+      id: 'try-2', type: 'output', q: OUT_Q,
+      code: py`try:
+    print("A")
+    x = int("hi")
+    print("B")
+except ValueError:
+    print("C")`,
+      opts: [
+        { t: 'A\nC', ok: true },
+        { t: 'A\nB\nC', why: '`int("hi")` 出错后，Python 立刻跳到 except。try 里剩下的 print("B") 不会执行。' },
+        { t: 'C', why: 'print("A") 在出错的那一行之前，它已经正常执行了。' },
+        { t: 'A\nB', why: '"hi" 不能转成整数，会出错。出错后不会显示 B，而是跳到 except 显示 C。' },
+      ],
+      explain: '先显示 A。int("hi") 出错，跳过 B，到 except 显示 C。',
+    },
+    {
+      id: 'try-3', type: 'output', q: OUT_Q,
+      code: py`try:
+    n = int("42")
+    print(n + 1)
+except ValueError:
+    print("错误")`,
+      opts: [
+        { t: '43', ok: true },
+        { t: '错误', why: '"42" 可以正常转成整数，没有出错。没出错就不会进入 except。' },
+        { t: '43\n错误', why: 'except 只在出错时执行。这里没出错，所以被跳过了。' },
+        { t: '421', why: 'int("42") 已经把它变成了整数 42，42 + 1 是加法，得 43。' },
+      ],
+      explain: '没有出错，try 里的代码全部执行完，except 被跳过。',
+    },
+    {
+      id: 'try-4', type: 'fill', q: '补全代码，接住索引超出范围的错误',
+      code: py`try:
+    a = [1, 2]
+    print(a[5])
+____ IndexError:
+    print("没有这个位置")`,
+      answers: ['except'], expect: '没有这个位置',
+      hints: {
+        'catch': 'catch 是 Java 和 JavaScript 的写法。Python 用 except。',
+        'else': 'else 是没出错时才执行的。接住错误用 except。',
+        'Except': 'Python 区分大小写，要全部小写：except。',
+      },
+      explain: '`try` 和 `except` 配对使用。',
+    },
+    {
+      id: 'try-5', type: 'choice', q: '`int("三")` 会引发哪种错误？',
+      opts: [
+        { t: 'ValueError', ok: true },
+        { t: 'ZeroDivisionError', why: 'ZeroDivisionError 是除以 0 的错误。这里没有做除法。' },
+        { t: 'IndexError', why: 'IndexError 是索引超出范围的错误。这里没有用索引。' },
+        { t: 'KeyError', why: 'KeyError 是字典里找不到键的错误。这里没有用字典。' },
+      ],
+      explain: 'int() 只认 "3" 这样的数字字符，"三" 这个值它转换不了，所以是 ValueError（值不合适）。',
+      checks: [{ code: py`int("三")`, err: 'ValueError' }],
+    },
+  ],
+});
+
+L({
+  id: 'file', ch: 'c6', title: '文件读写', hook: '把数据存进文件，关掉程序也不会丢',
+  syntax: py`with open("文件名", "模式") as f:
+    f.write("内容")    # 写入
+    text = f.read()   # 读出全部
+
+# 模式："r" 读  "w" 覆盖写  "a" 追加`,
+  how: [
+    '`open(文件名, 模式)` 打开文件。`with ... as f:` 会在用完之后自动关闭文件。',
+    '`"w"`：写入。会先清空原来的内容；文件不存在就新建一个。',
+    '`"a"`：追加。接在原来内容的后面写。',
+    '`"r"`：读取。不写模式时默认就是它；文件不存在会报错。',
+    '`write` 不会自动换行，要换行得自己加 `\\n`。',
+  ],
+  mean: '变量里的数据，程序一关就没了。文件保存在硬盘上，下次打开程序还能读回来。',
+  use: '保存游戏存档、记录日志、读取一份名单或成绩表。',
+  example: {
+    code: py`with open("diary.txt", "w", encoding="utf-8") as f:
+    f.write("今天学了 Python\n")
+    f.write("很开心\n")
+
+with open("diary.txt", "a", encoding="utf-8") as f:
+    f.write("明天继续\n")
+
+with open("diary.txt", encoding="utf-8") as f:
+    for line in f:
+        print(line.strip())`,
+    out: '今天学了 Python\n很开心\n明天继续',
+  },
+  tip: '读写中文时，加上 `encoding="utf-8"`，可以避免乱码。',
+  questions: [
+    {
+      id: 'file-1', type: 'choice', q: '想接着文件原来的内容往后写，不清空，用哪个模式？',
+      opts: [
+        { t: '`"a"`', ok: true },
+        { t: '`"w"`', why: '"w" 会先把文件原来的内容清空，再从头写。' },
+        { t: '`"r"`', why: '"r" 是只读模式，不能写入。' },
+        { t: '`"add"`', why: '没有 "add" 这个模式。追加的模式是 "a"（append 的首字母）。' },
+      ],
+      explain: '"a" 是追加：保留原来的内容，在末尾接着写。',
+      checks: [{ code: py`open("x.txt", "add")`, err: 'ValueError' }],
+    },
+    {
+      id: 'file-2', type: 'output', q: OUT_Q,
+      code: py`with open("a.txt", "w") as f:
+    f.write("1")
+with open("a.txt", "w") as f:
+    f.write("2")
+with open("a.txt") as f:
+    print(f.read())`,
+      opts: [
+        { t: '2', ok: true },
+        { t: '12', why: '第二次也是用 "w" 打开的，会先清空文件，之前写的 1 就没了。想保留要用 "a"。' },
+        { t: '1', why: '第二次写入把文件内容换成了 2。' },
+        { err: true, why: '同一个文件可以多次打开、写入，不会报错。' },
+      ],
+      explain: '"w" 每次打开都会清空文件。最后文件里只剩第二次写的 2。',
+    },
+    {
+      id: 'file-3', type: 'fill', q: '补全代码，打开文件准备写入',
+      code: py`with ____("note.txt", "w") as f:
+    f.write("hi")
+print("写好了")`,
+      answers: ['open'], expect: '写好了',
+      hints: {
+        'file': '打开文件的函数叫 open。',
+        'Open': 'Python 区分大小写，要全部小写：open。',
+        'read': 'read 是打开之后读内容用的。打开文件用 open。',
+      },
+      explain: '`open()` 打开文件。',
+    },
+    {
+      id: 'file-4', type: 'output', q: OUT_Q,
+      code: py`with open("b.txt", "w") as f:
+    f.write("Hi")
+    f.write("Py")
+with open("b.txt") as f:
+    print(f.read())`,
+      opts: [
+        { t: 'HiPy', ok: true },
+        { t: 'Hi\nPy', why: 'write 不会自动换行，这点和 print 不一样。想换行要自己写 `\\n`。' },
+        { t: 'Py', why: '两次 write 是在同一次打开里完成的，后一次会接在前一次后面，不会覆盖。' },
+        { t: 'Hi Py', why: 'write 写入的就是给它的内容，不会自动加空格。' },
+      ],
+      explain: '同一次打开里连续 write，内容会紧挨着写在一起，不换行也不加空格。',
+    },
+    {
+      id: 'file-5', type: 'choice', q: '用 "r" 模式打开一个不存在的文件，会怎样？',
+      opts: [
+        { t: '报错：FileNotFoundError', ok: true },
+        { t: '自动新建一个空文件', why: '自动新建是 "w" 和 "a" 模式的行为。"r" 只负责读，文件不存在就报错。' },
+        { t: '读到一个空字符串', why: '文件不存在时，open 这一步就会报错，根本走不到读取那一步。' },
+        { t: '什么都不会发生', why: 'Python 找不到文件会明确报错。' },
+      ],
+      explain: '读取不存在的文件会报 FileNotFoundError（找不到文件）。可以用 try/except 接住它。',
+      checks: [{ code: py`open("no_such_file.txt", "r")`, err: 'FileNotFoundError' }],
+    },
+  ],
+});
+
+L({
+  id: 'mod', ch: 'c6', title: '导入模块', hook: '别人写好的工具，拿来就能用',
+  syntax: py`import math
+math.sqrt(16)
+
+from random import randint
+randint(1, 6)`,
+  how: [
+    '模块是一包写好的工具。`import 模块名` 把整包拿进来。',
+    '用的时候写 `模块名.工具名`，中间是英文句点。',
+    '`from 模块 import 工具` 只拿其中一个工具，用的时候不用再写模块名。',
+    '常用的模块：`math`（数学）、`random`（随机）、`datetime`（日期和时间）。',
+  ],
+  mean: 'Python 自带很多模块，像一排工具箱。平时不打开，需要哪个就 import 哪个。',
+  use: '开平方、抽随机数、取今天的日期，这些功能不用自己从头写，导入模块就有。',
+  example: {
+    code: py`import math
+print(math.sqrt(16))
+print(math.floor(3.7))
+print(round(math.pi, 2))
+
+import random
+dice = random.randint(1, 6)
+print("骰子点数：", dice)`,
+    out: '4.0\n3\n3.14\n骰子点数： ⟦1-6⟧',
+    note: '骰子点数是随机的，多运行几次，每次可能不一样。',
+  },
+  tip: '`random.randint(1, 6)` 两头都包括，可能得到 1，也可能得到 6。这点和 range 不一样。',
+  questions: [
+    {
+      id: 'mod-1', type: 'fill', q: '补全代码，导入 math 模块',
+      code: py`____ math
+print(math.sqrt(9))`,
+      answers: ['import'], expect: '3.0',
+      hints: {
+        'include': 'include 是 C 语言的写法。Python 用 import。',
+        'from': 'from 要和 import 配合用：from math import sqrt。这里直接用 import。',
+        'require': 'require 是 JavaScript 的写法。Python 用 import。',
+        'Import': 'Python 区分大小写，要全部小写：import。',
+      },
+      explain: '`import math` 导入 math 模块，之后就能用 `math.sqrt()`。',
+    },
+    {
+      id: 'mod-2', type: 'output', q: OUT_Q,
+      code: py`import math
+print(math.floor(5.9))`,
+      opts: [
+        { t: '5', ok: true },
+        { t: '6', why: 'floor 是“向下取整”，直接去掉小数部分，不是四舍五入。' },
+        { t: '5.9', why: 'floor 会把小数部分去掉，只留下整数。' },
+        { t: '5.0', why: 'math.floor 返回的是整数 5，不带小数点。' },
+      ],
+      explain: '`math.floor()` 向下取整：5.9 → 5。',
+    },
+    {
+      id: 'mod-3', type: 'choice', q: '`random.randint(1, 6)` 可能得到哪些数？',
+      opts: [
+        { t: '1 到 6 的整数，包括 1 和 6', ok: true },
+        { t: '1 到 5 的整数，不包括 6', why: 'randint 两头都包括。不包括结尾的是 range，别弄混了。' },
+        { t: '1 到 6 之间的小数', why: 'randint 里的 int 表示整数，它只会给出整数。' },
+        { t: '只会是 1 或者 6', why: '1 和 6 之间的整数（2、3、4、5）也都有可能。' },
+      ],
+      explain: 'randint(1, 6) 随机给出 1、2、3、4、5、6 中的一个，正好像掷骰子。',
+      checks: [{ code: py`import random
+s = set(random.randint(1, 6) for _ in range(2000))
+print(sorted(s))`, out: '[1, 2, 3, 4, 5, 6]' }],
+    },
+    {
+      id: 'mod-4', type: 'choice', q: '写了 `from math import sqrt` 之后，怎样使用它？',
+      opts: [
+        { t: '`sqrt(25)`', ok: true },
+        { t: '`math.sqrt(25)`', why: '这种写法只把 sqrt 拿了进来，math 这个名字并没有导入，写 math.sqrt 会报错。' },
+        { t: '`import sqrt(25)`', why: 'import 是导入用的，不是调用。导入之后直接写 sqrt(25)。' },
+        { t: '`math(25)`', why: 'math 是模块，不是函数，不能直接调用。' },
+      ],
+      explain: '`from 模块 import 工具` 之后，直接用工具的名字，不用写模块名。',
+      checks: [
+        { code: py`from math import sqrt
+print(sqrt(25))`, out: '5.0' },
+        { code: py`from math import sqrt
+print(math.sqrt(25))`, err: 'NameError' },
+      ],
+    },
+    {
+      id: 'mod-5', type: 'output', q: OUT_Q,
+      code: py`import math
+print(math.sqrt(16) + 1)`,
+      opts: [
+        { t: '5.0', ok: true },
+        { t: '5', why: 'math.sqrt 的结果是小数 4.0。小数加整数，结果还是小数。' },
+        { t: '17', why: 'sqrt 是开平方，16 的平方根是 4，再加 1。' },
+        { t: '4.01', why: '4.0 + 1 是数学加法，得 5.0，不是把数字接在一起。' },
+      ],
+      explain: 'sqrt(16) 是 4.0，4.0 + 1 = 5.0。',
+    },
+  ],
+});
+
+L({
+  id: 'class', ch: 'c6', title: '类和对象', hook: '先画图纸，再照着图纸造东西',
+  syntax: py`class 类名:
+    def __init__(self, 参数):
+        self.属性 = 参数
+
+    def 方法名(self):
+        ...
+
+对象 = 类名(值)
+对象.属性
+对象.方法名()`,
+  how: [
+    '`class` 定义一个类。类名习惯首字母大写。',
+    '`__init__` 在创建对象时自动执行，用来设置对象的初始属性。前后各有两个下划线。',
+    '`self` 代表“这个对象自己”。`self.name = name` 就是把名字记在这个对象身上。',
+    '`类名(值)` 创建一个对象。同一个类可以创建很多对象，每个对象有自己的属性值。',
+    '写在类里的函数叫“方法”，用 `对象.方法名()` 调用。',
+  ],
+  mean: '类是图纸，对象是照着图纸造出来的东西。一张“狗”的图纸，可以造出旺财，也可以造出小白，它们各有各的名字和年龄。',
+  use: '当一个东西既有数据（名字、年龄），又有动作（叫、跑）时，用类把它们装在一起，代码更清楚。游戏里的角色、购物网站的商品，通常都是对象。',
+  example: {
+    code: py`class Dog:
+    def __init__(self, name, age):
+        self.name = name
+        self.age = age
+
+    def bark(self):
+        print(self.name + "：汪汪！")
+
+d1 = Dog("旺财", 3)
+d2 = Dog("小白", 1)
+print(d1.name, d1.age)
+d1.bark()
+d2.bark()`,
+    out: '旺财 3\n旺财：汪汪！\n小白：汪汪！',
+  },
+  tip: '定义方法时，第一个参数要写 `self`。调用时不用传它，Python 会自动把对象自己交给 self。',
+  questions: [
+    {
+      id: 'class-1', type: 'choice', q: '类和对象的关系，哪个比喻最准确？',
+      opts: [
+        { t: '类是图纸，对象是照图纸造出的房子', ok: true },
+        { t: '类是房子，对象是图纸', why: '说反了。先有类（图纸），再用它创建对象（房子）。' },
+        { t: '类和对象是同一个东西的两种叫法', why: '它们不一样。一个类可以创建出很多个不同的对象。' },
+        { t: '对象是类的名字', why: '类的名字就是 class 后面写的那个词。对象是用类创建出来的具体的东西。' },
+      ],
+      explain: '类是模板，对象是用模板造出来的具体的东西。',
+    },
+    {
+      id: 'class-2', type: 'output', q: OUT_Q,
+      code: py`class Cat:
+    def __init__(self, name):
+        self.name = name
+
+c = Cat("咪咪")
+print(c.name)`,
+      opts: [
+        { t: '咪咪', ok: true },
+        { t: 'name', why: '`c.name` 取出的是属性里存的值，不是属性的名字。' },
+        { t: 'Cat', why: 'Cat 是类名。`c.name` 取的是这个对象的 name 属性。' },
+        { err: true, why: '创建对象时 "咪咪" 交给了 name，再存进 self.name，可以正常读取。' },
+      ],
+      explain: '创建时 "咪咪" 存进了 self.name。`c.name` 把它取出来。',
+    },
+    {
+      id: 'class-3', type: 'fill', q: '补全代码，把颜色记在对象自己身上（显示 红色）',
+      code: py`class Car:
+    def __init__(self, color):
+        ____.color = color
+
+c = Car("红色")
+print(c.color)`,
+      answers: ['self'], expect: '红色',
+      hints: {
+        'this': 'this 是 Java 和 JavaScript 的写法。Python 用 self。',
+        'Car': '写 Car.color 会记在整个类上。要记在这个对象自己身上，用 self。',
+        'c': '在类的里面，对象自己叫 self。c 是外面才有的名字。',
+        'Self': 'Python 区分大小写，要全部小写：self。',
+      },
+      explain: '`self` 代表这个对象自己。`self.color = color` 把颜色存到对象身上。',
+    },
+    {
+      id: 'class-4', type: 'output', q: OUT_Q,
+      code: py`class Counter:
+    def __init__(self):
+        self.n = 0
+
+    def add(self):
+        self.n += 1
+
+a = Counter()
+b = Counter()
+a.add()
+a.add()
+b.add()
+print(a.n, b.n)`,
+      opts: [
+        { t: '2 1', ok: true },
+        { t: '3 3', why: 'a 和 b 是两个独立的对象，各有各的 n，不会加到一起。' },
+        { t: '2 2', why: 'b 只调用了一次 add()，所以 b.n 是 1。' },
+        { t: '0 0', why: '每调用一次 add()，那个对象的 n 就加 1。' },
+      ],
+      explain: '每个对象有自己的属性。a 加了 2 次，b 加了 1 次。',
+    },
+    {
+      id: 'class-5', type: 'choice', q: '`__init__` 方法什么时候执行？',
+      opts: [
+        { t: '创建对象的时候，自动执行', ok: true },
+        { t: '要自己写 `d.__init__()` 才会执行', why: '不用手动调用。写 `Dog("旺财", 3)` 创建对象时，Python 会自动执行它。' },
+        { t: '程序结束的时候', why: '__init__ 是“初始化”，在对象刚被创建时执行，不是在结束时。' },
+        { t: '每次读取属性的时候', why: '读取属性不会触发它。它只在创建对象时执行一次。' },
+      ],
+      explain: '`__init__` 是初始化方法，每创建一个对象就自动执行一次。',
+    },
+  ],
+});
+
+L({
+  id: 'final', ch: 'c6', title: '毕业挑战', hook: '把学过的拼在一起，读懂一个完整的小程序',
+  syntax: py`def average(scores):      # 函数
+    total = 0              # 变量
+    for s in scores:       # 循环
+        total += s         # 运算
+    return total / len(scores)`,
+  how: [
+    '读程序和读文章一样，从上往下，一行一行看。',
+    '遇到函数调用，就跳到函数里面看它做了什么，再带着返回值回来。',
+    '遇到循环，在心里（或者纸上）记下每一轮变量的值。',
+    '拿不准的时候，加一行 print 看看变量到底是多少。',
+  ],
+  mean: '真正的程序不会只用一个知识点。变量、列表、循环、判断、函数会同时出现，互相配合。',
+  use: '这一关没有新知识，只有混合题。全部答对，你就具备了 Python 入门的全部基础。',
+  example: {
+    code: py`def average(scores):
+    total = 0
+    for s in scores:
+        total += s
+    return total / len(scores)
+
+grades = {"小明": [90, 80],
+          "小红": [70, 95]}
+for name, scores in grades.items():
+    avg = average(scores)
+    if avg >= 85:
+        print(name, avg, "优秀")
+    else:
+        print(name, avg, "继续加油")`,
+    out: '小明 85.0 优秀\n小红 82.5 继续加油',
+  },
+  tip: '通关之后，最好的练习是自己动手写：做一个记账本、一个猜数字游戏，或者一个待办清单。',
+  questions: [
+    {
+      id: 'final-1', type: 'output', q: OUT_Q,
+      code: py`nums = [3, 8, 5]
+big = 0
+for n in nums:
+    if n > big:
+        big = n
+print(big)`,
+      opts: [
+        { t: '8', ok: true },
+        { t: '5', why: '5 是最后一个元素。但轮到 5 时，big 已经是 8 了，5 > 8 不成立，big 不会变。' },
+        { t: '3', why: 'big 先变成 3，但后面遇到更大的 8，又被更新了。' },
+        { t: '16', why: '这里没有求和。只有遇到更大的数，才把 big 换成它。' },
+      ],
+      explain: '这是“找最大值”的经典写法。big：0 → 3 → 8，遇到 5 时不变。',
+    },
+    {
+      id: 'final-2', type: 'output', q: OUT_Q,
+      code: py`def count_even(nums):
+    c = 0
+    for n in nums:
+        if n % 2 == 0:
+            c += 1
+    return c
+
+print(count_even([1, 2, 4, 7]))`,
+      opts: [
+        { t: '2', ok: true },
+        { t: '6', why: '6 是偶数 2 + 4 的和。函数里是 `c += 1`，数的是个数，不是求和。' },
+        { t: '4', why: '4 是列表的长度。函数只数了其中的偶数。' },
+        { t: 'None', why: '函数最后写了 `return c`，会把结果返回来。' },
+      ],
+      explain: '`n % 2 == 0` 判断偶数。列表里的偶数有 2 和 4，一共 2 个。',
+    },
+    {
+      id: 'final-3', type: 'fill', q: '补全代码，算出所有单词的总长度（显示 6）',
+      code: py`words = ["a", "bb", "ccc"]
+total = 0
+for w in words:
+    total += ____(w)
+print(total)`,
+      answers: ['len'], expect: '6',
+      hints: {
+        'int': '"bb" 这样的字符串没法转成整数。求长度用 len。',
+        'count': '求字符串的长度用 len。',
+        'length': 'Python 里求长度的函数叫 len。',
+      },
+      explain: '三个单词的长度是 1、2、3，加起来是 6。',
+    },
+    {
+      id: 'final-4', type: 'output', q: OUT_Q,
+      code: py`price = {"笔": 2, "本子": 5}
+cart = ["笔", "本子", "笔"]
+total = 0
+for item in cart:
+    total += price[item]
+print(total)`,
+      opts: [
+        { t: '9', ok: true },
+        { t: '7', why: '购物车里有两支笔，循环会走 3 轮：2 + 5 + 2。' },
+        { t: '3', why: '3 是购物车里的商品数量。total 加的是每件商品的价格。' },
+        { err: true, why: '"笔" 和 "本子" 都是字典里有的键，可以正常取到价格。' },
+      ],
+      explain: '依次取出每件商品的价格相加：2 + 5 + 2 = 9。',
+    },
+    {
+      id: 'final-5', type: 'output', q: OUT_Q,
+      code: py`s = "a,b,c"
+parts = s.split(",")
+parts.append("d")
+print("-".join(parts))`,
+      opts: [
+        { t: 'a-b-c-d', ok: true },
+        { t: 'a,b,c,d', why: '最后是用 "-" 把列表拼起来的，连接符是 - 而不是逗号。' },
+        { t: "['a', 'b', 'c', 'd']", why: 'join 把列表拼成了一个字符串，显示的不再是列表。' },
+        { t: 'a-b-c', why: 'append("d") 已经把 "d" 加进了列表，拼接时也包括它。' },
+      ],
+      explain: '切开得到 ["a", "b", "c"]，加上 "d"，再用 - 拼起来。',
+    },
+  ],
+});
+
+
+/* ===== 每一关的图示（内联 SVG，颜色全部走主题变量）===== */
+var DIAGRAMS = (function () {
+  var W = 340;
+  function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+  function rect(x, y, w, h, cls, r) { return '<rect x="' + x + '" y="' + y + '" width="' + w + '" height="' + h + '" rx="' + (r == null ? 6 : r) + '" class="' + (cls || 'box') + '"/>'; }
+  function tx(x, y, s, cls, anchor) { return '<text x="' + x + '" y="' + y + '" class="' + (cls || 't') + '" text-anchor="' + (anchor || 'middle') + '">' + esc(s) + '</text>'; }
+  function line(x1, y1, x2, y2, cls) { return '<line x1="' + x1 + '" y1="' + y1 + '" x2="' + x2 + '" y2="' + y2 + '" class="' + (cls || 'ln') + '"/>'; }
+  function circle(cx, cy, r, cls) { return '<circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" class="' + (cls || 'box') + '"/>'; }
+  function path(d, cls) { return '<path d="' + d + '" class="' + (cls || 'ln') + '"/>'; }
+  // 箭头头部：在 (x2,y2) 处，方向由 (x1,y1) 指向 (x2,y2)
+  function head(x1, y1, x2, y2, cls) {
+    var a = Math.atan2(y2 - y1, x2 - x1), s = 7, w = 0.45;
+    var p1 = [x2 - s * Math.cos(a - w), y2 - s * Math.sin(a - w)], p2 = [x2 - s * Math.cos(a + w), y2 - s * Math.sin(a + w)];
+    function f(n) { return Math.round(n * 10) / 10; }
+    return '<polygon points="' + x2 + ',' + y2 + ' ' + f(p1[0]) + ',' + f(p1[1]) + ' ' + f(p2[0]) + ',' + f(p2[1]) + '" class="' + (cls || 'hd') + '"/>';
+  }
+  function arrow(x1, y1, x2, y2, tone) {
+    var t = tone ? '-' + tone : '';
+    return line(x1, y1, x2, y2, 'ln' + (tone ? ' ln' + t : '')) + head(x1, y1, x2, y2, 'hd' + (tone ? ' hd' + t : ''));
+  }
+  // 一排带编号的格子
+  function cells(x, y, items, o) {
+    o = o || {}; var w = o.w || 44, h = o.h || 36, out = '';
+    items.forEach(function (it, i) {
+      var cx = x + i * w, hi = o.hi && o.hi.indexOf(i) >= 0;
+      out += rect(cx, y, w, h, hi ? 'box box-yel' : 'box', 0);
+      out += tx(cx + w / 2, y + h / 2 + 5, it, (o.tcls || 'tm') + (hi ? ' on-yel' : ''));
+      if (o.top) out += tx(cx + w / 2, y - 7, o.top[i], 'ts t-blue');
+      if (o.bottom) out += tx(cx + w / 2, y + h + 15, o.bottom[i], 'ts');
+    });
+    return out;
+  }
+  function lamp(cx, cy, on) {
+    var out = '';
+    if (on) for (var i = 0; i < 8; i++) {
+      var a = i * Math.PI / 4;
+      out += line(Math.round(cx + 30 * Math.cos(a)), Math.round(cy + 30 * Math.sin(a)), Math.round(cx + 38 * Math.cos(a)), Math.round(cy + 38 * Math.sin(a)), 'ln ln-yel');
+    }
+    return out + circle(cx, cy, 22, on ? 'box box-yel' : 'box') + rect(cx - 9, cy + 21, 18, 10, 'box', 2);
+  }
+  function sw(x, y, closed) { // 开关：两个接点 + 闸刀
+    return circle(x, y, 3, 'dot') + circle(x + 30, y, 3, 'dot') +
+      (closed ? line(x, y, x + 30, y, 'ln ln-thick') : line(x, y, x + 26, y - 14, 'ln ln-thick'));
+  }
+  function lock(cx, y, open) {
+    var sh = open
+      ? 'M' + (cx - 7) + ' ' + y + ' V' + (y - 8) + ' a7 7 0 0 1 14 0 V' + (y - 6)
+      : 'M' + (cx - 7) + ' ' + y + ' V' + (y - 6) + ' a7 7 0 0 1 14 0 V' + y;
+    return path(sh, 'ln ln-thick') + rect(cx - 12, y, 24, 18, open ? 'box box-good' : 'box box-bad', 4);
+  }
+  function make(h, label, body) {
+    return '<svg viewBox="0 0 ' + W + ' ' + h + '" role="img" aria-label="' + esc(label) + '" xmlns="http://www.w3.org/2000/svg">' + body + '</svg>';
+  }
+
+  var D = {};
+
+  D.print = {
+    cap: 'print 把括号里的内容显示到屏幕上。',
+    svg: make(124, 'print 把括号里的内容显示到屏幕上', [
+      tx(87, 16, '你写的代码', 'ts'),
+      rect(12, 24, 150, 44, 'box-code', 8),
+      tx(50, 51, 'print', 'tc tc-key'), tx(115, 51, '("你好")', 'tc'),
+      line(50, 70, 50, 86), tx(50, 102, '命令', 'ts'),
+      line(115, 70, 115, 86), tx(115, 102, '要显示的内容', 'ts'),
+      arrow(168, 46, 206, 46, 'blue'), tx(187, 38, '运行', 'ts t-blue'),
+      rect(212, 12, 116, 70, 'box', 8), rect(220, 20, 100, 54, 'box-soft', 4),
+      tx(270, 53, '你好', 'tl'),
+      path('M258 82 H282 L288 94 H252 Z', 'box'),
+      tx(270, 112, '屏幕', 'ts'),
+    ].join('')),
+  };
+
+  D.var = {
+    cap: '变量是贴了名字标签的盒子。重新赋值，就是换掉盒子里的东西。',
+    svg: make(138, '变量像贴了标签的盒子，重新赋值会换掉里面的值', [
+      rect(32, 12, 54, 22, 'box box-yel', 11), tx(59, 28, 'age', 'tm on-yel'),
+      rect(14, 40, 90, 60, 'box', 8), tx(59, 79, '18', 'tl'),
+      tx(59, 122, 'age = 18', 'tm'),
+      arrow(112, 70, 228, 70, 'blue'), tx(170, 60, 'age = age + 1', 'tm t-blue'),
+      rect(254, 12, 54, 22, 'box box-yel', 11), tx(281, 28, 'age', 'tm on-yel'),
+      rect(236, 40, 90, 60, 'box', 8), tx(281, 79, '19', 'tl'),
+      tx(281, 122, '旧的 18 被换掉', 'ts'),
+    ].join('')),
+  };
+
+  D.num = {
+    cap: 'int 是整数，float 是带小数点的数。',
+    svg: make(140, '数轴上整数落在刻度上，小数可以落在刻度之间', (function () {
+      var o = line(22, 62, 318, 62, 'ln');
+      for (var i = 0; i <= 5; i++) {
+        var x = 40 + i * 52;
+        o += line(x, 56, x, 68) + circle(x, 62, 6, 'dot-blue') + tx(x, 88, String(i), 'tm');
+      }
+      o += circle(118, 62, 6, 'dot-yel') + tx(118, 44, '1.5', 'tm');
+      o += circle(203, 62, 6, 'dot-yel') + tx(203, 44, '3.14', 'tm');
+      o += circle(30, 110, 6, 'dot-blue') + tx(44, 114, 'int 整数：正好落在刻度上', 'ts', 'start');
+      o += circle(30, 130, 6, 'dot-yel') + tx(44, 134, 'float 小数：可以落在两个刻度之间', 'ts', 'start');
+      return o;
+    })()),
+  };
+
+  D.str = {
+    cap: '字符串里每个字符都有编号，从 0 开始数。',
+    svg: make(136, '字符串 Python 的六个字符，索引从 0 到 5，也可以用 -6 到 -1 倒着数', [
+      tx(38, 22, '索引从 0 开始 →', 'ts t-blue', 'start'),
+      cells(38, 44, ['P', 'y', 't', 'h', 'o', 'n'], { w: 44, h: 40, tcls: 'tl', top: ['0', '1', '2', '3', '4', '5'], bottom: ['-6', '-5', '-4', '-3', '-2', '-1'] }),
+      tx(302, 126, '← 也可以倒着数，最后一个是 -1', 'ts', 'end'),
+    ].join('')),
+  };
+
+  D.arith = {
+    cap: '// 算出能分成几份，% 算出还剩多少。',
+    svg: make(128, '7 个苹果每 2 个一袋：能装 3 袋，还剩 1 个', (function () {
+      var o = tx(170, 16, '7 个苹果，每 2 个装一袋', 'ts');
+      [22, 94, 166].forEach(function (x) {
+        o += rect(x, 28, 62, 38, 'box-soft', 19) + circle(x + 19, 47, 9, 'dot-blue') + circle(x + 43, 47, 9, 'dot-blue');
+      });
+      o += circle(279, 47, 16, 'box-dash') + circle(279, 47, 9, 'dot-yel');
+      o += path('M22 76 V82 H228 V76', 'ln') + tx(125, 102, '7 // 2 = 3', 'tm') + tx(125, 120, '能装满 3 袋', 'ts');
+      o += path('M258 76 V82 H300 V76', 'ln') + tx(279, 102, '7 % 2 = 1', 'tm') + tx(279, 120, '还剩 1 个', 'ts');
+      return o;
+    })()),
+  };
+
+  D.input = {
+    cap: 'input() 交回来的是文字。用 int() 变成数字，才能计算。',
+    svg: make(146, 'input 得到字符串 "18"，经过 int() 变成整数 18，才能加 1 得到 19', [
+      tx(46, 28, 'input() 得到', 'ts'),
+      rect(10, 38, 72, 48, 'box', 8), tx(46, 68, '"18"', 'tl'), tx(46, 104, 'str 文字', 'ts'),
+      arrow(88, 62, 128, 62, 'blue'), tx(108, 52, 'int()', 'tm t-blue'),
+      rect(134, 38, 72, 48, 'box box-yel', 8), tx(170, 68, '18', 'tl on-yel'), tx(170, 104, 'int 数字', 'ts'),
+      arrow(212, 62, 252, 62, 'blue'), tx(232, 52, '+ 1', 'tm t-blue'),
+      rect(258, 38, 72, 48, 'box', 8), tx(294, 68, '19', 'tl'), tx(294, 104, '算出来了', 'ts'),
+      tx(88, 136, '"18" + 1  ✗ 报错', 'tm t-bad'), tx(254, 136, '18 + 1  ✓ 19', 'tm t-good'),
+    ].join('')),
+  };
+
+  D.bool = {
+    cap: '布尔值像一盏灯，只有开和关两种状态。',
+    svg: make(142, '布尔值只有 True 和 False 两个，像灯的开和关', [
+      lamp(95, 50, true), tx(95, 108, 'True', 'tl'), tx(95, 128, '真 · 成立', 'ts'),
+      tx(170, 54, '只有', 'ts'), tx(170, 70, '这两个值', 'ts'),
+      lamp(245, 50, false), tx(245, 108, 'False', 'tl'), tx(245, 128, '假 · 不成立', 'ts'),
+    ].join('')),
+  };
+
+  D.cmp = {
+    cap: '每个比较都是一个问题，答案只有 True 或 False。',
+    svg: make(154, '在数轴上 3 在 5 的左边，所以 3 小于 5 成立，3 大于 5 不成立', (function () {
+      var o = line(22, 44, 318, 44, 'ln');
+      for (var i = 0; i <= 8; i++) { var x = 30 + i * 35; o += line(x, 39, x, 49) + tx(x, 66, String(i), 'ts'); }
+      o += circle(135, 44, 8, 'dot-blue') + tx(135, 26, 'a = 3', 'tm');
+      o += circle(205, 44, 8, 'dot-yel') + tx(205, 26, 'b = 5', 'tm');
+      var chips = [['a < b', true], ['a > b', false], ['a == b', false], ['a != b', true]];
+      chips.forEach(function (c, i) {
+        var x = 14 + (i % 2) * 162, y = 82 + Math.floor(i / 2) * 36;
+        o += rect(x, y, 150, 28, 'box-soft', 6) + tx(x + 12, y + 19, c[0], 'tm', 'start') +
+          tx(x + 138, y + 19, c[1] ? 'True' : 'False', 'tm tb ' + (c[1] ? 't-good' : 't-bad'), 'end');
+      });
+      return o;
+    })()),
+  };
+
+  D.logic = {
+    cap: '同样是 A 合上、B 断开：and 的灯不亮，or 的灯亮。',
+    svg: make(216, 'and 像两个开关串联，都合上灯才亮；or 像并联，合上一个灯就亮', [
+      tx(14, 38, 'and', 'tl', 'start'), tx(14, 56, '串联', 'ts', 'start'),
+      line(70, 40, 100, 40), sw(100, 40, true), line(130, 40, 170, 40), sw(170, 40, false), line(200, 40, 248, 40),
+      tx(115, 64, 'A 合上', 'ts'), tx(185, 64, 'B 断开', 'ts'),
+      lamp(270, 34, false), tx(270, 84, '不亮', 'ts'),
+      tx(140, 90, 'True and False → False', 'tm'),
+      line(14, 104, 326, 104, 'ln ln-faint'),
+      tx(14, 146, 'or', 'tl', 'start'), tx(14, 164, '并联', 'ts', 'start'),
+      path('M62 148 H80 M80 132 V164 M80 132 H110 M140 132 H216 M80 164 H110 M140 164 H216 M216 132 V164 M216 148 H248', 'ln'),
+      sw(110, 132, true), sw(110, 164, false),
+      tx(125, 122, 'A 合上', 'ts'), tx(125, 184, 'B 断开', 'ts'),
+      lamp(270, 142, true), tx(270, 196, '亮', 'ts'),
+      tx(140, 208, 'True or False → True', 'tm'),
+    ].join('')),
+  };
+
+  D.if = {
+    cap: '条件成立走左边，不成立走右边，只会走其中一条路。',
+    svg: make(208, 'if 流程图：条件成立执行 if 下面的代码，否则执行 else 下面的代码', [
+      path('M170 12 L262 42 L170 72 L78 42 Z', 'box box-yel'), tx(170, 47, 'score >= 60 ?', 'tm on-yel'),
+      path('M78 42 H62 V94', 'ln ln-good'), head(62, 80, 62, 96, 'hd hd-good'), tx(52, 30, 'True', 'tm tb t-good'), tx(52, 68, '成立', 'ts', 'end'),
+      rect(6, 98, 112, 36, 'box box-good', 6), tx(62, 121, 'print("及格")', 'tm'),
+      path('M262 42 H278 V94', 'ln ln-bad'), head(278, 80, 278, 96, 'hd hd-bad'), tx(288, 30, 'False', 'tm tb t-bad'), tx(288, 68, '不成立', 'ts', 'start'),
+      rect(222, 98, 112, 36, 'box box-bad', 6), tx(278, 121, 'print("加油")', 'tm'),
+      path('M62 134 V160 H278 V134', 'ln'), arrow(170, 160, 170, 180),
+      tx(170, 198, '继续执行后面的代码', 'ts'),
+    ].join('')),
+  };
+
+  D.list = {
+    cap: '列表像一列车厢，每节装一个数据，编号从 0 开始。',
+    svg: make(140, '列表 fruits 有三个元素，索引是 0、1、2', [
+      rect(6, 50, 56, 24, 'box box-yel', 12), tx(34, 67, 'fruits', 'tm on-yel'),
+      line(62, 62, 74, 62),
+      cells(74, 42, ['苹果', '香蕉', '橙子'], { w: 84, h: 40, tcls: 't tb', hi: [1], top: ['0', '1', '2'], bottom: ['-3', '-2', '-1'] }),
+      tx(170, 130, 'fruits[1] 取出 "香蕉"，fruits[-1] 取出 "橙子"', 'ts'),
+    ].join('')),
+  };
+
+  D.for = {
+    cap: '每一轮，变量换成下一个元素，缩进的代码再执行一遍。',
+    svg: make(170, 'for 循环把列表里的三个元素依次交给变量 fruit，一共执行三轮', (function () {
+      var o = cells(53, 12, ['苹果', '香蕉', '橙子'], { w: 78, h: 34, tcls: 't tb' });
+      ['苹果', '香蕉', '橙子'].forEach(function (f, i) {
+        var cx = 92 + i * 78;
+        o += arrow(cx, 48, cx, 70, 'blue');
+        o += rect(cx - 33, 74, 66, 44, 'box box-yel', 10) + tx(cx, 92, 'fruit =', 'ts on-yel') + tx(cx, 110, f, 't tb on-yel');
+        o += tx(cx, 136, '第 ' + (i + 1) + ' 轮', 'ts');
+        if (i < 2) o += head(cx + 34, 96, cx + 44, 96, 'hd');
+      });
+      o += tx(170, 160, '每一轮都执行：print("我喜欢", fruit)', 'ts');
+      return o;
+    })()),
+  };
+
+  D.while = {
+    cap: '每一轮开始前先检查条件。成立就再做一遍，不成立就离开循环。',
+    svg: make(226, 'while 流程图：条件成立就执行循环体并回到条件，不成立就结束', [
+      arrow(170, 4, 170, 20),
+      path('M170 22 L250 50 L170 78 L90 50 Z', 'box box-yel'), tx(170, 55, 'n > 0 ?', 'tm on-yel'),
+      arrow(170, 78, 170, 104, 'good'), tx(180, 96, 'True', 'tm tb t-good', 'start'),
+      rect(100, 108, 140, 56, 'box', 8), tx(170, 131, 'print(n)', 'tm'), tx(170, 151, 'n = n - 1', 'tm'),
+      path('M100 136 H50 V50 H82', 'ln ln-blue'), head(70, 50, 88, 50, 'hd hd-blue'),
+      tx(26, 90, '回去', 'ts t-blue'), tx(26, 106, '再检查', 'ts t-blue'),
+      path('M250 50 H292 V182', 'ln ln-bad'), head(292, 170, 292, 186, 'hd hd-bad'), tx(274, 40, 'False', 'tm tb t-bad'),
+      rect(244, 190, 90, 30, 'box-soft', 6), tx(289, 210, '循环结束', 'ts'),
+    ].join('')),
+  };
+
+  D.brk = {
+    cap: 'continue 只跳过一轮，break 让整个循环结束。',
+    svg: make(152, '循环 1 到 7：到 3 时 continue 跳过，到 6 时 break 结束，7 不会执行', (function () {
+      var o = '', xs = [];
+      for (var i = 0; i < 7; i++) xs.push(32 + i * 46);
+      [[0, 1], [3, 4], [4, 5]].forEach(function (p) { o += line(xs[p[0]] + 17, 62, xs[p[1]] - 17, 62, 'ln ln-blue'); });
+      xs.forEach(function (x, i) {
+        var nth = i + 1;
+        if (nth === 3) o += circle(x, 62, 17, 'box-dash') + tx(x, 67, '3', 'tm t-mute');
+        else if (nth === 6) o += circle(x, 62, 17, 'box box-bad') + tx(x, 67, '6', 'tm tb t-bad');
+        else if (nth === 7) o += circle(x, 62, 17, 'box-dash') + tx(x, 67, '7', 'tm t-mute');
+        else o += circle(x, 62, 17, 'dot-blue') + tx(x, 67, String(nth), 'tm tb on-blue');
+      });
+      o += path('M82 40 Q124 8 164 38', 'ln ln-blue') + head(152, 28, 166, 40, 'hd hd-blue');
+      o += tx(124, 14, 'continue', 'tm tb t-blue') + tx(124, 100, '跳过这一轮', 'ts');
+      o += tx(262, 100, 'break', 'tm tb t-bad') + tx(262, 116, '循环到此结束', 'ts');
+      o += tx(308, 34, '到不了', 'ts');
+      o += tx(170, 142, '显示出来的是 1、2、4、5', 'ts');
+      return o;
+    })()),
+  };
+
+  D.listm = {
+    cap: 'append 加在末尾，insert 插到指定位置，pop 取走最后一个。',
+    svg: make(196, '列表方法：append 在末尾添加，insert 在指定位置插入，pop 取走最后一个', [
+      tx(12, 16, 'todo.append("看书")', 'tm', 'start'),
+      cells(12, 24, ['作业', '跑步', '看书'], { w: 58, h: 30, tcls: 't', hi: [2] }),
+      tx(198, 44, '加在末尾', 'ts', 'start'),
+      tx(12, 82, 'todo.insert(0, "早饭")', 'tm', 'start'),
+      cells(12, 90, ['早饭', '作业', '跑步', '看书'], { w: 58, h: 30, tcls: 't', hi: [0] }),
+      tx(254, 110, '插到位置 0', 'ts', 'start'),
+      tx(12, 148, 'todo.pop()', 'tm', 'start'),
+      cells(12, 156, ['早饭', '作业', '跑步'], { w: 58, h: 30, tcls: 't' }),
+      arrow(190, 171, 206, 171, 'bad'),
+      rect(210, 156, 58, 30, 'box-dash', 0), tx(239, 176, '看书', 't t-mute'),
+      tx(278, 176, '被取走', 'ts', 'start'),
+    ].join('')),
+  };
+
+  D.tuple = {
+    cap: '列表能改，元组不能改。',
+    svg: make(152, '列表可以修改元素，元组创建后不能修改', [
+      tx(82, 18, '[1, 2, 3]', 'tm'),
+      cells(22, 28, ['9', '2', '3'], { w: 40, h: 36, tcls: 'tl', hi: [0] }),
+      lock(82, 86, true),
+      tx(82, 124, '列表：可以修改', 'ts'), tx(82, 142, 'a[0] = 9  ✓', 'tm t-good'),
+      line(170, 12, 170, 146, 'ln ln-faint'),
+      tx(258, 18, '(1, 2, 3)', 'tm'),
+      cells(198, 28, ['1', '2', '3'], { w: 40, h: 36, tcls: 'tl' }),
+      lock(258, 86, false),
+      tx(258, 124, '元组：不能修改', 'ts'), tx(258, 142, 't[0] = 9  ✗ 报错', 'tm t-bad'),
+    ].join('')),
+  };
+
+  D.dict = {
+    cap: '字典里每个键都指向一个值。按键查找，不按位置。',
+    svg: make(172, '字典的三个键 name、age、city 各自指向一个值', (function () {
+      var o = tx(80, 16, '键 key', 'ts') + tx(255, 16, '值 value', 'ts');
+      [['"name"', '"小明"'], ['"age"', '19'], ['"city"', '"北京"']].forEach(function (r, i) {
+        var y = 26 + i * 40, hi = i === 1;
+        o += rect(30, y, 100, 30, 'box box-yel', 15) + tx(80, y + 20, r[0], 'tm on-yel');
+        o += arrow(134, y + 15, 196, y + 15, hi ? 'blue' : '');
+        o += rect(200, y, 110, 30, hi ? 'box box-hi' : 'box', 6) + tx(255, y + 20, r[1], 'tm' + (hi ? ' tb' : ''));
+      });
+      o += tx(170, 162, 'd["age"]：顺着键 "age" 找到值 19', 'ts');
+      return o;
+    })()),
+  };
+
+  D.set = {
+    cap: '两个集合重叠的部分是交集，全部合起来是并集。',
+    svg: make(200, '集合 a 有 1、2、3，集合 b 有 2、3、4，重叠部分是 2 和 3', [
+      circle(132, 74, 58, 'venn-a'), circle(208, 74, 58, 'venn-b'),
+      tx(86, 22, 'a', 'tl'), tx(254, 22, 'b', 'tl'),
+      tx(100, 80, '1', 'tl'), tx(170, 68, '2', 'tl'), tx(170, 94, '3', 'tl'), tx(240, 80, '4', 'tl'),
+      tx(24, 156, 'a & b → {2, 3}', 'tm', 'start'), tx(316, 156, '重叠的部分', 'ts', 'end'),
+      tx(24, 174, 'a | b → {1, 2, 3, 4}', 'tm', 'start'), tx(316, 174, '全部合起来', 'ts', 'end'),
+      tx(24, 192, 'a - b → {1}', 'tm', 'start'), tx(316, 192, '只在 a 里的', 'ts', 'end'),
+    ].join('')),
+  };
+
+  D.strm = {
+    cap: 'split 把字符串切成列表，join 把列表拼回字符串。',
+    svg: make(176, '字符串 红,绿,蓝 用 split 切成三个元素的列表，再用 join 拼成 红-绿-蓝', [
+      rect(105, 8, 130, 30, 'box', 15), tx(170, 28, '"红,绿,蓝"', 'tm'),
+      arrow(170, 40, 170, 64, 'blue'), tx(182, 57, '.split(",")', 'tm t-blue', 'start'), tx(158, 57, '在逗号处切开', 'ts', 'end'),
+      cells(95, 68, ['"红"', '"绿"', '"蓝"'], { w: 50, h: 32, tcls: 'tm' }),
+      tx(256, 89, '得到列表', 'ts', 'start'),
+      arrow(170, 102, 170, 126, 'blue'), tx(182, 119, '"-".join(…)', 'tm t-blue', 'start'), tx(158, 119, '用 - 拼起来', 'ts', 'end'),
+      rect(105, 130, 130, 30, 'box box-yel', 15), tx(170, 150, '"红-绿-蓝"', 'tm on-yel'),
+    ].join('')),
+  };
+
+  D.func = {
+    cap: '函数定义一次，可以调用很多次。',
+    svg: make(142, '一个函数定义，被三处调用', [
+      tx(85, 16, '定义一次', 'ts'),
+      rect(10, 24, 152, 76, 'box-code', 8),
+      tx(22, 50, 'def say_hi():', 'tc', 'start'), tx(22, 72, '    print("你好！")', 'tc', 'start'),
+      tx(281, 16, '调用很多次', 'ts'),
+      rect(236, 24, 90, 24, 'box', 12), tx(281, 41, 'say_hi()', 'tm'),
+      rect(236, 52, 90, 24, 'box', 12), tx(281, 69, 'say_hi()', 'tm'),
+      rect(236, 80, 90, 24, 'box', 12), tx(281, 97, 'say_hi()', 'tm'),
+      arrow(232, 36, 168, 50, 'blue'), arrow(232, 64, 168, 62, 'blue'), arrow(232, 92, 168, 74, 'blue'),
+      tx(170, 130, '每调用一次，函数里的代码就执行一遍', 'ts'),
+    ].join('')),
+  };
+
+  D.ret = {
+    cap: '参数从入口送进去，返回值从出口送出来。',
+    svg: make(168, '函数 add 接收参数 3 和 5，返回它们的和 8', [
+      tx(50, 26, '参数（送进去）', 'ts'),
+      rect(22, 40, 48, 26, 'box box-yel', 13), tx(46, 58, '3', 'tm tb on-yel'),
+      rect(22, 80, 48, 26, 'box box-yel', 13), tx(46, 98, '5', 'tm tb on-yel'),
+      arrow(74, 53, 108, 62, 'blue'), arrow(74, 93, 108, 84, 'blue'),
+      rect(112, 38, 116, 70, 'box-blue', 10), tx(170, 66, 'add(a, b)', 'tm tb on-blue'), tx(170, 90, 'return a + b', 'tm on-blue'),
+      arrow(232, 73, 268, 73, 'blue'),
+      tx(284, 26, '返回值（送出来）', 'ts'),
+      rect(272, 58, 52, 30, 'box box-yel', 15), tx(298, 78, '8', 'tm tb on-yel'),
+      tx(170, 138, 'result = add(3, 5)', 'tm'), tx(170, 158, '返回的 8 被存进 result', 'ts'),
+    ].join('')),
+  };
+
+  D.try = {
+    cap: '没出错就跳过 except，出错了就跳到 except。两条路最后都会继续往下走。',
+    svg: make(218, 'try except 流程图：没出错跳过 except，出错则跳到 except 处理，之后程序继续', [
+      rect(95, 6, 150, 32, 'box', 8), tx(170, 27, '执行 try 里的代码', 't'),
+      arrow(170, 38, 170, 56),
+      path('M170 58 L244 84 L170 110 L96 84 Z', 'box box-yel'), tx(170, 89, '出错了吗？', 't on-yel'),
+      path('M96 84 H62 V122', 'ln ln-good'), head(62, 110, 62, 126, 'hd hd-good'), tx(64, 72, '没出错', 'ts t-good'),
+      rect(4, 128, 118, 34, 'box box-good', 6), tx(63, 150, '跳过 except', 't'),
+      path('M244 84 H278 V122', 'ln ln-bad'), head(278, 110, 278, 126, 'hd hd-bad'), tx(278, 72, '出错', 'ts t-bad'),
+      rect(218, 128, 118, 34, 'box box-bad', 6), tx(277, 150, '跳到 except', 't'),
+      path('M63 162 V180 H277 V162', 'ln'), arrow(170, 180, 170, 196),
+      tx(170, 212, '程序继续往下运行，不会崩溃', 'ts'),
+    ].join('')),
+  };
+
+  D.file = {
+    cap: '写入是把数据从程序送进文件，读取是从文件拿回程序。',
+    svg: make(186, '程序用 w 或 a 模式把数据写进文件，用 r 模式从文件读出来', [
+      rect(14, 32, 110, 76, 'box-code', 8), tx(69, 66, '你的程序', 'tc'), tx(69, 88, 'Python', 'tc tc-dim'),
+      arrow(128, 54, 230, 54, 'blue'), tx(179, 44, '写入 "w" 或 "a"', 'ts t-blue'),
+      arrow(230, 90, 128, 90, 'good'), tx(179, 108, '读取 "r"', 'ts t-good'),
+      path('M238 24 H296 L318 46 V116 H238 Z', 'box'), path('M296 24 V46 H318', 'ln'),
+      line(250, 62, 304, 62, 'ln ln-faint'), line(250, 78, 304, 78, 'ln ln-faint'), line(250, 94, 290, 94, 'ln ln-faint'),
+      tx(278, 136, 'diary.txt', 'tm'),
+      rect(14, 152, 100, 26, 'box-soft', 13), tx(64, 170, '"r" 只读', 'ts t-ink'),
+      rect(120, 152, 100, 26, 'box-soft', 13), tx(170, 170, '"w" 清空再写', 'ts t-ink'),
+      rect(226, 152, 100, 26, 'box-soft', 13), tx(276, 170, '"a" 接着写', 'ts t-ink'),
+    ].join('')),
+  };
+
+  D.mod = {
+    cap: '模块是装好工具的箱子。import 把箱子拿来，再从里面取工具。',
+    svg: make(160, 'import math 把 math 模块拿进程序，然后用 math.sqrt 取出里面的工具', [
+      rect(10, 22, 108, 104, 'box', 8), rect(10, 22, 108, 28, 'box-blue', 8),
+      tx(64, 41, 'math 模块', 't tb on-blue'),
+      rect(20, 60, 42, 24, 'box-soft', 12), tx(41, 77, 'sqrt', 'tm'),
+      rect(66, 60, 42, 24, 'box-soft', 12), tx(87, 77, 'pi', 'tm'),
+      rect(20, 92, 42, 24, 'box-soft', 12), tx(41, 109, 'floor', 'tm'),
+      rect(66, 92, 42, 24, 'box-soft', 12), tx(87, 109, 'ceil', 'tm'),
+      arrow(122, 74, 214, 74, 'blue'), tx(168, 64, 'import math', 'tm t-blue'),
+      rect(218, 22, 112, 104, 'box-code', 8),
+      tx(274, 46, '你的程序', 'tc tc-dim'), tx(274, 76, 'math.sqrt(16)', 'tc'), tx(274, 102, '→ 4.0', 'tc tc-key'),
+      tx(170, 150, '先 import，再用「模块名.工具名」', 'ts'),
+    ].join('')),
+  };
+
+  D.class = {
+    cap: '一张图纸（类）可以造出很多个对象，每个对象有自己的属性。',
+    svg: make(216, '类 Dog 是图纸，照着它创建出 d1 和 d2 两个对象，各有自己的名字和年龄', [
+      tx(48, 42, '类 = 图纸', 'ts'),
+      rect(95, 6, 150, 76, 'box-blue', 8),
+      tx(170, 28, 'class Dog', 'tm tb on-blue'), tx(170, 50, '属性：name, age', 'ts on-blue'), tx(170, 68, '方法：bark()', 'ts on-blue'),
+      arrow(140, 84, 92, 116, 'blue'), arrow(200, 84, 248, 116, 'blue'),
+      rect(12, 120, 152, 68, 'box', 8), tx(88, 140, 'd1 = Dog("旺财", 3)', 'tm'),
+      tx(88, 160, 'name = "旺财"', 'ts'), tx(88, 178, 'age = 3', 'ts'),
+      rect(176, 120, 152, 68, 'box', 8), tx(252, 140, 'd2 = Dog("小白", 1)', 'tm'),
+      tx(252, 160, 'name = "小白"', 'ts'), tx(252, 178, 'age = 1', 'ts'),
+      tx(170, 208, '对象 = 照着图纸造出来的东西', 'ts'),
+    ].join('')),
+  };
+
+  D.final = {
+    cap: '六章知识一级一级搭上来，这一关把它们合在一起用。',
+    svg: make(196, '六章内容像六级台阶：起步、判断、循环、容器、函数、进阶', (function () {
+      var o = '', names = ['起步', '判断', '循环', '容器', '函数', '进阶'];
+      names.forEach(function (nm, i) {
+        var x = 14 + i * 52, top = 148 - i * 22;
+        o += rect(x, top, 52, 172 - top, i === 5 ? 'box box-yel' : 'box-blue', 0) + tx(x + 26, top + 19, nm, 'ts tb ' + (i === 5 ? 'on-yel' : 'on-blue'));
+      });
+      o += line(300, 38, 300, 8, 'ln ln-thick') + path('M300 8 L324 16 L300 24 Z', 'dot-yel');
+      o += tx(14, 30, '变量 · 判断 · 循环', 'ts', 'start') + tx(14, 48, '容器 · 函数 · 对象', 'ts', 'start');
+      o += tx(170, 190, '你已经走到最高一级', 'ts');
+      return o;
+    })()),
+  };
+
+  return D;
+})();
+
+/* ===== 游戏逻辑 ===== */
+(function () {
+  'use strict';
+
+  var STORE_KEY = 'pyquest.v1';
+  var STANDALONE = true;
+  var RANKS = [
+    { xp: 0, name: 'Python 萌新' }, { xp: 100, name: '打印学徒' }, { xp: 250, name: '变量收纳师' },
+    { xp: 450, name: '判断小能手' }, { xp: 700, name: '循环骑士' }, { xp: 1000, name: '列表管家' },
+    { xp: 1400, name: '函数工匠' }, { xp: 1850, name: '排错侦探' }, { xp: 2400, name: '对象建筑师' },
+    { xp: 3000, name: 'Python 高手' },
+  ];
+  var CN = ['一', '二', '三', '四', '五', '六', '七', '八', '九', '十'];
+  var TYPE_NAME = { choice: '选择题', output: '看代码选结果', fill: '填空题' };
+  var LEVEL_INDEX = {}, Q_INDEX = {};
+  LEVELS.forEach(function (lv, i) {
+    LEVEL_INDEX[lv.id] = i;
+    lv.questions.forEach(function (q) { Q_INDEX[q.id] = { q: q, li: i }; });
+  });
+
+  /* ---------- 存档 ---------- */
+  function freshState() {
+    return { v: 1, xp: 0, streak: 0, best: 0, levels: {}, wrong: {}, answered: 0, correct: 0, day: '', days: 0, last: '' };
+  }
+  var saveOk = true;
+  function load() {
+    try {
+      var raw = localStorage.getItem(STORE_KEY);
+      if (raw) {
+        var s = JSON.parse(raw);
+        if (s && s.v === 1) {
+          var st = freshState();
+          Object.keys(st).forEach(function (k) { if (s[k] !== undefined && typeof s[k] === typeof st[k]) st[k] = s[k]; });
+          Object.keys(st.wrong).forEach(function (id) { if (!Q_INDEX[id]) delete st.wrong[id]; });
+          return st;
+        }
+      }
+    } catch (e) { saveOk = false; }
+    return freshState();
+  }
+  function save() {
+    try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); saveOk = true; } catch (e) { saveOk = false; }
+  }
+  var state = load();
+
+  /* ---------- 小工具 ---------- */
+  function $(sel) { return document.querySelector(sel); }
+  function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+  function fmt(s) {
+    return String(s).split('`').map(function (seg, i) {
+      return i % 2 ? '<code>' + esc(seg) + '</code>' : esc(seg).replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+    }).join('');
+  }
+  function pad2(n) { return n < 10 ? '0' + n : '' + n; }
+  function shuffle(arr) {
+    var a = arr.slice();
+    for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t; }
+    return a;
+  }
+  var KW = /^(def|return|if|elif|else|for|while|in|not|and|or|break|continue|import|from|as|class|try|except|finally|with|True|False|None)$/;
+  var BI = /^(print|len|input|int|float|str|type|range|round|open|set|sorted)$/;
+  function hl(code, filled) {
+    var re = /(#[^\n]*)|(f?"(?:[^"\\\n]|\\.)*"|f?'(?:[^'\\\n]|\\.)*')|(\b\d+(?:\.\d+)?)|(____)|([A-Za-z_][A-Za-z_0-9]*)|([\s\S])/g;
+    return code.replace(re, function (m, com, str, num, blank, word, other) {
+      if (com) return '<span class="c-com">' + esc(com) + '</span>';
+      if (str) return '<span class="c-str">' + esc(str) + '</span>';
+      if (num) return '<span class="c-num">' + num + '</span>';
+      if (blank) return filled ? '<span class="blank is-right">' + esc(filled) + '</span>' : '<span class="blank">?</span>';
+      if (word) return KW.test(word) ? '<span class="c-key">' + word + '</span>' : BI.test(word) ? '<span class="c-fn">' + word + '</span>' : word;
+      return esc(other);
+    });
+  }
+  function norm(s) {
+    var t = String(s);
+    try { t = t.normalize('NFKC'); } catch (e) {}
+    return t.replace(/[“”„‟]/g, '"').replace(/[‘’‚‛]/g, "'").replace(/\s+/g, '');
+  }
+  function hasCnPunct(s) { return /[！-～　“”‘’]/.test(String(s)); }
+  function ymd(d) { return d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate()); }
+  function touchDay() {
+    var today = ymd(new Date());
+    if (state.day === today) return;
+    var y = new Date(); y.setDate(y.getDate() - 1);
+    state.days = state.day === ymd(y) ? state.days + 1 : 1;
+    state.day = today;
+  }
+  function dayStreak() {
+    var y = new Date(); y.setDate(y.getDate() - 1);
+    return (state.day === ymd(new Date()) || state.day === ymd(y)) ? state.days : 0;
+  }
+  var toastTimer;
+  function toast(msg) {
+    var el = $('#toast'); el.textContent = msg; el.classList.add('is-on');
+    clearTimeout(toastTimer); toastTimer = setTimeout(function () { el.classList.remove('is-on'); }, 2200);
+  }
+  function copyText(text, okMsg) {
+    function fallback() {
+      try {
+        var ta = document.createElement('textarea');
+        ta.value = text; ta.setAttribute('readonly', ''); ta.style.position = 'fixed'; ta.style.opacity = '0';
+        document.body.appendChild(ta); ta.select();
+        var ok = document.execCommand('copy'); document.body.removeChild(ta);
+        toast(ok ? okMsg : '复制失败，请长按文字手动复制');
+      } catch (e) { toast('复制失败，请长按文字手动复制'); }
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(function () { toast(okMsg); }, fallback);
+    else fallback();
+  }
+
+  /* ---------- 图标 ---------- */
+  function svgIcon(body, cls) { return '<svg class="ic' + (cls ? ' ' + cls : '') + '" viewBox="0 0 24 24" aria-hidden="true">' + body + '</svg>'; }
+  var S = ' fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"';
+  var STAR_PATH = '<path d="M12 2.8l2.85 5.78 6.38.93-4.62 4.5 1.09 6.35L12 17.36l-5.7 3 1.09-6.35-4.62-4.5 6.38-.93z" fill="currentColor" stroke-width="1.3" stroke-linejoin="round"/>';
+  var ICON = {
+    star: svgIcon(STAR_PATH),
+    starOff: svgIcon(STAR_PATH, 'off'),
+    flame: svgIcon('<path d="M12 2.5c.6 3.4 5.5 5.6 5.5 11a5.5 5.5 0 0 1-11 0c0-2 .9-3.6 2-4.8.3 1.4 1 2.3 1.8 2.6C10 8.5 10.4 5 12 2.5z" fill="currentColor"/>'),
+    lock: svgIcon('<path d="M7.5 10.5V8a4.5 4.5 0 0 1 9 0v2.5"' + S + '/><rect x="5" y="10.5" width="14" height="10.5" rx="2.5" fill="currentColor"/>'),
+    check: svgIcon('<path d="M5 12.5l4.5 4.5L19 7.5"' + S.replace('2.4', '3') + '/>'),
+    x: svgIcon('<path d="M6.5 6.5l11 11M17.5 6.5l-11 11"' + S.replace('2.4', '3') + '/>'),
+    back: svgIcon('<path d="M14.5 5l-7 7 7 7"' + S + '/>'),
+    play: svgIcon('<path d="M8 5.6v12.8a1 1 0 0 0 1.5.86l10.4-6.4a1 1 0 0 0 0-1.72L9.5 4.74A1 1 0 0 0 8 5.6z" fill="currentColor"/>'),
+    flag: svgIcon('<path d="M6 21V4"' + S + '/><path d="M6 4.5h12l-2.6 4 2.6 4H6z" fill="currentColor"/>'),
+    book: svgIcon('<path d="M5 5a2 2 0 0 1 2-2h12v15H7a2 2 0 0 0-2 2z"' + S + '/><path d="M5 20a2 2 0 0 0 2 1h12M9.5 8h5.5"' + S + '/>'),
+    user: svgIcon('<circle cx="12" cy="8" r="4.2" fill="currentColor"/><path d="M4 20.5c.9-4 4-6 8-6s7.1 2 8 6z" fill="currentColor"/>'),
+    redo: svgIcon('<path d="M19 12a7 7 0 1 1-2.3-5.2"' + S + '/><path d="M19.5 3.5v4.2h-4.2"' + S + '/>'),
+    share: svgIcon('<path d="M12 15V4M8 7.5l4-4 4 4M5 12v7.5h14V12"' + S + '/>'),
+    trophy: svgIcon('<path d="M7 4h10v5a5 5 0 0 1-10 0z" fill="currentColor"/><path d="M7 5.5H4.5c0 2 1 3.4 2.8 3.7M17 5.5h2.5c0 2-1 3.4-2.8 3.7M12 14v3.5M8.5 20.5h7"' + S + '/>'),
+  };
+
+  /* ---------- 进度计算 ---------- */
+  function rankInfo(xp) {
+    var i = 0;
+    for (var k = 0; k < RANKS.length; k++) if (xp >= RANKS[k].xp) i = k;
+    var cur = RANKS[i], next = RANKS[i + 1];
+    return { lv: i + 1, name: cur.name, next: next, pct: next ? Math.round((xp - cur.xp) / (next.xp - cur.xp) * 100) : 100, need: next ? next.xp - xp : 0 };
+  }
+  function starsOf(i) { var r = state.levels[LEVELS[i].id]; return r ? r.stars : 0; }
+  function totalStars() { var n = 0; for (var i = 0; i < LEVELS.length; i++) n += starsOf(i); return n; }
+  function currentIndex() { for (var i = 0; i < LEVELS.length; i++) if (!starsOf(i)) return i; return LEVELS.length; }
+  function unlocked(i) { return i <= currentIndex(); }
+  function wrongIds() {
+    return Object.keys(state.wrong).filter(function (id) { return Q_INDEX[id]; })
+      .sort(function (a, b) { return Q_INDEX[a].li - Q_INDEX[b].li || (a < b ? -1 : 1); });
+  }
+
+  /* ---------- 路由（只用 #name）---------- */
+  function route() {
+    var h = (location.hash || '').replace(/^#/, ''), m;
+    if (h === 'notebook') return { v: 'book' };
+    if (h === 'me') return { v: 'me' };
+    if (h === 'review') return { v: 'review' };
+    if ((m = /^level-(\d+)$/.exec(h))) return { v: 'lesson', i: +m[1] - 1 };
+    if ((m = /^quiz-(\d+)$/.exec(h))) return { v: 'quiz', i: +m[1] - 1 };
+    return { v: 'map' };
+  }
+  function go(name, replace) {
+    var cur = (location.hash || '').replace(/^#/, '');
+    if (cur === name || (name === 'levels' && cur === '')) { render(); return; }
+    try { if (replace) location.replace('#' + name); else location.hash = name; }
+    catch (e) { location.hash = name; }
+  }
+
+  var $view = $('#view'), $bar = $('#bar');
+  var quiz = null, pendingReview = null, resetAsk = false;
+
+  function render() {
+    var r = route();
+    if ((r.v === 'lesson' || r.v === 'quiz') && (!LEVELS[r.i] || !unlocked(r.i))) { go('levels', true); return; }
+    resetAsk = false; clearFloat();
+    if (r.v === 'map') viewMap();
+    else if (r.v === 'book') viewBook();
+    else if (r.v === 'me') viewMe();
+    else if (r.v === 'lesson') viewLesson(r.i);
+    else if (r.v === 'quiz') { startLevelQuiz(r.i); viewQuiz(); }
+    else if (r.v === 'review') {
+      var ids = pendingReview || wrongIds(); pendingReview = null;
+      ids = ids.filter(function (id) { return state.wrong[id]; });
+      if (!ids.length) { go('notebook', true); return; }
+      startReview(ids); viewQuiz();
+    }
+    if (r.v === 'map') focusMap(); else window.scrollTo(0, 0);
+  }
+
+  /* ---------- 公共片段 ---------- */
+  function topMain() {
+    var r = rankInfo(state.xp);
+    return '<header class="top">' +
+      '<button class="rank" data-act="go" data-to="me" aria-label="等级 ' + r.lv + '，' + esc(r.name) + '，积分 ' + state.xp + '">' +
+      '<span class="rank-badge"><small>Lv</small>' + r.lv + '</span>' +
+      '<span class="rank-main"><span class="rank-name">' + esc(r.name) + ' · <span class="num">' + state.xp + '</span> 分</span>' +
+      '<span class="xpbar"><i style="width:' + r.pct + '%"></i></span></span></button>' +
+      '<span class="stat stat-star" role="img" aria-label="星星 ' + totalStars() + ' 颗">' + ICON.star + '<span>' + totalStars() + '</span></span>' +
+      '<span class="stat stat-fire' + (state.streak ? '' : ' is-zero') + '" role="img" aria-label="连胜 ' + state.streak + ' 题">' + ICON.flame + '<span>' + state.streak + '</span></span>' +
+      '</header>';
+  }
+  function tabbar(on) {
+    var wn = wrongIds().length;
+    function tab(to, label, icon, badge) {
+      return '<button class="tab' + (on === to ? ' is-on' : '') + '" data-act="go" data-to="' + to + '"' + (on === to ? ' aria-current="page"' : '') + '>' + icon +
+        '<span>' + label + '</span>' + (badge ? '<span class="tab-badge" aria-label="' + badge + ' 道错题">' + badge + '</span>' : '') + '</button>';
+    }
+    return '<nav class="tabbar" aria-label="主导航"><div class="bar-in">' + tab('levels', '闯关', ICON.flag) + tab('notebook', '错题本', ICON.book, wn) + tab('me', '我的', ICON.user) + '</div></nav>';
+  }
+  function starRow(n) { var s = ''; for (var i = 0; i < 3; i++) s += i < n ? ICON.star : ICON.starOff; return s; }
+
+  /* ---------- 地图 ---------- */
+  function mapLayout() {
+    var y = 4, k = 0, nodes = [], heads = [];
+    CHAPTERS.forEach(function (ch, ci) {
+      heads.push({ y: y, ch: ch, ci: ci }); y += 72;
+      LEVELS.forEach(function (lv, i) {
+        if (lv.ch !== ch.id) return;
+        nodes.push({ i: i, x: k % 2 === 0 ? 28 : 72, y: y + 56 }); y += 122; k++;
+      });
+      y += 4;
+    });
+    return { nodes: nodes, heads: heads, h: y + 16 };
+  }
+  function pathThrough(nodes, from, to) {
+    var d = '';
+    for (var k = from; k <= to; k++) {
+      var n = nodes[k];
+      if (k === from) d += 'M' + n.x + ' ' + n.y;
+      else { var p = nodes[k - 1], dy = (n.y - p.y) * 0.8; d += ' C' + p.x + ' ' + (p.y + dy) + ' ' + n.x + ' ' + (n.y - dy) + ' ' + n.x + ' ' + n.y; }
+    }
+    return d;
+  }
+  var HEAD_SVG = '<svg class="head" viewBox="0 0 84 100" aria-hidden="true"><circle class="ring" cx="42" cy="42" r="40"/>' +
+    '<path class="tongue" d="M42 80v10M42 90l-5 7M42 90l5 7"/><circle class="skin" cx="42" cy="42" r="38"/>' +
+    '<circle class="eye" cx="28" cy="38" r="10"/><circle class="eye" cx="56" cy="38" r="10"/>' +
+    '<circle class="pupil" cx="29.5" cy="41.5" r="5"/><circle class="pupil" cx="54.5" cy="41.5" r="5"/></svg>';
+
+  function viewMap() {
+    var lay = mapLayout(), cur = currentIndex(), allDone = cur >= LEVELS.length;
+    var headIdx = allDone ? LEVELS.length - 1 : cur;
+    var html = topMain();
+    if (!state.answered) html += '<p class="hello"><b>欢迎来到蟒蛇闯关。</b>一关只学一个知识点：先看讲解和图示，再做几道题。点蛇头，从第 1 关开始。</p>';
+    html += '<div class="map" style="height:' + lay.h + 'px">';
+    var n0 = lay.nodes[0];
+    html += '<svg class="snake" viewBox="0 0 100 ' + lay.h + '" preserveAspectRatio="none" aria-hidden="true">' +
+      '<path class="trail" d="' + pathThrough(lay.nodes, headIdx, lay.nodes.length - 1) + '"/>' +
+      '<path class="tail" d="M' + n0.x + ' ' + n0.y + ' C' + n0.x + ' ' + (n0.y - 26) + ' ' + (n0.x - 9) + ' ' + (n0.y - 30) + ' ' + (n0.x - 13) + ' ' + (n0.y - 46) + '"/>' +
+      (headIdx > 0 ? '<path class="body" d="' + pathThrough(lay.nodes, 0, headIdx) + '"/><path class="belly" d="' + pathThrough(lay.nodes, 0, headIdx) + '"/>' : '') +
+      '</svg>';
+    lay.heads.forEach(function (hd) {
+      var ids = LEVELS.filter(function (l) { return l.ch === hd.ch.id; });
+      var done = ids.filter(function (l) { return state.levels[l.id] && state.levels[l.id].stars; }).length;
+      html += '<div class="chap" style="top:' + hd.y + 'px"><span class="chap-no">第' + CN[hd.ci] + '章</span>' +
+        '<span class="chap-main"><span class="chap-title">' + esc(hd.ch.title) + '</span><span class="chap-sub">' + esc(hd.ch.sub) + '</span></span>' +
+        '<span class="chap-prog" aria-label="已通过 ' + done + ' 关，共 ' + ids.length + ' 关">' + done + '/' + ids.length + '</span></div>';
+    });
+    lay.nodes.forEach(function (n) {
+      var lv = LEVELS[n.i], st = starsOf(n.i), rec = state.levels[lv.id];
+      var status = (!allDone && n.i === headIdx) ? 'current' : (st ? 'done' : 'locked');
+      var side = n.x < 50 ? 'on-left' : 'on-right';
+      var inner, extra = '', aria = '第 ' + (n.i + 1) + ' 关，' + lv.title;
+      if (status === 'current') { inner = HEAD_SVG; extra = '<span class="node-go">' + (rec && rec.plays ? '再挑战' : '开始') + '</span>'; aria += '，当前关卡'; }
+      else if (status === 'done') { inner = '<span class="node-dot">' + (n.i + 1) + '</span>'; extra = '<span class="node-stars">' + starRow(st) + '</span>'; aria += '，已获得 ' + st + ' 颗星'; }
+      else { inner = '<span class="node-dot">' + ICON.lock + '</span>'; aria += '，未解锁'; }
+      html += '<button class="node is-' + status + ' ' + side + '" style="left:' + n.x + '%;top:' + n.y + 'px" data-act="open" data-i="' + n.i + '" aria-label="' + esc(aria) + '">' +
+        inner + '<span class="node-label"><span class="node-no">第 ' + pad2(n.i + 1) + ' 关</span><span class="node-title">' + esc(lv.title) + '</span>' + extra + '</span></button>';
+    });
+    html += '</div>';
+    if (allDone) html += '<div class="finish">' + ICON.trophy + '<b>全部通关！</b><span>26 关都拿下了。去错题本清一清，或者回头把每关刷成三星。</span></div>';
+    $view.innerHTML = html;
+    $bar.innerHTML = tabbar('levels');
+  }
+  function focusMap() {
+    var el = $('.node.is-current');
+    if (!el && state.last && LEVEL_INDEX[state.last] != null) el = $('.node[data-i="' + LEVEL_INDEX[state.last] + '"]');
+    if (el && el.getAttribute('data-i') !== '0') { try { el.scrollIntoView({ block: 'center' }); } catch (e) {} }
+    else window.scrollTo(0, 0);
+  }
+
+  /* ---------- 讲解 ---------- */
+  function sec(tag, body, cls) { return '<section class="sec' + (cls ? ' ' + cls : '') + '"><h2 class="sec-tag">' + tag + '</h2>' + body + '</section>'; }
+  function viewLesson(i) {
+    var lv = LEVELS[i], d = DIAGRAMS[lv.id], ch = CHAPTERS.filter(function (c) { return c.id === lv.ch; })[0];
+    var html = '<header class="top top-nav"><button class="icon-btn" data-act="go" data-to="levels" aria-label="返回地图">' + ICON.back + '</button>' +
+      '<span class="top-title">第 ' + (i + 1) + ' 关 / 共 ' + LEVELS.length + ' 关</span><span class="top-spacer"></span></header>';
+    html += '<article class="lesson"><div class="lesson-head"><span class="eyebrow">第 ' + pad2(i + 1) + ' 关 · ' + esc(ch.title) + '</span>' +
+      '<h1>' + esc(lv.title) + '</h1><p class="hook">' + fmt(lv.hook) + '</p></div>';
+    html += '<figure class="fig">' + d.svg + '<figcaption>' + fmt(d.cap) + '</figcaption></figure>';
+    html += sec('怎么写', '<pre class="code" tabindex="0">' + hl(lv.syntax) + '</pre><ul>' + lv.how.map(function (t) { return '<li>' + fmt(t) + '</li>'; }).join('') + '</ul>');
+    html += sec('什么意思', '<p>' + fmt(lv.mean) + '</p>');
+    html += sec('有什么用', '<p>' + fmt(lv.use) + '</p>');
+    html += sec('试一试', '<div class="demo"><pre class="code" tabindex="0">' + hl(lv.example.code) + '</pre>' +
+      '<div class="demo-bar"><button class="demo-btn demo-run" data-act="run" data-i="' + i + '">' + ICON.play + '运行</button>' +
+      '<button class="demo-btn demo-copy" data-act="copy" data-i="' + i + '">复制代码</button></div>' +
+      '<div class="demo-out" id="demo-out" hidden><div class="demo-out-label">运行结果</div><pre id="demo-pre" aria-live="polite"></pre></div></div>' +
+      '<p class="demo-note">' + (lv.example.note ? esc(lv.example.note) + ' ' : '') + '先猜一猜会显示什么，再点“运行”。代码可以复制到自己的 Python 里运行。</p>');
+    html += sec('小心', '<p>' + fmt(lv.tip) + '</p>', 'sec-tip');
+    html += '</article>';
+    $view.innerHTML = html;
+    $bar.innerHTML = '<div class="actionbar"><div class="bar-in"><button class="btn" data-act="start" data-i="' + i + '">开始答题 · ' + lv.questions.length + ' 题</button></div></div>';
+  }
+  var runTimers = [];
+  function runDemo(i) {
+    var ex = LEVELS[i].example, box = $('#demo-out'), pre = $('#demo-pre');
+    if (!box) return;
+    runTimers.forEach(clearTimeout); runTimers = [];
+    var text = ex.out.replace(/⟦(\d+)-(\d+)⟧/g, function (m, a, b) { return String(+a + Math.floor(Math.random() * (+b - +a + 1))); });
+    var lines = text.split('\n').map(function (ln) { return esc(ln).replace(/«([^»]*)»/g, '<span class="typed">$1</span>'); });
+    box.hidden = false; pre.innerHTML = '';
+    var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduce) { pre.innerHTML = lines.join('\n'); return; }
+    lines.forEach(function (ln, k) {
+      runTimers.push(setTimeout(function () {
+        pre.insertAdjacentHTML('beforeend', '<span class="ln-in">' + (ln || ' ') + '</span>');
+        if (k === 0) { try { box.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); } catch (e) {} }
+      }, k * 110));
+    });
+  }
+
+  /* ---------- 答题 ---------- */
+  function makeItem(q, li) {
+    var it = { q: q, li: li, done: false, ok: false, picked: -1, input: '', gain: 0, bonus: 0 };
+    if (q.type !== 'fill') it.opts = shuffle(q.opts);
+    return it;
+  }
+  function startLevelQuiz(i) {
+    var lv = LEVELS[i];
+    quiz = { mode: 'level', li: i, pos: 0, right: 0, gain: 0, cleared: 0, finished: false, rank0: rankInfo(state.xp).lv,
+      items: lv.questions.map(function (q) { return makeItem(q, i); }) };
+  }
+  function startReview(ids) {
+    quiz = { mode: 'review', li: -1, pos: 0, right: 0, gain: 0, cleared: 0, finished: false, rank0: rankInfo(state.xp).lv,
+      items: shuffle(ids).map(function (id) { return makeItem(Q_INDEX[id].q, Q_INDEX[id].li); }) };
+  }
+  function optBody(q, o) {
+    if (o.err) return '<span class="opt-note">会报错</span>';
+    if (o.none) return '<span class="opt-note">什么都不显示</span>';
+    return q.type === 'output' ? '<pre>' + esc(o.t) + '</pre>' : fmt(o.t);
+  }
+  function optPlain(q, o) { return o.err ? '会报错' : o.none ? '什么都不显示' : o.t; }
+
+  function viewQuiz() {
+    if (quiz.finished) { viewResult(); return; }
+    var it = quiz.items[quiz.pos], q = it.q, n = quiz.items.length;
+    var html = '<header class="top top-nav"><button class="icon-btn" data-act="quit" aria-label="退出答题">' + ICON.x + '</button>' +
+      '<div class="progress" role="img" aria-label="第 ' + (quiz.pos + 1) + ' 题，共 ' + n + ' 题">' +
+      quiz.items.map(function (x, k) { return '<i class="' + (x.done ? (x.ok ? 'is-right' : 'is-wrong') : (k === quiz.pos ? 'is-now' : '')) + '"></i>'; }).join('') + '</div>' +
+      '<span class="stat stat-fire' + (state.streak ? '' : ' is-zero') + '" role="img" aria-label="连胜 ' + state.streak + ' 题">' + ICON.flame + '<span>' + state.streak + '</span></span></header>';
+    html += '<div class="quiz"><div class="q-meta"><span class="q-type">' + TYPE_NAME[q.type] + '</span>' +
+      '<span class="q-from">' + (quiz.mode === 'review' ? '错题重练 · ' : '') + '第 ' + (it.li + 1) + ' 关 ' + esc(LEVELS[it.li].title) + ' · ' + (quiz.pos + 1) + '/' + n + '</span></div>';
+    html += '<h1 class="q-stem">' + fmt(q.q) + '</h1>';
+    if (q.code) html += '<pre class="code" tabindex="0">' + hl(q.code, q.type === 'fill' && it.done ? q.answers[0] : '') + '</pre>';
+    if (q.type === 'fill') {
+      html += '<div class="fill"><label class="fill-label" for="fill">在这里输入问号处应该填的内容</label>' +
+        '<input class="fill-input' + (it.done ? (it.ok ? ' is-right' : ' is-wrong') : '') + '" id="fill" type="text" inputmode="text" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="done" placeholder="点这里输入" value="' + esc(it.input) + '"' + (it.done ? ' disabled' : '') + '>';
+      if (!it.done) html += '<div class="keys" aria-label="常用符号">' + ['(', ')', '[', ']', '"', ':', '=', '+', '-', '*', '/', '%', '<', '>', '!', '_', '.', ','].map(function (c) {
+        return '<button class="key" type="button" data-act="key" data-ch="' + esc(c) + '" aria-label="输入 ' + esc(c) + '">' + esc(c) + '</button>';
+      }).join('') + '</div>';
+      html += '</div>';
+    } else {
+      html += '<div class="opts" role="group" aria-label="选项">' + it.opts.map(function (o, k) {
+        var cls = 'opt', key = 'ABCD'.charAt(k);
+        if (it.done) {
+          if (o.ok) { cls += ' is-right'; key = ICON.check; }
+          else if (k === it.picked) { cls += ' is-wrong'; key = ICON.x; }
+          else cls += ' is-dim';
+        } else if (k === it.picked) cls += ' is-picked';
+        return '<button class="' + cls + '" data-act="pick" data-k="' + k + '"' + (it.done ? ' disabled' : '') + ' aria-pressed="' + (k === it.picked) + '">' +
+          '<span class="opt-key">' + key + '</span><span class="opt-body">' + optBody(q, o) + '</span></button>';
+      }).join('') + '</div>';
+    }
+    if (it.done) html += feedback(it);
+    html += '</div>';
+    $view.innerHTML = html;
+    var last = quiz.pos === n - 1;
+    $bar.innerHTML = '<div class="actionbar"><div class="bar-in">' + (it.done
+      ? '<button class="btn ' + (it.ok ? 'btn-good' : 'btn-bad') + '" data-act="next">' + (last ? '看结果' : '下一题') + '</button>'
+      : '<button class="btn" id="confirm" data-act="confirm"' + (canConfirm(it) ? '' : ' disabled') + '>确定</button>') + '</div></div>';
+  }
+  function canConfirm(it) { return it.q.type === 'fill' ? norm(it.input) !== '' : it.picked >= 0; }
+  function fbBlock(label, bodyHtml, cls) { return '<div class="fb-block"><div class="fb-label' + (cls ? ' ' + cls : '') + '">' + label + '</div>' + bodyHtml + '</div>'; }
+  function feedback(it) {
+    var q = it.q, html;
+    if (it.ok) {
+      html = '<div class="fb good" id="fb" role="status"><div class="fb-head">' + ICON.check + '<span>答对了！</span><span class="fb-gain">+' + it.gain + ' 分</span></div>';
+      if (it.bonus > 0) html += '<div class="fb-streak">' + ICON.flame + '连胜 ' + it.streak + ' 题，多加 ' + it.bonus + ' 分</div>';
+      html += fbBlock('解析', '<p>' + fmt(q.explain) + '</p>');
+      if (it.cn) html += '<p class="fb-note">注意：你输入的是中文符号。真正写代码时要切换到英文输入法，否则 Python 会报错。</p>';
+      if (quiz.mode === 'review') html += '<p class="fb-note">这道题已经掌握，从错题本里移走了。</p>';
+      return html + '</div>';
+    }
+    html = '<div class="fb bad" id="fb" role="status"><div class="fb-head">' + ICON.x + '<span>答错了</span></div>';
+    if (q.type === 'fill') {
+      var hint = null, key = norm(it.input);
+      Object.keys(q.hints || {}).forEach(function (h) { if (norm(h) === key) hint = q.hints[h]; });
+      html += fbBlock('为什么错', '<p>你填的是 <code>' + esc(it.input.trim()) + '</code>。' + (hint ? fmt(hint) : '把它填进去，代码得不到题目要的结果。') + '</p>', 'is-why');
+      html += fbBlock('正确答案', '<div class="fb-ans">' + q.answers.map(esc).join('  或  ') + '</div>');
+    } else {
+      var picked = it.opts[it.picked], right = it.opts.filter(function (o) { return o.ok; })[0];
+      html += fbBlock('为什么错', '<p>' + fmt(picked.why) + '</p>', 'is-why');
+      html += fbBlock('正确答案', q.type === 'output' && right.t ? '<div class="fb-ans">' + esc(right.t) + '</div>' : '<div class="fb-ans plain">' + (right.t ? fmt(right.t) : esc(optPlain(q, right))) + '</div>');
+    }
+    html += fbBlock('解析', '<p>' + fmt(q.explain) + '</p>');
+    html += '<p class="fb-note">' + (quiz.mode === 'review' ? '这道题还留在错题本里，下次再练。' : '这道题已经放进错题本，可以随时重练。') + '</p>';
+    return html + '</div>';
+  }
+  function confirmAnswer() {
+    var it = quiz.items[quiz.pos], q = it.q;
+    if (it.done || !canConfirm(it)) return;
+    var ok;
+    if (q.type === 'fill') {
+      var v = norm(it.input);
+      ok = q.answers.some(function (a) { return norm(a) === v; });
+      it.cn = ok && hasCnPunct(it.input);
+    } else ok = !!it.opts[it.picked].ok;
+    it.done = true; it.ok = ok;
+    state.answered++; touchDay();
+    if (ok) {
+      state.correct++; state.streak++;
+      if (state.streak > state.best) state.best = state.streak;
+      it.streak = state.streak;
+      it.bonus = Math.min((state.streak - 1) * 2, 10);
+      it.gain = (quiz.mode === 'review' ? 5 : 10) + it.bonus;
+      state.xp += it.gain; quiz.gain += it.gain; quiz.right++;
+      if (quiz.mode === 'review') { delete state.wrong[q.id]; quiz.cleared++; }
+    } else {
+      state.streak = 0;
+      var w = state.wrong[q.id] || { n: 0, t: 0 };
+      w.n++; w.t = Date.now(); state.wrong[q.id] = w;
+    }
+    save();
+    viewQuiz();
+    if (ok) {
+      var f = document.createElement('div'); f.className = 'float-gain'; f.textContent = '+' + it.gain; f.setAttribute('aria-hidden', 'true');
+      document.body.appendChild(f); setTimeout(function () { if (f.parentNode) f.parentNode.removeChild(f); }, 950);
+    }
+    var fb = $('#fb');
+    if (fb) { try { fb.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); } catch (e) {} }
+  }
+  function clearFloat() {
+    Array.prototype.forEach.call(document.querySelectorAll('.float-gain'), function (f) { f.parentNode.removeChild(f); });
+  }
+  function nextQuestion() {
+    if (!quiz || quiz.finished) return;
+    clearFloat();
+    if (quiz.pos < quiz.items.length - 1) { quiz.pos++; viewQuiz(); window.scrollTo(0, 0); return; }
+    quiz.finished = true;
+    if (quiz.mode === 'level') {
+      var lv = LEVELS[quiz.li], total = quiz.items.length, wrongN = total - quiz.right;
+      var passed = quiz.right >= Math.ceil(total / 2);
+      var stars = !passed ? 0 : wrongN === 0 ? 3 : wrongN === 1 ? 2 : 1;
+      var rec = state.levels[lv.id] || { stars: 0, plays: 0 };
+      rec.plays++;
+      quiz.starBonus = Math.max(0, stars - rec.stars) * 10;
+      rec.stars = Math.max(rec.stars, stars);
+      state.levels[lv.id] = rec; state.xp += quiz.starBonus; quiz.gain += quiz.starBonus;
+      quiz.stars = stars; quiz.passed = passed; state.last = lv.id;
+    }
+    quiz.rank1 = rankInfo(state.xp).lv;
+    save();
+    viewResult(); window.scrollTo(0, 0);
+  }
+
+  /* ---------- 结算 ---------- */
+  function viewResult() {
+    var n = quiz.items.length, wrongN = n - quiz.right, html, actions = '';
+    var up = quiz.rank1 > quiz.rank0 ? '<div class="levelup"><small>升级了</small><b>Lv' + quiz.rank1 + ' ' + esc(RANKS[quiz.rank1 - 1].name) + '</b></div>' : '';
+    html = '<header class="top top-nav"><button class="icon-btn" data-act="go" data-to="levels" aria-label="返回地图">' + ICON.back + '</button><span class="top-title">' + (quiz.mode === 'review' ? '错题重练' : '第 ' + (quiz.li + 1) + ' 关 ' + esc(LEVELS[quiz.li].title)) + '</span><span class="top-spacer"></span></header>';
+    html += '<div class="result">';
+    if (quiz.mode === 'level') {
+      var need = Math.ceil(n / 2), isLast = quiz.li === LEVELS.length - 1;
+      html += '<div class="stars" role="img" aria-label="获得 ' + quiz.stars + ' 颗星">' + starRow(quiz.stars) + '</div>';
+      if (quiz.passed) {
+        html += '<h1>' + (quiz.stars === 3 ? '满分通关！' : quiz.stars === 2 ? '通关！' : '过关了') + '</h1>' +
+          '<p class="result-sub">答对 ' + quiz.right + ' / ' + n + ' 题。' + (isLast ? '你已经学完了 Python 入门的全部内容。' : quiz.stars === 3 ? '这一关的知识点你已经掌握了。' : '再练一次全对，就能拿到三颗星。') + '</p>';
+      } else {
+        html += '<h1>差一点点</h1><p class="result-sub">答对 ' + quiz.right + ' / ' + n + ' 题，至少答对 ' + need + ' 题才能过关。再看一遍讲解，马上重来。</p>';
+      }
+      html += '<div class="tiles"><div class="tile"><b>+' + quiz.gain + '</b><span>本关得分</span></div><div class="tile"><b>' + state.streak + '</b><span>当前连胜</span></div><div class="tile"><b>' + wrongN + '</b><span>进错题本</span></div></div>' + up;
+      if (quiz.passed) {
+        actions += isLast ? '<button class="btn" data-act="go" data-to="levels" data-replace="1">回到地图</button>'
+          : '<button class="btn" data-act="go" data-to="level-' + (quiz.li + 2) + '" data-replace="1">下一关：' + esc(LEVELS[quiz.li + 1].title) + '</button>';
+        if (wrongN) actions += '<button class="btn btn-ghost" data-act="review-these">重练刚才的错题</button>';
+        if (quiz.stars < 3) actions += '<button class="btn btn-ghost" data-act="retry">再练一次，冲三星</button>';
+        if (!isLast) actions += '<button class="btn-text" data-act="go" data-to="levels" data-replace="1">回到地图</button>';
+      } else {
+        actions += '<button class="btn" data-act="go" data-to="level-' + (quiz.li + 1) + '" data-replace="1">再看一遍讲解</button>' +
+          '<button class="btn btn-ghost" data-act="retry">直接重新挑战</button>' +
+          '<button class="btn-text" data-act="go" data-to="levels" data-replace="1">回到地图</button>';
+      }
+    } else {
+      var left = wrongIds().length;
+      html += '<div class="stars" role="img" aria-label="重练完成">' + starRow(quiz.cleared === n ? 3 : quiz.cleared > 0 ? (quiz.cleared * 2 >= n ? 2 : 1) : 0) + '</div>';
+      html += '<h1>' + (quiz.cleared === n ? '全部掌握！' : quiz.cleared ? '有进步' : '再来一次') + '</h1>' +
+        '<p class="result-sub">这次掌握了 ' + quiz.cleared + ' 题' + (left ? '，错题本里还剩 ' + left + ' 题。' : '，错题本已经清空。') + '</p>';
+      html += '<div class="tiles"><div class="tile"><b>+' + quiz.gain + '</b><span>重练得分</span></div><div class="tile"><b>' + state.streak + '</b><span>当前连胜</span></div><div class="tile"><b>' + left + '</b><span>剩余错题</span></div></div>' + up;
+      if (left) actions += '<button class="btn" data-act="go" data-to="review">继续重练剩下的 ' + left + ' 题</button>';
+      actions += '<button class="btn' + (left ? ' btn-ghost' : '') + '" data-act="go" data-to="levels" data-replace="1">回到地图</button>';
+    }
+    html += '<div class="result-actions">' + actions + '</div></div>';
+    $view.innerHTML = html;
+    $bar.innerHTML = '';
+  }
+
+  /* ---------- 错题本 ---------- */
+  function viewBook() {
+    var ids = wrongIds();
+    var html = topMain() + '<div class="page-head"><h1>错题本</h1><p>答错的题会自动收进这里。重练时答对，就会移走。</p></div>';
+    if (!ids.length) {
+      html += '<div class="empty">' + ICON.book + '<b>错题本是空的</b><span>' + (state.answered ? '所有错题都已经掌握了。' : '还没有开始答题。去闯关吧。') + '</span></div>';
+    } else {
+      html += '<div class="book-cta"><button class="btn" data-act="go" data-to="review">' + ICON.redo + '全部重练 · ' + ids.length + ' 题</button></div>';
+      var lastLi = -1;
+      ids.forEach(function (id) {
+        var e = Q_INDEX[id], q = e.q;
+        if (e.li !== lastLi) { if (lastLi !== -1) html += '</div>'; html += '<div class="book-group"><h2>第 ' + (e.li + 1) + ' 关 · ' + esc(LEVELS[e.li].title) + '</h2>'; lastLi = e.li; }
+        html += '<div class="wq"><div class="wq-top"><span class="q-type">' + TYPE_NAME[q.type] + '</span><span class="wq-n">错了 ' + state.wrong[id].n + ' 次</span></div>' +
+          '<div class="wq-stem">' + fmt(q.q) + '</div>' + (q.code ? '<pre class="code" tabindex="0">' + hl(q.code) + '</pre>' : '') +
+          '<button class="btn btn-sm btn-ghost" data-act="review-one" data-id="' + id + '">重练这道题</button></div>';
+      });
+      html += '</div>';
+    }
+    $view.innerHTML = html;
+    $bar.innerHTML = tabbar('notebook');
+  }
+
+  /* ---------- 我的 ---------- */
+  function viewMe() {
+    var r = rankInfo(state.xp), passed = 0;
+    for (var i = 0; i < LEVELS.length; i++) if (starsOf(i)) passed++;
+    var acc = state.answered ? Math.round(state.correct / state.answered * 100) + '%' : '—';
+    var html = topMain() + '<div class="page-head"><h1>我的</h1></div>';
+    if (!saveOk) html += '<p class="warn" style="margin-top:12px">这个浏览器现在不能保存进度（可能开了无痕模式，或者禁用了网站数据）。关掉页面后进度会丢失。</p>';
+    html += '<div class="card"><div class="me-rank"><span class="rank-badge"><small>Lv</small>' + r.lv + '</span><div class="me-rank-main"><div class="me-rank-name">' + esc(r.name) + '</div>' +
+      '<div class="xpbar" role="img" aria-label="升级进度 ' + r.pct + '%"><i style="width:' + r.pct + '%"></i></div>' +
+      '<div class="me-rank-next">' + (r.next ? '再得 <span class="num">' + r.need + '</span> 分升到 Lv' + (r.lv + 1) + ' ' + esc(r.next.name) : '已经是最高等级') + '</div></div></div>' +
+      '<div class="grid2"><div class="tile"><b>' + state.xp + '</b><span>总积分</span></div><div class="tile"><b>' + totalStars() + '/' + LEVELS.length * 3 + '</b><span>星星</span></div>' +
+      '<div class="tile"><b>' + passed + '/' + LEVELS.length + '</b><span>已通关</span></div><div class="tile"><b>' + state.best + '</b><span>最高连胜</span></div>' +
+      '<div class="tile"><b>' + acc + '</b><span>正确率（共答 ' + state.answered + ' 题）</span></div><div class="tile"><b>' + dayStreak() + '</b><span>连续学习天数</span></div></div></div>';
+    html += '<div class="card"><h2>各章进度</h2><div class="chap-rows">' + CHAPTERS.map(function (ch, ci) {
+      var ls = LEVELS.filter(function (l) { return l.ch === ch.id; });
+      var d = ls.filter(function (l) { return state.levels[l.id] && state.levels[l.id].stars; }).length;
+      return '<div class="chap-row"><b>第' + CN[ci] + '章 ' + esc(ch.title) + '</b><span>' + d + '/' + ls.length + '</span><div class="xpbar"><i style="width:' + Math.round(d / ls.length * 100) + '%"></i></div></div>';
+    }).join('') + '</div></div>';
+    html += '<div class="card"><h2>分享给朋友</h2><p>把这个页面的链接发给朋友，对方打开就能玩，不用注册。每个人的进度只保存在自己的手机里，互不影响。</p>' +
+      (STANDALONE ? '<button class="btn btn-ghost" data-act="share">' + ICON.share + '分享链接</button>' : '') + '</div>';
+    html += '<div class="card"><h2>添加到手机桌面</h2><ol class="steps">' +
+      '<li><b>苹果手机：</b>用 Safari 打开本页，点底部的分享按钮，选“添加到主屏幕”。</li>' +
+      '<li><b>安卓手机：</b>在浏览器右上角的菜单里，选“添加到主屏幕”或“安装应用”。</li>' +
+      '<li>添加之后，建议一直从桌面图标进入，进度保存在那里。</li></ol></div>';
+    html += '<div class="card"><h2>学习进度</h2><p>进度保存在这台设备的这个浏览器里。换手机、换浏览器或清除浏览器数据后，进度不会跟过去。</p>' +
+      (resetAsk ? '<div class="confirm"><p><b>确定清空全部进度吗？</b>积分、星星和错题本都会删除，无法恢复。</p><div class="confirm-row"><button class="btn btn-sm btn-ghost" data-act="reset-no">取消</button><button class="btn btn-sm btn-bad" data-act="reset-yes">确定清空</button></div></div>'
+        : '<button class="btn-text" data-act="reset-ask" style="color:var(--bad)">清空进度，从头开始</button>') + '</div>';
+    $view.innerHTML = html;
+    $bar.innerHTML = tabbar('me');
+  }
+
+  /* ---------- 事件 ---------- */
+  document.addEventListener('click', function (e) {
+    var el = e.target.closest ? e.target.closest('[data-act]') : null;
+    if (!el) return;
+    var act = el.getAttribute('data-act'), it;
+    if (act === 'go') go(el.getAttribute('data-to'), !!el.getAttribute('data-replace'));
+    else if (act === 'open') {
+      var i = +el.getAttribute('data-i');
+      if (unlocked(i)) go('level-' + (i + 1));
+      else toast('先通过第 ' + (currentIndex() + 1) + ' 关，才能解锁这一关');
+    }
+    else if (act === 'start') go('quiz-' + (+el.getAttribute('data-i') + 1));
+    else if (act === 'run') runDemo(+el.getAttribute('data-i'));
+    else if (act === 'copy') copyText(LEVELS[+el.getAttribute('data-i')].example.code, '代码已复制');
+    else if (act === 'pick') {
+      it = quiz && quiz.items[quiz.pos];
+      if (!it || it.done) return;
+      it.picked = +el.getAttribute('data-k');
+      Array.prototype.forEach.call(document.querySelectorAll('.opt'), function (b, k) {
+        b.classList.toggle('is-picked', k === it.picked); b.setAttribute('aria-pressed', k === it.picked);
+      });
+      var c = $('#confirm'); if (c) c.disabled = false;
+    }
+    else if (act === 'confirm') confirmAnswer();
+    else if (act === 'next') nextQuestion();
+    else if (act === 'key') insertKey(el.getAttribute('data-ch'));
+    else if (act === 'quit') go(quiz && quiz.mode === 'review' ? 'notebook' : 'levels');
+    else if (act === 'retry') { startLevelQuiz(quiz.li); viewQuiz(); window.scrollTo(0, 0); }
+    else if (act === 'review-one') { pendingReview = [el.getAttribute('data-id')]; go('review'); }
+    else if (act === 'review-these') {
+      pendingReview = quiz.items.filter(function (x) { return !x.ok; }).map(function (x) { return x.q.id; });
+      go('review', true);
+    }
+    else if (act === 'reset-ask') { resetAsk = true; viewMe(); }
+    else if (act === 'reset-no') { resetAsk = false; viewMe(); }
+    else if (act === 'reset-yes') { state = freshState(); save(); resetAsk = false; quiz = null; viewMe(); window.scrollTo(0, 0); toast('进度已清空'); }
+    else if (act === 'share') {
+      var url = location.href.split('#')[0];
+      if (navigator.share) navigator.share({ title: 'Python 蟒蛇闯关', text: '从零开始学 Python 的闯关小游戏，打开就能玩', url: url }).catch(function () {});
+      else copyText(url, '链接已复制，发给朋友吧');
+    }
+  });
+  // 点符号键时不让输入框失去焦点，键盘就不会收起
+  document.addEventListener('mousedown', function (e) { if (e.target.closest && e.target.closest('.key')) e.preventDefault(); });
+  function onFillInput() {
+    var el = $('#fill'), it = quiz && quiz.items[quiz.pos];
+    if (!el || !it || it.done) return;
+    it.input = el.value;
+    var c = $('#confirm'); if (c) c.disabled = !canConfirm(it);
+  }
+  function insertKey(ch) {
+    var el = $('#fill');
+    if (!el || el.disabled) return;
+    var s = el.selectionStart == null ? el.value.length : el.selectionStart, e2 = el.selectionEnd == null ? s : el.selectionEnd;
+    el.value = el.value.slice(0, s) + ch + el.value.slice(e2);
+    el.focus();
+    try { el.setSelectionRange(s + ch.length, s + ch.length); } catch (x) {}
+    onFillInput();
+  }
+  document.addEventListener('input', function (e) { if (e.target && e.target.id === 'fill') onFillInput(); });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter' && e.target && e.target.id === 'fill') { e.preventDefault(); e.target.blur(); confirmAnswer(); }
+  });
+  window.addEventListener('hashchange', render);
+
+  render();
+})();
+
+})();
+</script>
+<script>
+if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
+  window.addEventListener('load', function () { navigator.serviceWorker.register('sw.js').catch(function () {}); });
+}
+</script>
+</body>
+</html>
