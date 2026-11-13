@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Python 蟒蛇闯关</title>
-<meta name="description" content="从零开始学 Python 的闯关小游戏：26 关、125 道题，每关一张图示，打开就能玩。">
+<meta name="description" content="从零开始学 Python 的闯关小游戏：26 关、125 道题，每关一张图示，代码要亲手打一遍才能通关。">
 <meta name="theme-color" content="#EEF3FA" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#0B1322" media="(prefers-color-scheme: dark)">
 <meta name="mobile-web-app-capable" content="yes">
@@ -315,6 +315,43 @@ strong, b { font-weight: 800; }
 .fb-ans { font-family: var(--font-mono); font-size: 16px; font-weight: 700; white-space: pre-wrap; overflow-wrap: anywhere; line-height: 1.5; }
 .fb-ans.plain { font-family: var(--font-body); }
 .fb-note { font-size: 15px; color: var(--ink-2); line-height: 1.55; }
+
+/* ---------- 手打代码 ---------- */
+.top-count { flex: none; font-size: 15px; font-weight: 800; color: var(--ink-2); }
+.typing { padding-top: 6px; display: grid; gap: 14px; }
+.type-intro { font-size: 15px; line-height: 1.6; color: var(--ink-2); }
+.type-code { padding: 10px 14px 10px 0; }
+.tline { display: block; border-left: 4px solid transparent; }
+.tline > i { display: inline-block; width: 2.6em; padding-right: .9em; text-align: right; font-style: normal; color: var(--code-dim); -webkit-user-select: none; user-select: none; }
+.tline.is-todo { opacity: .45; }
+.tline.is-now { background: rgba(255, 203, 61, .16); border-left-color: var(--yellow); }
+.tline.is-now > i { color: var(--code-str); font-weight: 800; }
+.tline.is-done > i { color: var(--code-fn); }
+.type-now { display: grid; gap: 6px; }
+.type-now-label { font-size: 16px; font-weight: 800; line-height: 1.4; display: grid; gap: 2px; }
+.type-legend { font-size: 14px; font-weight: 400; color: var(--ink-2); }
+.type-target { border: 2px solid var(--yellow); font-size: 16px; }
+.sp { font-style: normal; color: var(--code-dim); }
+.type-row { display: flex; gap: 8px; }
+.type-input { flex: 1; min-width: 0; height: 58px; padding: 0 12px; font-size: 18px; }
+.type-input.is-ok { border-color: var(--blue); }
+.type-enter { flex: none; width: 62px; height: 58px; border-radius: 16px; display: grid; place-items: center; background: var(--btn); color: #fff; box-shadow: 0 4px 0 var(--btn-edge); }
+.type-enter .ic { width: 28px; height: 28px; }
+.type-enter:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--btn-edge); }
+.type-enter[disabled] { background: var(--tint); color: var(--ink-3); box-shadow: 0 4px 0 var(--line); transform: none; }
+.type-enter.is-ready { background: var(--good); color: var(--surface); box-shadow: 0 4px 0 color-mix(in srgb, var(--good) 70%, #000); }
+.type-hint { min-height: 3.1em; font-size: 15px; line-height: 1.55; color: var(--ink-2); }
+.type-hint.bad { color: var(--bad); font-weight: 700; }
+.type-hint.good { color: var(--good); font-weight: 700; }
+.key-wide { padding: 0 14px; font-family: var(--font-body); font-size: 16px; background: var(--yellow); color: var(--on-yellow); border-color: var(--yellow-edge); box-shadow: 0 2px 0 var(--yellow-edge); }
+.shake { animation: shake .28s ease; }
+@keyframes shake { 25% { transform: translateX(-6px); } 75% { transform: translateX(6px); } }
+.done-mark { width: 92px; height: 92px; border-radius: 50%; display: grid; place-items: center; background: var(--good-bg); color: var(--good); animation: pop .45s cubic-bezier(.2, 1.6, .4, 1) both; }
+.done-mark .ic { width: 52px; height: 52px; }
+.type-done { width: 100%; text-align: left; }
+.bar-row { display: flex; gap: 10px; }
+.bar-side { flex: none; width: auto; padding: 10px 16px; font-size: 16px; }
+.node-note { font-size: 12px; font-weight: 700; color: var(--ink-3); line-height: 1.3; }
 
 /* ---------- 结算 ---------- */
 .result { padding-top: 28px; display: grid; gap: 18px; justify-items: center; text-align: center; }
@@ -1869,8 +1906,8 @@ d["city"] = "北京"
 print(d)
 print(len(d))
 for k, v in d.items():
-    print(k, "→", v)`,
-    out: "小明\n{'name': '小明', 'age': 19, 'city': '北京'}\n3\nname → 小明\nage → 19\ncity → 北京",
+    print(k, "=", v)`,
+    out: "小明\n{'name': '小明', 'age': 19, 'city': '北京'}\n3\nname = 小明\nage = 19\ncity = 北京",
   },
   tip: '取一个不存在的键会报错：KeyError。不确定有没有，可以先用 `in` 检查，或者用 `d.get("键")`，没有时得到 None。',
   checks: [
@@ -3330,6 +3367,130 @@ var DIAGRAMS = (function () {
   return D;
 })();
 
+/* ===== 手打代码的比对规则 =====
+   按“词”比较而不是按字符比较：引号外多一个少一个空格、单引号换双引号都算对，
+   因为它们在 Python 里是同一段代码。缩进、大小写、符号、引号里的内容必须一致。 */
+var TypeCheck = (function () {
+  var CN_PUNCT = /[！-／：-＠［-｀｛-～　-。〈-】—…]/;
+  var CN_TO_EN = { '（': '(', '）': ')', '：': ':', '，': ',', '。': '.', '；': ';', '！': '!', '？': '?', '【': '[', '】': ']', '｛': '{', '｝': '}',
+    '＝': '=', '＋': '+', '－': '-', '＊': '*', '／': '/', '％': '%', '＜': '<', '＞': '>', '、': ',', '《': '<', '》': '>', '＃': '#', '＿': '_', '．': '.', '—': '-', '…': '...' };
+  var OPS2 = ['**', '//', '==', '!=', '>=', '<=', '+=', '-=', '*=', '/=', '->'];
+
+  // 手机键盘常把直引号自动换成弯引号，这里换回来
+  function normQuotes(s) { return String(s).replace(/[“”„‟]/g, '"').replace(/[‘’‚‛]/g, "'"); }
+  function nk(s) { try { return s.normalize('NFKC'); } catch (e) { return s; } }
+
+  function tokenize(src) {
+    var toks = [], i = 0, n = src.length, m, rest;
+    while (i < n) {
+      var ch = src.charAt(i);
+      if (ch === ' ' || ch === '\t') { i++; continue; }
+      if (ch === '#') { toks.push({ t: 'com', s: src.slice(i) }); break; }
+      rest = src.slice(i);
+      m = /^([fFrRbB]{0,2})(["'])/.exec(rest);
+      if (m) {
+        var q = m[2], j = i + m[0].length, content = '', closed = false;
+        while (j < n) {
+          var c = src.charAt(j);
+          if (c === '\\' && j + 1 < n) { content += c + src.charAt(j + 1); j += 2; continue; }
+          if (c === q) { closed = true; j++; break; }
+          content += c; j++;
+        }
+        toks.push({ t: 'str', p: m[1].toLowerCase(), s: content, open: !closed, raw: src.slice(i, j) });
+        i = j; continue;
+      }
+      if (CN_PUNCT.test(ch)) { toks.push({ t: 'cn', s: ch }); i++; continue; }
+      m = /^\d+(?:\.\d*)?/.exec(rest);
+      if (m) { toks.push({ t: 'num', s: m[0] }); i += m[0].length; continue; }
+      m = /^[A-Za-z_一-鿿][A-Za-z0-9_一-鿿]*/.exec(rest);
+      if (m) { toks.push({ t: 'name', s: m[0] }); i += m[0].length; continue; }
+      var two = src.substr(i, 2);
+      if (OPS2.indexOf(two) >= 0) { toks.push({ t: 'op', s: two }); i += 2; continue; }
+      toks.push({ t: 'op', s: ch }); i++;
+    }
+    return toks;
+  }
+
+  function indentOf(line) {
+    var lead = /^[ \t　]*/.exec(line)[0], w = 0, wide = false;
+    for (var i = 0; i < lead.length; i++) {
+      var c = lead.charAt(i);
+      if (c === '\t') w += 4; else if (c === '　') wide = true; else w += 1;
+    }
+    return { width: w, wide: wide, rest: line.slice(lead.length) };
+  }
+  function noComment(toks) { return toks.filter(function (t) { return t.t !== 'com'; }); }
+  function show(t) { return t.t === 'str' ? t.raw : t.s; }
+  function tokEq(u, t) {
+    if (u.t !== t.t) return false;
+    if (u.t === 'str') return !u.open && u.p === t.p && nk(u.s) === nk(t.s);
+    return u.s === t.s;
+  }
+  // 还在打的最后一个词：只要是目标的开头就不算错
+  function isPrefix(u, t) {
+    if (u.t === 'str') return t.t === 'str' && u.open && u.p === t.p && nk(t.s).indexOf(nk(u.s)) === 0;
+    if (u.t === 'name' && t.t === 'str') return t.p !== '' && t.p.indexOf(u.s.toLowerCase()) === 0;
+    return u.t === t.t && t.s.indexOf(u.s) === 0;
+  }
+  function indentMsg(want, got) {
+    if (want > 0 && got === 0) return '这一行前面要缩进 ' + want + ' 个空格（点 ' + (want / 4) + ' 次“缩进”键）。缩进表示它属于上面那一行。';
+    if (want === 0) return '这一行前面不要空格，要顶格写。';
+    return '缩进不对：这一行前面要 ' + want + ' 个空格，你打了 ' + got + ' 个。';
+  }
+  function diffMsg(u, t) {
+    if (u.t === 'cn') return '`' + u.s + '` 是中文符号，Python 不认。' + (CN_TO_EN[u.s] ? '这里要用英文的 `' + CN_TO_EN[u.s] + '`，' : '要换成英文符号，') + '可以点下面的符号键输入。';
+    if (!t) return '后面多打了 `' + show(u) + '`。这一行到这里已经结束了。';
+    if (u.t === 'str' && t.t === 'str') {
+      if (u.open) return '引号没有打完整。文字要用一对引号包起来：`' + t.raw + '`。';
+      if (u.p !== t.p) return t.p ? '这个字符串前面要加一个 `' + t.p + '`，写成 `' + t.raw + '`。' : '这个字符串前面不用加 `' + u.p + '`。';
+      if (nk(u.s).replace(/\s/g, '') === nk(t.s).replace(/\s/g, '')) return '引号里的空格不一样。引号里的内容会原样显示，空格的位置和个数要和例子一样（· 代表一个空格）。';
+      return '引号里的文字不一样：你打的是 `' + u.raw + '`，应该是 `' + t.raw + '`。';
+    }
+    if (t.t === 'str') return '这里应该是带引号的文字 `' + t.raw + '`。你打的是 `' + show(u) + '`。';
+    if (u.t === 'str') return '这里不用引号，应该是 `' + t.s + '`。';
+    if (u.t === 'name' && t.t === 'name' && u.s.toLowerCase() === t.s.toLowerCase()) return '大小写不对：`' + u.s + '` 要写成 `' + t.s + '`。Python 区分大小写。';
+    return '这里不一样：你打的是 `' + show(u) + '`，应该是 `' + show(t) + '`。';
+  }
+
+  /* 比较一行。partial=true 用于边打边查（还没打完不算错）；partial=false 用于按回车时的最终检查。
+     返回 { state: 'empty' | 'ok' | 'done' | 'bad', msg } */
+  function analyze(target, input, partial) {
+    input = normQuotes(input);
+    var ti = indentOf(target), ui = indentOf(input);
+    var all = tokenize(ti.rest), isComment = all.length > 0 && all[0].t === 'com';
+    var tt = noComment(all), ut = tokenize(ui.rest);
+    function bad(msg) { return { state: 'bad', msg: msg }; }
+
+    if (ui.wide) return bad('行首有全角空格。缩进要用英文空格，点“缩进”键就可以。');
+    if (ui.rest === '') {
+      if (!partial) return bad('这一行还没有打。');
+      if (input === '') return { state: 'empty' };
+      return (isComment || ui.width <= ti.width) ? { state: 'ok' } : bad(indentMsg(ti.width, ui.width));
+    }
+    if (isComment) {
+      return ut[0].t === 'com' ? { state: 'done' } : bad('这一行是注释，要以 `#` 开头。`#` 后面写什么都可以。');
+    }
+    if (ui.width !== ti.width) return bad(indentMsg(ti.width, ui.width));
+    ut = noComment(ut);
+    var tail = partial && !/\s$/.test(input), exact = true;
+    for (var k = 0; k < ut.length; k++) {
+      var u = ut[k], t = tt[k];
+      if (u.t === 'cn' || !t) return bad(diffMsg(u, t));
+      if (tokEq(u, t)) continue;
+      var last = k === ut.length - 1;
+      if (partial && last && (tail || (u.t === 'str' && u.open)) && isPrefix(u, t)) { exact = false; continue; }
+      return bad(diffMsg(u, t));
+    }
+    if (ut.length < tt.length) {
+      if (partial) return { state: 'ok' };
+      return bad('还没打完，后面还有：`' + tt.slice(ut.length).map(show).join(' ') + '`');
+    }
+    return { state: exact ? 'done' : 'ok' };
+  }
+
+  return { analyze: analyze, tokenize: tokenize, normQuotes: normQuotes };
+})();
+
 /* ===== 游戏逻辑 ===== */
 (function () {
   'use strict';
@@ -3352,7 +3513,7 @@ var DIAGRAMS = (function () {
 
   /* ---------- 存档 ---------- */
   function freshState() {
-    return { v: 1, xp: 0, streak: 0, best: 0, levels: {}, wrong: {}, answered: 0, correct: 0, day: '', days: 0, last: '' };
+    return { v: 1, xp: 0, streak: 0, best: 0, levels: {}, wrong: {}, typed: {}, tpos: {}, answered: 0, correct: 0, day: '', days: 0, last: '' };
   }
   var saveOk = true;
   function load() {
@@ -3391,11 +3552,11 @@ var DIAGRAMS = (function () {
   }
   var KW = /^(def|return|if|elif|else|for|while|in|not|and|or|break|continue|import|from|as|class|try|except|finally|with|True|False|None)$/;
   var BI = /^(print|len|input|int|float|str|type|range|round|open|set|sorted)$/;
-  function hl(code, filled) {
+  function hl(code, filled, dots) {
     var re = /(#[^\n]*)|(f?"(?:[^"\\\n]|\\.)*"|f?'(?:[^'\\\n]|\\.)*')|(\b\d+(?:\.\d+)?)|(____)|([A-Za-z_][A-Za-z_0-9]*)|([\s\S])/g;
     return code.replace(re, function (m, com, str, num, blank, word, other) {
       if (com) return '<span class="c-com">' + esc(com) + '</span>';
-      if (str) return '<span class="c-str">' + esc(str) + '</span>';
+      if (str) return '<span class="c-str">' + (dots ? esc(str).replace(/ /g, '<i class="sp">·</i>') : esc(str)) + '</span>';
       if (num) return '<span class="c-num">' + num + '</span>';
       if (blank) return filled ? '<span class="blank is-right">' + esc(filled) + '</span>' : '<span class="blank">?</span>';
       if (word) return KW.test(word) ? '<span class="c-key">' + word + '</span>' : BI.test(word) ? '<span class="c-fn">' + word + '</span>' : word;
@@ -3455,6 +3616,7 @@ var DIAGRAMS = (function () {
     flag: svgIcon('<path d="M6 21V4"' + S + '/><path d="M6 4.5h12l-2.6 4 2.6 4H6z" fill="currentColor"/>'),
     book: svgIcon('<path d="M5 5a2 2 0 0 1 2-2h12v15H7a2 2 0 0 0-2 2z"' + S + '/><path d="M5 20a2 2 0 0 0 2 1h12M9.5 8h5.5"' + S + '/>'),
     user: svgIcon('<circle cx="12" cy="8" r="4.2" fill="currentColor"/><path d="M4 20.5c.9-4 4-6 8-6s7.1 2 8 6z" fill="currentColor"/>'),
+    enter: svgIcon('<path d="M19 5v7a3 3 0 0 1-3 3H6M10 10.5 5.5 15l4.5 4.5"' + S + '/>'),
     redo: svgIcon('<path d="M19 12a7 7 0 1 1-2.3-5.2"' + S + '/><path d="M19.5 3.5v4.2h-4.2"' + S + '/>'),
     share: svgIcon('<path d="M12 15V4M8 7.5l4-4 4 4M5 12v7.5h14V12"' + S + '/>'),
     trophy: svgIcon('<path d="M7 4h10v5a5 5 0 0 1-10 0z" fill="currentColor"/><path d="M7 5.5H4.5c0 2 1 3.4 2.8 3.7M17 5.5h2.5c0 2-1 3.4-2.8 3.7M12 14v3.5M8.5 20.5h7"' + S + '/>'),
@@ -3484,6 +3646,7 @@ var DIAGRAMS = (function () {
     if (h === 'review') return { v: 'review' };
     if ((m = /^level-(\d+)$/.exec(h))) return { v: 'lesson', i: +m[1] - 1 };
     if ((m = /^quiz-(\d+)$/.exec(h))) return { v: 'quiz', i: +m[1] - 1 };
+    if ((m = /^type-(\d+)$/.exec(h))) return { v: 'type', i: +m[1] - 1 };
     return { v: 'map' };
   }
   function go(name, replace) {
@@ -3498,12 +3661,15 @@ var DIAGRAMS = (function () {
 
   function render() {
     var r = route();
-    if ((r.v === 'lesson' || r.v === 'quiz') && (!LEVELS[r.i] || !unlocked(r.i))) { go('levels', true); return; }
+    if ((r.v === 'lesson' || r.v === 'quiz' || r.v === 'type') && (!LEVELS[r.i] || !unlocked(r.i))) { go('levels', true); return; }
+    // 代码还没亲手打过，就不能答题
+    if (r.v === 'quiz' && !state.typed[LEVELS[r.i].id]) { go('type-' + (r.i + 1), true); return; }
     resetAsk = false; clearFloat();
     if (r.v === 'map') viewMap();
     else if (r.v === 'book') viewBook();
     else if (r.v === 'me') viewMe();
     else if (r.v === 'lesson') viewLesson(r.i);
+    else if (r.v === 'type') { startTyping(r.i); viewTyping(); }
     else if (r.v === 'quiz') { startLevelQuiz(r.i); viewQuiz(); }
     else if (r.v === 'review') {
       var ids = pendingReview || wrongIds(); pendingReview = null;
@@ -3567,7 +3733,7 @@ var DIAGRAMS = (function () {
     var lay = mapLayout(), cur = currentIndex(), allDone = cur >= LEVELS.length;
     var headIdx = allDone ? LEVELS.length - 1 : cur;
     var html = topMain();
-    if (!state.answered) html += '<p class="hello"><b>欢迎来到蟒蛇闯关。</b>一关只学一个知识点：先看讲解和图示，再做几道题。点蛇头，从第 1 关开始。</p>';
+    if (!state.answered && !Object.keys(state.typed).length) html += '<p class="hello"><b>欢迎来到蟒蛇闯关。</b>一关只学一个知识点：先看讲解和图示，再把例子代码亲手打一遍，最后做几道题。点蛇头，从第 1 关开始。</p>';
     html += '<div class="map" style="height:' + lay.h + 'px">';
     var n0 = lay.nodes[0];
     html += '<svg class="snake" viewBox="0 0 100 ' + lay.h + '" preserveAspectRatio="none" aria-hidden="true">' +
@@ -3587,8 +3753,8 @@ var DIAGRAMS = (function () {
       var status = (!allDone && n.i === headIdx) ? 'current' : (st ? 'done' : 'locked');
       var side = n.x < 50 ? 'on-left' : 'on-right';
       var inner, extra = '', aria = '第 ' + (n.i + 1) + ' 关，' + lv.title;
-      if (status === 'current') { inner = HEAD_SVG; extra = '<span class="node-go">' + (rec && rec.plays ? '再挑战' : '开始') + '</span>'; aria += '，当前关卡'; }
-      else if (status === 'done') { inner = '<span class="node-dot">' + (n.i + 1) + '</span>'; extra = '<span class="node-stars">' + starRow(st) + '</span>'; aria += '，已获得 ' + st + ' 颗星'; }
+      if (status === 'current') { inner = HEAD_SVG; extra = '<span class="node-go">' + (rec && rec.plays ? '再挑战' : (state.typed[lv.id] || state.tpos[lv.id]) ? '继续' : '开始') + '</span>'; aria += '，当前关卡'; }
+      else if (status === 'done') { inner = '<span class="node-dot">' + (n.i + 1) + '</span>'; extra = '<span class="node-stars">' + starRow(st) + '</span>' + (state.typed[lv.id] ? '' : '<span class="node-note">代码还没手打</span>'); aria += '，已获得 ' + st + ' 颗星'; }
       else { inner = '<span class="node-dot">' + ICON.lock + '</span>'; aria += '，未解锁'; }
       html += '<button class="node is-' + status + ' ' + side + '" style="left:' + n.x + '%;top:' + n.y + 'px" data-act="open" data-i="' + n.i + '" aria-label="' + esc(aria) + '">' +
         inner + '<span class="node-label"><span class="node-no">第 ' + pad2(n.i + 1) + ' 关</span><span class="node-title">' + esc(lv.title) + '</span>' + extra + '</span></button>';
@@ -3621,19 +3787,25 @@ var DIAGRAMS = (function () {
       '<div class="demo-bar"><button class="demo-btn demo-run" data-act="run" data-i="' + i + '">' + ICON.play + '运行</button>' +
       '<button class="demo-btn demo-copy" data-act="copy" data-i="' + i + '">复制代码</button></div>' +
       '<div class="demo-out" id="demo-out" hidden><div class="demo-out-label">运行结果</div><pre id="demo-pre" aria-live="polite"></pre></div></div>' +
-      '<p class="demo-note">' + (lv.example.note ? esc(lv.example.note) + ' ' : '') + '先猜一猜会显示什么，再点“运行”。代码可以复制到自己的 Python 里运行。</p>');
+      '<p class="demo-note">' + (lv.example.note ? esc(lv.example.note) + ' ' : '') + '先猜一猜会显示什么，再点“运行”。看懂之后，下一步要把这段代码亲手打一遍。</p>');
     html += sec('小心', '<p>' + fmt(lv.tip) + '</p>', 'sec-tip');
     html += '</article>';
     $view.innerHTML = html;
-    $bar.innerHTML = '<div class="actionbar"><div class="bar-in"><button class="btn" data-act="start" data-i="' + i + '">开始答题 · ' + lv.questions.length + ' 题</button></div></div>';
+    $bar.innerHTML = '<div class="actionbar"><div class="bar-in">' + (state.typed[lv.id]
+      ? '<div class="bar-row"><button class="btn btn-ghost bar-side" data-act="go" data-to="type-' + (i + 1) + '">再打一遍</button>' +
+        '<button class="btn" data-act="start" data-i="' + i + '">开始答题 · ' + lv.questions.length + ' 题</button></div>'
+      : '<button class="btn" data-act="go" data-to="type-' + (i + 1) + '">下一步：手打代码 · ' + typeTodo(lv).length + ' 行</button>') + '</div></div>';
+  }
+  function demoLines(ex) {
+    var text = ex.out.replace(/⟦(\d+)-(\d+)⟧/g, function (m, a, b) { return String(+a + Math.floor(Math.random() * (+b - +a + 1))); });
+    return text.split('\n').map(function (ln) { return esc(ln).replace(/«([^»]*)»/g, '<span class="typed">$1</span>'); });
   }
   var runTimers = [];
   function runDemo(i) {
     var ex = LEVELS[i].example, box = $('#demo-out'), pre = $('#demo-pre');
     if (!box) return;
     runTimers.forEach(clearTimeout); runTimers = [];
-    var text = ex.out.replace(/⟦(\d+)-(\d+)⟧/g, function (m, a, b) { return String(+a + Math.floor(Math.random() * (+b - +a + 1))); });
-    var lines = text.split('\n').map(function (ln) { return esc(ln).replace(/«([^»]*)»/g, '<span class="typed">$1</span>'); });
+    var lines = demoLines(ex);
     box.hidden = false; pre.innerHTML = '';
     var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (reduce) { pre.innerHTML = lines.join('\n'); return; }
@@ -3643,6 +3815,128 @@ var DIAGRAMS = (function () {
         if (k === 0) { try { box.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); } catch (e) {} }
       }, k * 110));
     });
+  }
+
+  /* ---------- 手打代码 ---------- */
+  var DOT = '<i class="sp">·</i>';
+  var TYPE_KEYS = ['(', ')', '"', "'", ':', '=', ',', '.', '[', ']', '{', '}', '+', '-', '*', '/', '%', '<', '>', '!', '_', '#'];
+  var typing = null;
+  function typeTodo(lv) {
+    var todo = [];
+    lv.example.code.split('\n').forEach(function (ln, k) { if (ln.trim() !== '') todo.push(k); });
+    return todo;
+  }
+  function startTyping(i) {
+    var lv = LEVELS[i], todo = typeTodo(lv), pos = state.tpos[lv.id] || 0;
+    if (pos < 0 || pos >= todo.length) pos = 0;
+    typing = { li: i, lines: lv.example.code.split('\n'), todo: todo, pos: pos, fails: 0, gain: 0, finished: false, rank0: rankInfo(state.xp).lv };
+  }
+  function targetHtml(line) {
+    var ind = /^ */.exec(line)[0];
+    return ind.replace(/ /g, DOT) + hl(line.slice(ind.length), '', true);
+  }
+  function typeCodeHtml() {
+    var no = 0;
+    return typing.lines.map(function (ln) {
+      if (ln.trim() === '') return '<span class="tline is-blank"><i></i> </span>';
+      var j = no++, cls = (typing.finished || j < typing.pos) ? 'is-done' : j === typing.pos ? 'is-now' : 'is-todo';
+      return '<span class="tline ' + cls + '"><i>' + (j + 1) + '</i>' + hl(ln) + '</span>';
+    }).join('');
+  }
+  function setHint(msg, cls) {
+    var h = $('#type-hint'); if (!h) return;
+    h.innerHTML = fmt(msg || ''); h.className = 'type-hint' + (cls ? ' ' + cls : '');
+  }
+  function viewTyping() {
+    if (typing.finished) { viewTypingDone(); return; }
+    var lv = LEVELS[typing.li];
+    var html = '<header class="top top-nav"><button class="icon-btn" data-act="go" data-to="level-' + (typing.li + 1) + '" aria-label="回到讲解">' + ICON.back + '</button>' +
+      '<div class="progress" id="type-prog" role="img"></div><span class="top-count num" id="type-count"></span></header>';
+    html += '<div class="typing"><div class="q-meta"><span class="q-type">手打代码</span><span class="q-from">第 ' + (typing.li + 1) + ' 关 ' + esc(lv.title) + '</span></div>' +
+      '<h1 class="q-stem">照着例子，把代码一行一行打出来</h1>' +
+      '<p class="type-intro">每一行打对了才能到下一行，全部打完才能答题。引号外的空格多一个少一个没关系；缩进、符号和大小写必须对。</p>' +
+      '<pre class="code type-code" id="type-code" tabindex="0"></pre>' +
+      '<div class="type-now"><div class="type-now-label" id="type-label"></div><pre class="code type-target" id="type-target" tabindex="0"></pre></div>' +
+      '<div class="type-row"><input class="fill-input type-input" id="type-input" type="text" inputmode="text" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="enter" aria-label="在这里打出这一行代码" placeholder="在这里打这一行">' +
+      '<button class="type-enter" id="type-ok" type="button" data-act="type-ok" data-keepfocus="1" aria-label="确定这一行" disabled>' + ICON.enter + '</button></div>' +
+      '<p class="type-hint" id="type-hint" role="status"></p>' +
+      '<div class="keys" aria-label="常用符号"><button class="key key-wide" type="button" data-act="key" data-ch="    " aria-label="缩进，输入 4 个空格">缩进</button>' +
+      TYPE_KEYS.map(function (c) { return '<button class="key" type="button" data-act="key" data-ch="' + esc(c) + '" aria-label="输入 ' + esc(c) + '">' + esc(c) + '</button>'; }).join('') + '</div></div>';
+    $view.innerHTML = html;
+    $bar.innerHTML = '';
+    updateTyping();
+  }
+  function updateTyping(msg, cls) {
+    var n = typing.todo.length, line = typing.lines[typing.todo[typing.pos]];
+    var prog = $('#type-prog');
+    prog.innerHTML = typing.todo.map(function (_, j) { return '<i class="' + (j < typing.pos ? 'is-right' : j === typing.pos ? 'is-now' : '') + '"></i>'; }).join('');
+    prog.setAttribute('aria-label', '第 ' + (typing.pos + 1) + ' 行，共 ' + n + ' 行');
+    $('#type-count').textContent = (typing.pos + 1) + '/' + n;
+    $('#type-code').innerHTML = typeCodeHtml();
+    var indent = /^ */.exec(line)[0].length, body = line.slice(indent), note = '';
+    var inStr = /(["'])(?:[^"'\\\n]|\\.)* (?:[^"'\\\n]|\\.)*\1/.test(body);
+    if (/^#/.test(body)) note = '这是注释：以 # 开头，后面写什么都可以';
+    else if (indent) note = '开头的 · 是缩进：点 ' + (indent / 4) + ' 次“缩进”键' + (inStr ? '。引号里的 · 是空格' : '');
+    else if (inStr) note = '引号里的 · 代表一个空格';
+    $('#type-label').innerHTML = '现在打第 ' + (typing.pos + 1) + ' 行' + (note ? '<span class="type-legend">' + esc(note) + '</span>' : '');
+    $('#type-target').innerHTML = targetHtml(line);
+    var el = $('#type-input'); el.value = ''; el.className = 'fill-input type-input';
+    var ok = $('#type-ok'); ok.disabled = true; ok.classList.remove('is-ready');
+    setHint(msg, cls);
+  }
+  function liveTyping() {
+    var el = $('#type-input');
+    if (!el || !typing || typing.finished) return;
+    var fixed = TypeCheck.normQuotes(el.value);
+    if (fixed !== el.value) { var caret = el.selectionStart; el.value = fixed; try { el.setSelectionRange(caret, caret); } catch (e) {} }
+    var r = TypeCheck.analyze(typing.lines[typing.todo[typing.pos]], el.value, true), ok = $('#type-ok');
+    el.classList.remove('is-wrong', 'is-right', 'is-ok', 'shake');
+    ok.disabled = r.state === 'empty';
+    ok.classList.toggle('is-ready', r.state === 'done');
+    if (r.state === 'bad') { el.classList.add('is-wrong'); setHint(r.msg, 'bad'); }
+    else if (r.state === 'done') { el.classList.add('is-right'); setHint('这一行打完了。按键盘上的回车，或者点右边的按钮。', 'good'); }
+    else { if (r.state === 'ok') el.classList.add('is-ok'); setHint('', ''); }
+  }
+  function submitLine() {
+    var el = $('#type-input');
+    if (!el || !typing || typing.finished) return;
+    var r = TypeCheck.analyze(typing.lines[typing.todo[typing.pos]], el.value, false);
+    if (r.state !== 'done') {
+      typing.fails++;
+      el.classList.remove('is-ok', 'is-right', 'shake'); void el.offsetWidth; el.classList.add('is-wrong', 'shake');
+      setHint(r.msg, 'bad'); el.focus();
+      return;
+    }
+    var lv = LEVELS[typing.li];
+    typing.pos++; touchDay();
+    if (typing.pos >= typing.todo.length) {
+      typing.finished = true;
+      if (!state.typed[lv.id]) { typing.gain = typing.todo.length * 3; state.xp += typing.gain; state.typed[lv.id] = true; }
+      delete state.tpos[lv.id];
+      typing.rank1 = rankInfo(state.xp).lv;
+      save(); viewTypingDone(); window.scrollTo(0, 0);
+      return;
+    }
+    state.tpos[lv.id] = typing.pos; save();
+    updateTyping('第 ' + typing.pos + ' 行打对了。接着打第 ' + (typing.pos + 1) + ' 行。', 'good');
+    el.focus();
+    try { $('#type-label').scrollIntoView({ block: 'nearest' }); } catch (e) {}
+  }
+  function viewTypingDone() {
+    var lv = LEVELS[typing.li], n = typing.todo.length, no = typing.li + 1;
+    var up = typing.rank1 > typing.rank0 ? '<div class="levelup"><small>升级了</small><b>Lv' + typing.rank1 + ' ' + esc(RANKS[typing.rank1 - 1].name) + '</b></div>' : '';
+    var html = '<header class="top top-nav"><button class="icon-btn" data-act="go" data-to="level-' + no + '" aria-label="回到讲解">' + ICON.back + '</button>' +
+      '<span class="top-title">第 ' + no + ' 关 ' + esc(lv.title) + '</span><span class="top-spacer"></span></header>';
+    html += '<div class="result"><div class="done-mark">' + ICON.check + '</div><h1>代码全部打对了！</h1>' +
+      '<p class="result-sub">你亲手打完了这 ' + n + ' 行代码。这个程序运行起来是这样：</p>' +
+      '<div class="demo type-done"><pre class="code" tabindex="0">' + hl(lv.example.code) + '</pre>' +
+      '<div class="demo-out"><div class="demo-out-label">运行结果</div><pre>' + demoLines(lv.example).join('\n') + '</pre></div></div>' +
+      '<div class="tiles"><div class="tile"><b>+' + typing.gain + '</b><span>' + (typing.gain ? '手打得分' : '重打不加分') + '</span></div>' +
+      '<div class="tile"><b>' + n + '</b><span>打了几行</span></div><div class="tile"><b>' + typing.fails + '</b><span>改错次数</span></div></div>' + up +
+      '<div class="result-actions"><button class="btn" data-act="go" data-to="quiz-' + no + '" data-replace="1">开始答题 · ' + lv.questions.length + ' 题</button>' +
+      '<button class="btn-text" data-act="go" data-to="level-' + no + '" data-replace="1">回到讲解</button></div></div>';
+    $view.innerHTML = html;
+    $bar.innerHTML = '';
   }
 
   /* ---------- 答题 ---------- */
@@ -3863,8 +4157,9 @@ var DIAGRAMS = (function () {
       '<div class="xpbar" role="img" aria-label="升级进度 ' + r.pct + '%"><i style="width:' + r.pct + '%"></i></div>' +
       '<div class="me-rank-next">' + (r.next ? '再得 <span class="num">' + r.need + '</span> 分升到 Lv' + (r.lv + 1) + ' ' + esc(r.next.name) : '已经是最高等级') + '</div></div></div>' +
       '<div class="grid2"><div class="tile"><b>' + state.xp + '</b><span>总积分</span></div><div class="tile"><b>' + totalStars() + '/' + LEVELS.length * 3 + '</b><span>星星</span></div>' +
-      '<div class="tile"><b>' + passed + '/' + LEVELS.length + '</b><span>已通关</span></div><div class="tile"><b>' + state.best + '</b><span>最高连胜</span></div>' +
-      '<div class="tile"><b>' + acc + '</b><span>正确率（共答 ' + state.answered + ' 题）</span></div><div class="tile"><b>' + dayStreak() + '</b><span>连续学习天数</span></div></div></div>';
+      '<div class="tile"><b>' + passed + '/' + LEVELS.length + '</b><span>已通关</span></div><div class="tile"><b>' + Object.keys(state.typed).length + '/' + LEVELS.length + '</b><span>代码已手打</span></div>' +
+      '<div class="tile"><b>' + state.best + '</b><span>最高连胜</span></div><div class="tile"><b>' + dayStreak() + '</b><span>连续学习天数</span></div>' +
+      '<div class="tile"><b>' + acc + '</b><span>正确率（共答 ' + state.answered + ' 题）</span></div><div class="tile"><b>' + wrongIds().length + '</b><span>错题本里的题</span></div></div></div>';
     html += '<div class="card"><h2>各章进度</h2><div class="chap-rows">' + CHAPTERS.map(function (ch, ci) {
       var ls = LEVELS.filter(function (l) { return l.ch === ch.id; });
       var d = ls.filter(function (l) { return state.levels[l.id] && state.levels[l.id].stars; }).length;
@@ -3909,6 +4204,7 @@ var DIAGRAMS = (function () {
     else if (act === 'confirm') confirmAnswer();
     else if (act === 'next') nextQuestion();
     else if (act === 'key') insertKey(el.getAttribute('data-ch'));
+    else if (act === 'type-ok') submitLine();
     else if (act === 'quit') go(quiz && quiz.mode === 'review' ? 'notebook' : 'levels');
     else if (act === 'retry') { startLevelQuiz(quiz.li); viewQuiz(); window.scrollTo(0, 0); }
     else if (act === 'review-one') { pendingReview = [el.getAttribute('data-id')]; go('review'); }
@@ -3918,7 +4214,7 @@ var DIAGRAMS = (function () {
     }
     else if (act === 'reset-ask') { resetAsk = true; viewMe(); }
     else if (act === 'reset-no') { resetAsk = false; viewMe(); }
-    else if (act === 'reset-yes') { state = freshState(); save(); resetAsk = false; quiz = null; viewMe(); window.scrollTo(0, 0); toast('进度已清空'); }
+    else if (act === 'reset-yes') { state = freshState(); save(); resetAsk = false; quiz = null; typing = null; viewMe(); window.scrollTo(0, 0); toast('进度已清空'); }
     else if (act === 'share') {
       var url = location.href.split('#')[0];
       if (navigator.share) navigator.share({ title: 'Python 蟒蛇闯关', text: '从零开始学 Python 的闯关小游戏，打开就能玩', url: url }).catch(function () {});
@@ -3926,7 +4222,7 @@ var DIAGRAMS = (function () {
     }
   });
   // 点符号键时不让输入框失去焦点，键盘就不会收起
-  document.addEventListener('mousedown', function (e) { if (e.target.closest && e.target.closest('.key')) e.preventDefault(); });
+  document.addEventListener('mousedown', function (e) { if (e.target.closest && e.target.closest('.key, [data-keepfocus]')) e.preventDefault(); });
   function onFillInput() {
     var el = $('#fill'), it = quiz && quiz.items[quiz.pos];
     if (!el || !it || it.done) return;
@@ -3934,18 +4230,30 @@ var DIAGRAMS = (function () {
     var c = $('#confirm'); if (c) c.disabled = !canConfirm(it);
   }
   function insertKey(ch) {
-    var el = $('#fill');
+    var el = $('#fill') || $('#type-input');
     if (!el || el.disabled) return;
     var s = el.selectionStart == null ? el.value.length : el.selectionStart, e2 = el.selectionEnd == null ? s : el.selectionEnd;
     el.value = el.value.slice(0, s) + ch + el.value.slice(e2);
     el.focus();
     try { el.setSelectionRange(s + ch.length, s + ch.length); } catch (x) {}
-    onFillInput();
+    if (el.id === 'fill') onFillInput(); else liveTyping();
   }
-  document.addEventListener('input', function (e) { if (e.target && e.target.id === 'fill') onFillInput(); });
-  document.addEventListener('keydown', function (e) {
-    if (e.key === 'Enter' && e.target && e.target.id === 'fill') { e.preventDefault(); e.target.blur(); confirmAnswer(); }
+  document.addEventListener('input', function (e) {
+    if (!e.target) return;
+    if (e.target.id === 'fill') onFillInput();
+    else if (e.target.id === 'type-input' && !e.isComposing) liveTyping(); // 拼音还没选字时先不检查
   });
+  document.addEventListener('compositionend', function (e) { if (e.target && e.target.id === 'type-input') liveTyping(); });
+  document.addEventListener('keydown', function (e) {
+    if (e.key !== 'Enter' || !e.target) return;
+    if (e.target.id === 'fill') { e.preventDefault(); e.target.blur(); confirmAnswer(); }
+    else if (e.target.id === 'type-input' && !e.isComposing && e.keyCode !== 229) { e.preventDefault(); submitLine(); }
+  });
+  // 手打环节不能粘贴
+  document.addEventListener('paste', function (e) {
+    if (e.target && e.target.id === 'type-input') { e.preventDefault(); setHint('这里要亲手打，不能粘贴。', 'bad'); }
+  });
+  document.addEventListener('drop', function (e) { if (e.target && e.target.id === 'type-input') e.preventDefault(); });
   window.addEventListener('hashchange', render);
 
   render();
