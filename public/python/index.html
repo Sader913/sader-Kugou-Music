@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Python 蟒蛇闯关</title>
-<meta name="description" content="从零开始学 Python 的闯关小游戏：26 关、125 道题，每关一张图示，代码要亲手打一遍才能通关。">
+<meta name="description" content="从零开始学 Python 的闯关小游戏：26 关、125 道题，每关一张图示，语法和例子都要亲手打一遍才能通关。">
 <meta name="theme-color" content="#EEF3FA" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#0B1322" media="(prefers-color-scheme: dark)">
 <meta name="mobile-web-app-capable" content="yes">
@@ -259,9 +259,6 @@ strong, b { font-weight: 800; }
 .fig .venn-b { fill: var(--yellow); fill-opacity: .32; stroke: var(--yellow-edge); stroke-width: 1.5; }
 
 /* ---------- 答题 ---------- */
-.progress { flex: 1; display: flex; gap: 5px; min-width: 0; }
-.progress i { flex: 1; height: 10px; border-radius: 5px; background: var(--tint); }
-.progress i.is-right { background: var(--good); } .progress i.is-wrong { background: var(--bad); } .progress i.is-now { background: var(--yellow); box-shadow: 0 0 0 1.5px var(--yellow-edge); }
 .quiz { padding-top: 6px; display: grid; gap: 16px; }
 .q-meta { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .q-type { font-size: 14px; font-weight: 800; line-height: 1.2; padding: 5px 10px; border-radius: 8px; background: var(--blue-soft); color: var(--blue-text); }
@@ -415,14 +412,114 @@ strong, b { font-weight: 800; }
 .confirm-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .warn { padding: 12px 14px; border-radius: 14px; background: var(--bad-bg); color: var(--ink); font-size: 15px; line-height: 1.55; }
 
-.toast { position: fixed; left: 50%; bottom: calc(96px + env(safe-area-inset-bottom, 0px)); transform: translate(-50%, 12px); z-index: 40; max-width: calc(100% - 32px); background: var(--ink); color: var(--bg); font-size: 16px; font-weight: 700; line-height: 1.4; padding: 12px 18px; border-radius: 14px; opacity: 0; pointer-events: none; transition: opacity .2s ease, transform .2s ease; text-align: center; }
+.toast { position: fixed; left: 50%; top: calc(76px + env(safe-area-inset-top, 0px)); transform: translate(-50%, -12px); z-index: 40; max-width: calc(100% - 32px); background: var(--ink); color: var(--bg); font-size: 16px; font-weight: 700; line-height: 1.4; padding: 12px 18px; border-radius: 14px; opacity: 0; pointer-events: none; transition: opacity .2s ease, transform .2s ease; text-align: center; }
 .toast.is-on { opacity: 1; transform: translate(-50%, 0); }
 .float-gain { position: fixed; z-index: 41; left: 50%; top: 26%; transform: translateX(-50%); font-family: var(--font-mono); font-size: 34px; font-weight: 800; color: var(--good); pointer-events: none; animation: floatUp .9s ease-out both; text-shadow: 0 2px 0 var(--surface); }
 @keyframes floatUp { 0% { opacity: 0; transform: translate(-50%, 16px) scale(.7); } 25% { opacity: 1; transform: translate(-50%, 0) scale(1.1); } 100% { opacity: 0; transform: translate(-50%, -56px) scale(1); } }
 
+/* ---------- 一步一屏：进度条、红心、吉祥物 ---------- */
+.pbar { flex: 1; min-width: 0; height: 18px; border-radius: 9px; background: var(--tint); overflow: hidden; }
+.pbar > i { display: block; height: 100%; border-radius: 9px; background: var(--yellow); box-shadow: inset 0 5px 0 rgba(255, 255, 255, .38), inset 0 -3px 0 rgba(215, 155, 0, .35); transition: width .45s cubic-bezier(.3, 1.3, .5, 1); }
+.hearts { flex: none; display: flex; gap: 1px; }
+.hearts .ic { width: 26px; height: 26px; color: var(--bad); stroke: var(--bad); }
+.hearts .ic.off { color: transparent; stroke: var(--ink-3); }
+.hearts .ic.lost { animation: heartLost .55s ease both; }
+@keyframes heartLost { 0% { transform: scale(1.6); color: var(--bad); } 45% { transform: scale(.7) rotate(-18deg); } 100% { transform: none; } }
+.step { display: grid; gap: 16px; padding-top: 6px; }
+.step > .sec { margin-top: 0; }
+.step > .sec + .sec { margin-top: 8px; }
+.step .fig { margin-top: 0; }
+.anim-in { animation: stepIn .28s ease both; }
+@keyframes stepIn { from { opacity: 0; transform: translateX(26px); } to { opacity: 1; transform: none; } }
+.mrow { display: flex; align-items: flex-end; gap: 12px; }
+.mascot { flex: none; width: 64px; height: 73px; overflow: visible; }
+.mascot.is-big { width: 116px; height: 132px; }
+.mascot .m-skin { fill: var(--btn); stroke: var(--btn-edge); stroke-width: 2.5; }
+.mascot .m-cheek { fill: var(--yellow); }
+.mascot .m-eye { fill: #fff; }
+.mascot .m-pupil { fill: #15233F; }
+.mascot .m-line { fill: none; stroke: #0E1930; stroke-width: 3.2; stroke-linecap: round; }
+.mascot .m-tongue { fill: none; stroke: var(--bad); stroke-width: 3.2; stroke-linecap: round; stroke-linejoin: round; transform-origin: 36px 62px; animation: flick 3.6s ease-in-out infinite; }
+.mascot .m-open { transform-origin: 36px 30px; animation: blink 4.4s infinite; }
+.mascot .m-shut, .mascot .m-frown { display: none; }
+.mascot.is-happy .m-open { display: none; }
+.mascot.is-happy .m-shut { display: inline; }
+.mascot.is-happy { animation: hop .55s cubic-bezier(.3, 1.6, .5, 1); }
+.mascot.is-sad .m-smile { display: none; }
+.mascot.is-sad .m-frown { display: inline; }
+.mascot.is-sad .m-pupil { transform: translateY(3px); }
+.mascot.is-sad { animation: wobble .5s ease; }
+@keyframes blink { 0%, 93%, 100% { transform: scaleY(1); } 96% { transform: scaleY(.08); } }
+@keyframes flick { 0%, 82%, 100% { transform: scaleY(1); } 88% { transform: scaleY(.25); } 94% { transform: scaleY(1.1); } }
+@keyframes hop { 0% { transform: translateY(0); } 40% { transform: translateY(-12px) rotate(-6deg); } 100% { transform: none; } }
+@keyframes wobble { 0%, 100% { transform: rotate(0); } 25% { transform: rotate(-9deg); } 75% { transform: rotate(9deg); } }
+.head .eyes { transform-origin: 42px 38px; animation: blink 4.4s infinite; }
+.bubble { position: relative; flex: 1; min-width: 0; background: var(--surface); border: 2px solid var(--line); border-radius: 18px; padding: 12px 14px; margin-bottom: 12px; }
+.bubble::before { content: ""; position: absolute; left: -9px; bottom: 14px; width: 14px; height: 14px; background: var(--surface); border-left: 2px solid var(--line); border-bottom: 2px solid var(--line); border-bottom-left-radius: 3px; transform: rotate(45deg); }
+.bubble .q-stem { font-size: 19px; line-height: 1.45; }
+.bubble-text { font-size: 17px; line-height: 1.55; }
+
+/* ---------- 拼积木 ---------- */
+.tray { min-height: 72px; padding: 10px; border-radius: 16px; background: var(--code-bg); border: 2px dashed #3A4B72; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; align-content: flex-start; }
+.tray-empty { color: var(--code-dim); font-size: 15px; line-height: 1.5; padding: 8px 6px; }
+.bank { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
+.chip { display: inline-flex; align-items: center; justify-content: center; min-width: 46px; min-height: 48px; padding: 6px 14px; border-radius: 12px; background: var(--surface); border: 2px solid var(--line); box-shadow: 0 3px 0 var(--line); font-family: var(--font-mono); font-size: 18px; font-weight: 700; line-height: 1.2; color: var(--ink); white-space: pre; }
+.tray .chip { background: #1C2B4E; border-color: #3A4B72; box-shadow: 0 3px 0 #060C19; color: var(--code-fg); }
+.chip-ghost { background: var(--tint); border-color: transparent; box-shadow: none; color: transparent; }
+
+/* ---------- 底部反馈条 ---------- */
+.sheet { position: fixed; left: 0; right: 0; bottom: 0; z-index: 26; padding-bottom: env(safe-area-inset-bottom, 0px); border-top: 2px solid var(--line); animation: sheetUp .28s cubic-bezier(.2, .9, .3, 1) both; }
+.sheet.good { background: var(--good-bg); border-color: var(--good); }
+.sheet.bad { background: var(--bad-bg); border-color: var(--bad); }
+.sheet .bar-in { padding-top: 14px; padding-bottom: 12px; display: grid; gap: 12px; }
+.sheet-body { max-height: 44vh; overflow-y: auto; -webkit-overflow-scrolling: touch; display: grid; gap: 10px; }
+.sheet.good .fb-head { color: var(--good); }
+.sheet.bad .fb-head, .sheet.bad .fb-label.is-why { color: var(--bad); }
+.fb-heart { display: inline-flex; align-items: center; gap: 2px; }
+.fb-heart .ic { width: 22px; height: 22px; }
+@keyframes sheetUp { from { transform: translateY(100%); } to { transform: none; } }
+body.has-sheet .app { padding-bottom: 58vh; }
+
+/* ---------- 关卡页的四个步骤 ---------- */
+.hub { display: grid; gap: 16px; padding-top: 6px; }
+.stages { display: grid; gap: 12px; }
+.stage { width: 100%; display: flex; align-items: center; gap: 14px; min-height: 78px; padding: 12px 14px; text-align: left; background: var(--surface); border: 2px solid var(--line); border-radius: 18px; box-shadow: 0 3px 0 var(--line); }
+.stage:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--line); }
+.stage-no { flex: none; width: 46px; height: 46px; border-radius: 50%; display: grid; place-items: center; background: var(--tint); color: var(--ink-2); font-family: var(--font-mono); font-weight: 800; font-size: 19px; line-height: 1; }
+.stage-no .ic { width: 24px; height: 24px; }
+.stage-main { flex: 1; min-width: 0; display: grid; gap: 2px; }
+.stage-main b { font-size: 18px; line-height: 1.3; }
+.stage-main span { font-size: 14px; line-height: 1.4; color: var(--ink-2); }
+.stage-state { flex: none; display: flex; align-items: center; font-size: 14px; font-weight: 800; color: var(--ink-2); }
+.stage-state .ic { width: 20px; height: 20px; }
+.stage.is-done .stage-no { background: var(--good); color: var(--surface); }
+.stage.is-done .stage-state { color: var(--good); }
+.stage.is-next { border-color: var(--blue); box-shadow: 0 3px 0 var(--blue); }
+.stage.is-next .stage-no { background: var(--yellow); color: var(--on-yellow); box-shadow: 0 0 0 2px var(--yellow-edge); }
+.stage.is-locked { opacity: .55; box-shadow: none; }
+.stage-stars { display: flex; gap: 1px; }
+.stage-stars .ic { width: 18px; height: 18px; color: var(--yellow); stroke: var(--yellow-edge); }
+.stage-stars .ic.off { color: transparent; stroke: var(--ink-3); }
+
+/* ---------- 手打时点亮打对的词 ---------- */
+.tk { border-radius: 4px; }
+.tk.hit { background: rgba(47, 179, 126, .32); box-shadow: 0 0 0 2px rgba(47, 179, 126, .32); }
+.tk.mask { color: var(--code-dim); letter-spacing: 1px; }
+.type-target.flash { animation: flashOk .4s ease; }
+@keyframes flashOk { 0% { box-shadow: 0 0 0 0 rgba(47, 179, 126, .8); border-color: #2FB37E; } 100% { box-shadow: 0 0 0 12px rgba(47, 179, 126, 0); } }
+.peek { margin-top: -6px; }
+
+/* ---------- 开关、彩纸 ---------- */
+.switch-row { width: 100%; min-height: 48px; display: flex; align-items: center; justify-content: space-between; gap: 12px; text-align: left; font-size: 17px; font-weight: 700; }
+.switch { flex: none; position: relative; width: 56px; height: 32px; border-radius: 16px; background: var(--tint); border: 2px solid var(--line); transition: background .15s ease; }
+.switch::after { content: ""; position: absolute; top: 2px; left: 2px; width: 24px; height: 24px; border-radius: 50%; background: var(--surface); box-shadow: 0 1px 3px rgba(0, 0, 0, .3); transition: transform .15s ease; }
+.switch.is-on { background: var(--good); border-color: var(--good); }
+.switch.is-on::after { transform: translateX(24px); }
+.confetti { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 50; }
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
-  .head .ring { display: none; }
+  .head .ring, .confetti { display: none; }
 }
 </style>
 </head>
@@ -2931,6 +3028,233 @@ print("-".join(parts))`,
 });
 
 
+/* ===== 语法练习 =====
+   每一关把“怎么写”里的语法拆成几句小任务：say 是要做的事，code 是对应的 Python。
+   同一关的 code 按顺序连起来是一段能运行的程序。key 标出最后要默写的那一句。 */
+var DRILLS = {
+  print: [
+    { say: '显示文字 你好', code: py`print("你好")`, key: true },
+    { say: '显示数字 123', code: py`print(123)` },
+    { say: '一次显示两个内容：文字 年龄 和数字 18', code: py`print("年龄", 18)` },
+    { say: '写一行注释（# 后面写什么都行）', code: py`# 这是注释` },
+  ],
+  var: [
+    { say: '把 18 存进变量 age', code: py`age = 18`, key: true },
+    { say: '把文字 小明 存进变量 name', code: py`name = "小明"` },
+    { say: '让 age 增加 1', code: py`age = age + 1` },
+    { say: '显示 name 和 age', code: py`print(name, age)` },
+  ],
+  num: [
+    { say: '把整数 10 存进 count', code: py`count = 10` },
+    { say: '把小数 3.5 存进 price', code: py`price = 3.5` },
+    { say: '显示 price 的类型', code: py`print(type(price))`, key: true },
+    { say: '显示 count 除以 4 的结果', code: py`print(count / 4)` },
+  ],
+  str: [
+    { say: '把文字 Python 存进 s', code: py`s = "Python"` },
+    { say: '显示 s 的第一个字符', code: py`print(s[0])` },
+    { say: '显示 s 的最后一个字符', code: py`print(s[-1])` },
+    { say: '显示 s 的长度', code: py`print(len(s))`, key: true },
+    { say: '把 "我爱" 和 s 拼在一起显示', code: py`print("我爱" + s)` },
+    { say: '用 f 字符串显示：我叫Python', code: py`print(f"我叫{s}")` },
+  ],
+  arith: [
+    { say: '显示 7 除以 2（普通除法）', code: py`print(7 / 2)` },
+    { say: '显示 7 整除 2', code: py`print(7 // 2)`, key: true },
+    { say: '显示 7 除以 2 的余数', code: py`print(7 % 2)` },
+    { say: '显示 2 的 3 次方', code: py`print(2 ** 3)` },
+    { say: '先算 2 + 3，再乘以 4，显示结果', code: py`print((2 + 3) * 4)` },
+    { say: '把 10 存进 x，再用简写让 x 加 5', code: py`x = 10
+x += 5` },
+  ],
+  input: [
+    { say: '问用户“你叫什么？”，把回答存进 name', code: py`name = input("你叫什么？")` },
+    { say: '把字符串 "18" 转成整数，存进 n', code: py`n = int("18")`, key: true },
+    { say: '把字符串 "3.5" 转成小数，存进 f', code: py`f = float("3.5")` },
+    { say: '把数字 18 转成字符串，存进 s', code: py`s = str(18)` },
+    { say: '把 "你好，" 和 name 拼起来显示', code: py`print("你好，" + name)` },
+  ],
+  bool: [
+    { say: '把 True 存进 is_sunny', code: py`is_sunny = True`, key: true },
+    { say: '把 False 存进 game_over', code: py`game_over = False` },
+    { say: '显示 3 > 2 的结果', code: py`print(3 > 2)` },
+    { say: '显示 True 的类型', code: py`print(type(True))` },
+  ],
+  cmp: [
+    { say: '把 18 存进 age', code: py`age = 18` },
+    { say: '显示 age 是否等于 18', code: py`print(age == 18)`, key: true },
+    { say: '显示 age 是否不等于 20', code: py`print(age != 20)` },
+    { say: '显示 age 是否大于或等于 18', code: py`print(age >= 18)` },
+    { say: '显示 age 是否小于 60', code: py`print(age < 60)` },
+  ],
+  logic: [
+    { say: '把 True 存进 a，把 False 存进 b', code: py`a = True
+b = False` },
+    { say: '显示 a 并且 b', code: py`print(a and b)`, key: true },
+    { say: '显示 a 或者 b', code: py`print(a or b)` },
+    { say: '显示 a 取反', code: py`print(not a)` },
+    { say: '把 5 存进 x，显示 x 是否在 1 到 10 之间', code: py`x = 5
+print(x >= 1 and x <= 10)` },
+  ],
+  if: [
+    { say: '把 85 存进 score', code: py`score = 85` },
+    { say: '如果 score 大于或等于 60，就显示 及格', code: py`if score >= 60:
+    print("及格")`, key: true },
+    { say: '90 以上显示 A，60 以上显示 B，其余显示 C', code: py`if score >= 90:
+    print("A")
+elif score >= 60:
+    print("B")
+else:
+    print("C")` },
+  ],
+  list: [
+    { say: '把 10、20、30 放进列表 nums', code: py`nums = [10, 20, 30]` },
+    { say: '显示 nums 的第一个元素', code: py`print(nums[0])`, key: true },
+    { say: '显示 nums 的最后一个元素', code: py`print(nums[-1])` },
+    { say: '把第二个元素改成 99', code: py`nums[1] = 99` },
+    { say: '显示 nums 有几个元素', code: py`print(len(nums))` },
+    { say: '显示 nums 的前两个元素（切片）', code: py`print(nums[0:2])` },
+    { say: '显示 30 在不在 nums 里', code: py`print(30 in nums)` },
+  ],
+  for: [
+    { say: '用 range(3) 重复 3 次，每次显示 i', code: py`for i in range(3):
+    print(i)`, key: true },
+    { say: '让 i 从 1 数到 3，每次显示 i', code: py`for i in range(1, 4):
+    print(i)` },
+    { say: '把列表 [10, 20, 30] 里的每个数 n 显示出来', code: py`for n in [10, 20, 30]:
+    print(n)` },
+  ],
+  while: [
+    { say: '把 3 存进 n', code: py`n = 3` },
+    { say: '只要 n 大于 0，就显示 n，再让 n 减 1', code: py`while n > 0:
+    print(n)
+    n = n - 1`, key: true },
+    { say: '把 0 存进 i；只要 i 小于 3，就让 i 加 1', code: py`i = 0
+while i < 3:
+    i += 1` },
+  ],
+  brk: [
+    { say: 'n 从 0 数到 9：等于 3 时结束循环，否则显示 n', code: py`for n in range(10):
+    if n == 3:
+        break
+    print(n)`, key: true },
+    { say: 'n 从 0 数到 4：等于 2 时跳过这一轮，否则显示 n', code: py`for n in range(5):
+    if n == 2:
+        continue
+    print(n)` },
+  ],
+  listm: [
+    { say: '把 3 和 1 放进列表 a', code: py`a = [3, 1]` },
+    { say: '在 a 的末尾加上 2', code: py`a.append(2)`, key: true },
+    { say: '在 a 的位置 0 插入 9', code: py`a.insert(0, 9)` },
+    { say: '取走 a 的最后一个元素', code: py`a.pop()` },
+    { say: '删掉 a 里的 9', code: py`a.remove(9)` },
+    { say: '把 a 从小到大排序', code: py`a.sort()` },
+    { say: '把 a 前后颠倒', code: py`a.reverse()` },
+  ],
+  tuple: [
+    { say: '把 3 和 5 放进元组 point', code: py`point = (3, 5)` },
+    { say: '显示 point 的第一个元素', code: py`print(point[0])` },
+    { say: '把 point 拆给 x 和 y', code: py`x, y = point`, key: true },
+    { say: '创建只有一个元素 5 的元组 one', code: py`one = (5,)` },
+  ],
+  dict: [
+    { say: '创建字典 d：name 是 小明，age 是 18', code: py`d = {"name": "小明", "age": 18}` },
+    { say: '显示 d 里 name 对应的值', code: py`print(d["name"])`, key: true },
+    { say: '把 age 改成 19', code: py`d["age"] = 19` },
+    { say: '新增一项：city 是 北京', code: py`d["city"] = "北京"` },
+    { say: '显示 d 里有没有 age 这个键', code: py`print("age" in d)` },
+    { say: '把 d 里每一对键 k 和值 v 显示出来', code: py`for k, v in d.items():
+    print(k, v)` },
+  ],
+  set: [
+    { say: '创建集合 s，里面有 1、2、3', code: py`s = {1, 2, 3}` },
+    { say: '往 s 里添加 4', code: py`s.add(4)`, key: true },
+    { say: '从 s 里删掉 1', code: py`s.remove(1)` },
+    { say: '把列表 [1, 1, 2] 去重，存进 u', code: py`u = set([1, 1, 2])` },
+    { say: '创建集合 a（1、2、3）和 b（2、3、4）', code: py`a = {1, 2, 3}
+b = {2, 3, 4}` },
+    { say: '显示 a 和 b 的交集', code: py`print(a & b)` },
+    { say: '显示 a 和 b 的并集', code: py`print(a | b)` },
+    { say: '显示只在 a 里、不在 b 里的元素', code: py`print(a - b)` },
+  ],
+  func: [
+    { say: '定义函数 say_hi：显示 你好', code: py`def say_hi():
+    print("你好")`, key: true },
+    { say: '调用 say_hi', code: py`say_hi()` },
+    { say: '定义函数 cheer：显示两次 加油', code: py`def cheer():
+    print("加油")
+    print("加油")` },
+    { say: '调用 cheer', code: py`cheer()` },
+  ],
+  ret: [
+    { say: '定义函数 add：接收 a 和 b，返回它们的和', code: py`def add(a, b):
+    return a + b`, key: true },
+    { say: '调用 add(3, 5)，把结果存进 result', code: py`result = add(3, 5)` },
+    { say: '显示 result', code: py`print(result)` },
+    { say: '定义函数 greet：参数 name 默认是 朋友，返回 "你好，" 加上 name', code: py`def greet(name="朋友"):
+    return "你好，" + name` },
+    { say: '不传参数调用 greet，显示结果', code: py`print(greet())` },
+  ],
+  strm: [
+    { say: '把 "  Hi  " 存进 s（两头各有两个空格）', code: py`s = "  Hi  "` },
+    { say: '显示去掉两头空格后的 s', code: py`print(s.strip())` },
+    { say: '显示全部大写的 s', code: py`print(s.upper())`, key: true },
+    { say: '显示全部小写的 s', code: py`print(s.lower())` },
+    { say: '把 s 里的 Hi 换成 Yo，显示结果', code: py`print(s.replace("Hi", "Yo"))` },
+    { say: '把 "a,b,c" 按逗号切开，存进 parts', code: py`parts = "a,b,c".split(",")` },
+    { say: '用 - 把 parts 拼起来显示', code: py`print("-".join(parts))` },
+  ],
+  try: [
+    { say: '尝试把 "abc" 转成整数存进 n；出现 ValueError 时显示 不是数字', code: py`try:
+    n = int("abc")
+except ValueError:
+    print("不是数字")`, key: true },
+    { say: '尝试显示 10 / 0；出现 ZeroDivisionError 时显示 不能除以 0；最后显示 结束', code: py`try:
+    print(10 / 0)
+except ZeroDivisionError:
+    print("不能除以 0")
+finally:
+    print("结束")` },
+  ],
+  file: [
+    { say: '用 "w" 模式打开 a.txt（起名 f），写入 hi', code: py`with open("a.txt", "w") as f:
+    f.write("hi")`, key: true },
+    { say: '用 "a" 模式打开 a.txt，追加一个 !', code: py`with open("a.txt", "a") as f:
+    f.write("!")` },
+    { say: '打开 a.txt，显示读到的全部内容', code: py`with open("a.txt") as f:
+    print(f.read())` },
+  ],
+  mod: [
+    { say: '导入 math 模块', code: py`import math`, key: true },
+    { say: '显示 16 的平方根', code: py`print(math.sqrt(16))` },
+    { say: '显示圆周率 math.pi', code: py`print(math.pi)` },
+    { say: '从 random 模块里只导入 randint', code: py`from random import randint` },
+    { say: '显示 1 到 6 之间的一个随机整数', code: py`print(randint(1, 6))` },
+  ],
+  class: [
+    { say: '定义类 Cat：创建时记下 name；方法 meow 显示 name 和 喵', code: py`class Cat:
+    def __init__(self, name):
+        self.name = name
+
+    def meow(self):
+        print(self.name, "喵")` },
+    { say: '用 Cat 创建一个叫 咪咪 的对象，存进 c', code: py`c = Cat("咪咪")`, key: true },
+    { say: '显示 c 的 name', code: py`print(c.name)` },
+    { say: '让 c 调用 meow', code: py`c.meow()` },
+  ],
+  final: [
+    { say: '定义函数 total：把列表 nums 里的数加起来并返回', code: py`def total(nums):
+    t = 0
+    for n in nums:
+        t += n
+    return t` },
+    { say: '显示 total([1, 2, 3]) 的结果', code: py`print(total([1, 2, 3]))`, key: true },
+    { say: '如果 total([1, 2]) 大于 2，就显示 大于 2', code: py`if total([1, 2]) > 2:
+    print("大于 2")` },
+  ],
+};
+
 /* ===== 每一关的图示（内联 SVG，颜色全部走主题变量）===== */
 var DIAGRAMS = (function () {
   var W = 340;
@@ -3380,12 +3704,14 @@ var TypeCheck = (function () {
   function normQuotes(s) { return String(s).replace(/[“”„‟]/g, '"').replace(/[‘’‚‛]/g, "'"); }
   function nk(s) { try { return s.normalize('NFKC'); } catch (e) { return s; } }
 
+  // 每个词记下类型 t、内容 s、在这一行里的起止位置 a/b
   function tokenize(src) {
     var toks = [], i = 0, n = src.length, m, rest;
+    function push(tok, j) { tok.a = i; tok.b = j; tok.raw = src.slice(i, j); toks.push(tok); i = j; }
     while (i < n) {
       var ch = src.charAt(i);
       if (ch === ' ' || ch === '\t') { i++; continue; }
-      if (ch === '#') { toks.push({ t: 'com', s: src.slice(i) }); break; }
+      if (ch === '#') { push({ t: 'com', s: src.slice(i) }, n); break; }
       rest = src.slice(i);
       m = /^([fFrRbB]{0,2})(["'])/.exec(rest);
       if (m) {
@@ -3396,17 +3722,17 @@ var TypeCheck = (function () {
           if (c === q) { closed = true; j++; break; }
           content += c; j++;
         }
-        toks.push({ t: 'str', p: m[1].toLowerCase(), s: content, open: !closed, raw: src.slice(i, j) });
-        i = j; continue;
+        push({ t: 'str', p: m[1].toLowerCase(), s: content, open: !closed }, j);
+        continue;
       }
-      if (CN_PUNCT.test(ch)) { toks.push({ t: 'cn', s: ch }); i++; continue; }
+      if (CN_PUNCT.test(ch)) { push({ t: 'cn', s: ch }, i + 1); continue; }
       m = /^\d+(?:\.\d*)?/.exec(rest);
-      if (m) { toks.push({ t: 'num', s: m[0] }); i += m[0].length; continue; }
+      if (m) { push({ t: 'num', s: m[0] }, i + m[0].length); continue; }
       m = /^[A-Za-z_一-鿿][A-Za-z0-9_一-鿿]*/.exec(rest);
-      if (m) { toks.push({ t: 'name', s: m[0] }); i += m[0].length; continue; }
+      if (m) { push({ t: 'name', s: m[0] }, i + m[0].length); continue; }
       var two = src.substr(i, 2);
-      if (OPS2.indexOf(two) >= 0) { toks.push({ t: 'op', s: two }); i += 2; continue; }
-      toks.push({ t: 'op', s: ch }); i++;
+      if (OPS2.indexOf(two) >= 0) { push({ t: 'op', s: two }, i + 2); continue; }
+      push({ t: 'op', s: ch }, i + 1);
     }
     return toks;
   }
@@ -3420,7 +3746,6 @@ var TypeCheck = (function () {
     return { width: w, wide: wide, rest: line.slice(lead.length) };
   }
   function noComment(toks) { return toks.filter(function (t) { return t.t !== 'com'; }); }
-  function show(t) { return t.t === 'str' ? t.raw : t.s; }
   function tokEq(u, t) {
     if (u.t !== t.t) return false;
     if (u.t === 'str') return !u.open && u.p === t.p && nk(u.s) === nk(t.s);
@@ -3437,83 +3762,99 @@ var TypeCheck = (function () {
     if (want === 0) return '这一行前面不要空格，要顶格写。';
     return '缩进不对：这一行前面要 ' + want + ' 个空格，你打了 ' + got + ' 个。';
   }
-  function diffMsg(u, t) {
+  // hide=true 是默写：提示里不直接说出答案
+  function diffMsg(u, t, hide) {
     if (u.t === 'cn') return '`' + u.s + '` 是中文符号，Python 不认。' + (CN_TO_EN[u.s] ? '这里要用英文的 `' + CN_TO_EN[u.s] + '`，' : '要换成英文符号，') + '可以点下面的符号键输入。';
-    if (!t) return '后面多打了 `' + show(u) + '`。这一行到这里已经结束了。';
+    if (!t) return '后面多打了 `' + u.raw + '`。这一行到这里已经结束了。';
+    if (u.t === 'name' && t.t === 'name' && u.s !== t.s && u.s.toLowerCase() === t.s.toLowerCase()) return '大小写不对：`' + u.s + '` 要写成 `' + t.s + '`。Python 区分大小写。';
+    if (u.t === 'str' && u.open) return '引号没有打完整。文字要用一对引号包起来' + (hide || t.t !== 'str' ? '。' : '：`' + t.raw + '`。');
+    if (hide) return '`' + u.raw + '` 这里不对。想不起来可以点“看答案”。';
     if (u.t === 'str' && t.t === 'str') {
-      if (u.open) return '引号没有打完整。文字要用一对引号包起来：`' + t.raw + '`。';
       if (u.p !== t.p) return t.p ? '这个字符串前面要加一个 `' + t.p + '`，写成 `' + t.raw + '`。' : '这个字符串前面不用加 `' + u.p + '`。';
       if (nk(u.s).replace(/\s/g, '') === nk(t.s).replace(/\s/g, '')) return '引号里的空格不一样。引号里的内容会原样显示，空格的位置和个数要和例子一样（· 代表一个空格）。';
       return '引号里的文字不一样：你打的是 `' + u.raw + '`，应该是 `' + t.raw + '`。';
     }
-    if (t.t === 'str') return '这里应该是带引号的文字 `' + t.raw + '`。你打的是 `' + show(u) + '`。';
+    if (t.t === 'str') return '这里应该是带引号的文字 `' + t.raw + '`。你打的是 `' + u.raw + '`。';
     if (u.t === 'str') return '这里不用引号，应该是 `' + t.s + '`。';
-    if (u.t === 'name' && t.t === 'name' && u.s.toLowerCase() === t.s.toLowerCase()) return '大小写不对：`' + u.s + '` 要写成 `' + t.s + '`。Python 区分大小写。';
-    return '这里不一样：你打的是 `' + show(u) + '`，应该是 `' + show(t) + '`。';
+    return '这里不一样：你打的是 `' + u.raw + '`，应该是 `' + t.raw + '`。';
   }
 
   /* 比较一行。partial=true 用于边打边查（还没打完不算错）；partial=false 用于按回车时的最终检查。
-     返回 { state: 'empty' | 'ok' | 'done' | 'bad', msg } */
-  function analyze(target, input, partial) {
+     返回 { state: 'empty' | 'ok' | 'done' | 'bad', msg, hit }，hit 是已经打对的词数 */
+  function analyze(target, input, partial, hide) {
     input = normQuotes(input);
     var ti = indentOf(target), ui = indentOf(input);
     var all = tokenize(ti.rest), isComment = all.length > 0 && all[0].t === 'com';
-    var tt = noComment(all), ut = tokenize(ui.rest);
-    function bad(msg) { return { state: 'bad', msg: msg }; }
+    var tt = noComment(all), ut = tokenize(ui.rest), hit = 0;
+    function bad(msg) { return { state: 'bad', msg: msg, hit: hit }; }
 
     if (ui.wide) return bad('行首有全角空格。缩进要用英文空格，点“缩进”键就可以。');
     if (ui.rest === '') {
       if (!partial) return bad('这一行还没有打。');
-      if (input === '') return { state: 'empty' };
-      return (isComment || ui.width <= ti.width) ? { state: 'ok' } : bad(indentMsg(ti.width, ui.width));
+      if (input === '') return { state: 'empty', hit: 0 };
+      return (isComment || ui.width <= ti.width) ? { state: 'ok', hit: 0 } : bad(indentMsg(ti.width, ui.width));
     }
     if (isComment) {
-      return ut[0].t === 'com' ? { state: 'done' } : bad('这一行是注释，要以 `#` 开头。`#` 后面写什么都可以。');
+      return ut[0].t === 'com' ? { state: 'done', hit: 0 } : bad('这一行是注释，要以 `#` 开头。`#` 后面写什么都可以。');
     }
     if (ui.width !== ti.width) return bad(indentMsg(ti.width, ui.width));
     ut = noComment(ut);
     var tail = partial && !/\s$/.test(input), exact = true;
     for (var k = 0; k < ut.length; k++) {
       var u = ut[k], t = tt[k];
-      if (u.t === 'cn' || !t) return bad(diffMsg(u, t));
-      if (tokEq(u, t)) continue;
+      if (u.t === 'cn' || !t) return bad(diffMsg(u, t, hide));
+      if (tokEq(u, t)) { hit++; continue; }
       var last = k === ut.length - 1;
       if (partial && last && (tail || (u.t === 'str' && u.open)) && isPrefix(u, t)) { exact = false; continue; }
-      return bad(diffMsg(u, t));
+      return bad(diffMsg(u, t, hide));
     }
     if (ut.length < tt.length) {
-      if (partial) return { state: 'ok' };
-      return bad('还没打完，后面还有：`' + tt.slice(ut.length).map(show).join(' ') + '`');
+      if (partial) return { state: 'ok', hit: hit };
+      return bad(hide ? '还没打完，后面还有内容。想不起来可以点“看答案”。'
+        : '还没打完，后面还有：`' + tt.slice(ut.length).map(function (x) { return x.raw; }).join(' ') + '`');
     }
-    return { state: exact ? 'done' : 'ok' };
+    return { state: exact ? 'done' : 'ok', hit: hit };
   }
 
   return { analyze: analyze, tokenize: tokenize, normQuotes: normQuotes };
 })();
 
-/* ===== 游戏逻辑 ===== */
+/* ===== 游戏逻辑 =====
+   每一关分四步：学一学（卡片）→ 打语法（拼积木、照着打、默写）→ 打例子（整段程序）→ 闯关答题（3 颗红心）。
+   四步共用同一套“一步一屏”的流程：顶部进度条，答完弹出底部反馈条，再进下一步。 */
 (function () {
   'use strict';
 
   var STORE_KEY = 'pyquest.v1';
   var STANDALONE = true;
+  var HEARTS = 3;
   var RANKS = [
-    { xp: 0, name: 'Python 萌新' }, { xp: 100, name: '打印学徒' }, { xp: 250, name: '变量收纳师' },
-    { xp: 450, name: '判断小能手' }, { xp: 700, name: '循环骑士' }, { xp: 1000, name: '列表管家' },
-    { xp: 1400, name: '函数工匠' }, { xp: 1850, name: '排错侦探' }, { xp: 2400, name: '对象建筑师' },
-    { xp: 3000, name: 'Python 高手' },
+    { xp: 0, name: 'Python 萌新' }, { xp: 150, name: '打印学徒' }, { xp: 350, name: '变量收纳师' },
+    { xp: 650, name: '判断小能手' }, { xp: 1000, name: '循环骑士' }, { xp: 1450, name: '列表管家' },
+    { xp: 2000, name: '函数工匠' }, { xp: 2650, name: '排错侦探' }, { xp: 3400, name: '对象建筑师' },
+    { xp: 4200, name: 'Python 高手' },
   ];
   var CN = ['一', '二', '三', '四', '五', '六', '七', '八', '九', '十'];
   var TYPE_NAME = { choice: '选择题', output: '看代码选结果', fill: '填空题' };
+  var STAGES = [
+    { key: 'learn', name: '学一学', go: '开始学习' },
+    { key: 'syntax', name: '打语法', go: '下一步：打语法' },
+    { key: 'type', name: '打例子', go: '下一步：打例子' },
+    { key: 'quiz', name: '闯关答题', go: '下一步：闯关答题' },
+  ];
+  var STAGE_OF = { learn: 0, syntax: 1, type: 2, quiz: 3 };
+  var PRAISE = ['答对了！', '漂亮！', '没错！', '就是这样！', '真不错！'];
   var LEVEL_INDEX = {}, Q_INDEX = {};
   LEVELS.forEach(function (lv, i) {
+    lv.drills = DRILLS[lv.id] || [];
     LEVEL_INDEX[lv.id] = i;
     lv.questions.forEach(function (q) { Q_INDEX[q.id] = { q: q, li: i }; });
   });
 
   /* ---------- 存档 ---------- */
   function freshState() {
-    return { v: 1, xp: 0, streak: 0, best: 0, levels: {}, wrong: {}, typed: {}, tpos: {}, answered: 0, correct: 0, day: '', days: 0, last: '' };
+    return { v: 1, xp: 0, streak: 0, best: 0, levels: {}, wrong: {}, learned: {}, syn: {}, spos: {}, typed: {}, tpos: {},
+      answered: 0, correct: 0, day: '', days: 0, last: '', sound: true };
   }
   var saveOk = true;
   function load() {
@@ -3550,13 +3891,14 @@ var TypeCheck = (function () {
     for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t; }
     return a;
   }
+  var DOT = '<i class="sp">·</i>';
   var KW = /^(def|return|if|elif|else|for|while|in|not|and|or|break|continue|import|from|as|class|try|except|finally|with|True|False|None)$/;
   var BI = /^(print|len|input|int|float|str|type|range|round|open|set|sorted)$/;
   function hl(code, filled, dots) {
     var re = /(#[^\n]*)|(f?"(?:[^"\\\n]|\\.)*"|f?'(?:[^'\\\n]|\\.)*')|(\b\d+(?:\.\d+)?)|(____)|([A-Za-z_][A-Za-z_0-9]*)|([\s\S])/g;
     return code.replace(re, function (m, com, str, num, blank, word, other) {
       if (com) return '<span class="c-com">' + esc(com) + '</span>';
-      if (str) return '<span class="c-str">' + (dots ? esc(str).replace(/ /g, '<i class="sp">·</i>') : esc(str)) + '</span>';
+      if (str) return '<span class="c-str">' + (dots ? esc(str).replace(/ /g, DOT) : esc(str)) + '</span>';
       if (num) return '<span class="c-num">' + num + '</span>';
       if (blank) return filled ? '<span class="blank is-right">' + esc(filled) + '</span>' : '<span class="blank">?</span>';
       if (word) return KW.test(word) ? '<span class="c-key">' + word + '</span>' : BI.test(word) ? '<span class="c-fn">' + word + '</span>' : word;
@@ -3600,27 +3942,109 @@ var TypeCheck = (function () {
     else fallback();
   }
 
-  /* ---------- 图标 ---------- */
+  /* ---------- 音效、震动、彩纸 ---------- */
+  function reduceMotion() { return !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches); }
+  var actx = null;
+  function beep(f0, f1, t, dur, type, vol) {
+    var o = actx.createOscillator(), g = actx.createGain();
+    o.type = type || 'sine';
+    o.frequency.setValueAtTime(f0, t);
+    if (f1) o.frequency.exponentialRampToValueAtTime(f1, t + dur);
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(vol || 0.12, t + 0.012);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    o.connect(g); g.connect(actx.destination);
+    o.start(t); o.stop(t + dur + 0.02);
+  }
+  function sfx(name) {
+    if (!state.sound) return;
+    try {
+      if (!actx) { var AC = window.AudioContext || window.webkitAudioContext; if (!AC) return; actx = new AC(); }
+      if (actx.state === 'suspended') actx.resume();
+      var t = actx.currentTime + 0.01;
+      if (name === 'ok') { beep(660, 0, t, 0.12, 'triangle'); beep(990, 0, t + 0.1, 0.2, 'triangle'); }
+      else if (name === 'bad') beep(220, 140, t, 0.3, 'sawtooth', 0.06);
+      else if (name === 'line') { beep(620, 0, t, 0.07, 'sine', 0.09); beep(930, 0, t + 0.06, 0.1, 'sine', 0.08); }
+      else if (name === 'tap') beep(520, 0, t, 0.04, 'sine', 0.05);
+      else if (name === 'win') [523, 659, 784, 1047].forEach(function (f, i) { beep(f, 0, t + i * 0.11, 0.24, 'triangle'); });
+      else if (name === 'lose') [392, 330, 262].forEach(function (f, i) { beep(f, 0, t + i * 0.16, 0.28, 'triangle', 0.08); });
+    } catch (e) {}
+  }
+  function buzz(p) { try { if (navigator.vibrate) navigator.vibrate(p); } catch (e) {} }
+  function confetti() {
+    if (reduceMotion()) return;
+    var c = document.createElement('canvas');
+    c.className = 'confetti'; c.setAttribute('aria-hidden', 'true');
+    var w = c.width = window.innerWidth, h = c.height = window.innerHeight, ctx = c.getContext('2d');
+    if (!ctx) return;
+    document.body.appendChild(c);
+    var colors = ['#2C6CB5', '#FFCB3D', '#2FB37E', '#F0776B', '#7CC0FF'], ps = [];
+    for (var i = 0; i < 90; i++) {
+      ps.push({ x: w / 2 + (Math.random() - 0.5) * 80, y: h * 0.32, vx: (Math.random() - 0.5) * 10, vy: -Math.random() * 11 - 3,
+        s: 6 + Math.random() * 6, r: Math.random() * 6.28, vr: (Math.random() - 0.5) * 0.4, c: colors[i % colors.length] });
+    }
+    var t0 = null;
+    function frame(now) {
+      if (t0 === null) t0 = now;
+      var t = now - t0;
+      ctx.clearRect(0, 0, w, h);
+      ps.forEach(function (p) {
+        p.vy += 0.32; p.x += p.vx; p.y += p.vy; p.r += p.vr;
+        ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.r);
+        ctx.globalAlpha = Math.max(0, 1 - t / 1800); ctx.fillStyle = p.c;
+        ctx.fillRect(-p.s / 2, -p.s / 3, p.s, p.s * 0.66); ctx.restore();
+      });
+      if (t < 1800 && c.parentNode) requestAnimationFrame(frame);
+      else if (c.parentNode) c.parentNode.removeChild(c);
+    }
+    requestAnimationFrame(frame);
+  }
+  function clearFx() {
+    Array.prototype.forEach.call(document.querySelectorAll('.float-gain, .confetti'), function (f) { f.parentNode.removeChild(f); });
+  }
+  function floatGain(n) {
+    var f = document.createElement('div');
+    f.className = 'float-gain'; f.textContent = '+' + n; f.setAttribute('aria-hidden', 'true');
+    document.body.appendChild(f);
+    setTimeout(function () { if (f.parentNode) f.parentNode.removeChild(f); }, 950);
+  }
+
+  /* ---------- 图标和吉祥物 ---------- */
   function svgIcon(body, cls) { return '<svg class="ic' + (cls ? ' ' + cls : '') + '" viewBox="0 0 24 24" aria-hidden="true">' + body + '</svg>'; }
-  var S = ' fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"';
+  var SK = ' fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"';
   var STAR_PATH = '<path d="M12 2.8l2.85 5.78 6.38.93-4.62 4.5 1.09 6.35L12 17.36l-5.7 3 1.09-6.35-4.62-4.5 6.38-.93z" fill="currentColor" stroke-width="1.3" stroke-linejoin="round"/>';
+  var HEART_PATH = '<path d="M12 20.4s-7.6-4.5-7.6-10A4.4 4.4 0 0 1 12 7.7a4.4 4.4 0 0 1 7.6 2.7c0 5.5-7.6 10-7.6 10z" fill="currentColor" stroke-width="1.6" stroke-linejoin="round"/>';
   var ICON = {
     star: svgIcon(STAR_PATH),
     starOff: svgIcon(STAR_PATH, 'off'),
+    heart: svgIcon(HEART_PATH),
+    heartOff: svgIcon(HEART_PATH, 'off'),
     flame: svgIcon('<path d="M12 2.5c.6 3.4 5.5 5.6 5.5 11a5.5 5.5 0 0 1-11 0c0-2 .9-3.6 2-4.8.3 1.4 1 2.3 1.8 2.6C10 8.5 10.4 5 12 2.5z" fill="currentColor"/>'),
-    lock: svgIcon('<path d="M7.5 10.5V8a4.5 4.5 0 0 1 9 0v2.5"' + S + '/><rect x="5" y="10.5" width="14" height="10.5" rx="2.5" fill="currentColor"/>'),
-    check: svgIcon('<path d="M5 12.5l4.5 4.5L19 7.5"' + S.replace('2.4', '3') + '/>'),
-    x: svgIcon('<path d="M6.5 6.5l11 11M17.5 6.5l-11 11"' + S.replace('2.4', '3') + '/>'),
-    back: svgIcon('<path d="M14.5 5l-7 7 7 7"' + S + '/>'),
+    lock: svgIcon('<path d="M7.5 10.5V8a4.5 4.5 0 0 1 9 0v2.5"' + SK + '/><rect x="5" y="10.5" width="14" height="10.5" rx="2.5" fill="currentColor"/>'),
+    check: svgIcon('<path d="M5 12.5l4.5 4.5L19 7.5"' + SK.replace('2.4', '3') + '/>'),
+    x: svgIcon('<path d="M6.5 6.5l11 11M17.5 6.5l-11 11"' + SK.replace('2.4', '3') + '/>'),
+    back: svgIcon('<path d="M14.5 5l-7 7 7 7"' + SK + '/>'),
     play: svgIcon('<path d="M8 5.6v12.8a1 1 0 0 0 1.5.86l10.4-6.4a1 1 0 0 0 0-1.72L9.5 4.74A1 1 0 0 0 8 5.6z" fill="currentColor"/>'),
-    flag: svgIcon('<path d="M6 21V4"' + S + '/><path d="M6 4.5h12l-2.6 4 2.6 4H6z" fill="currentColor"/>'),
-    book: svgIcon('<path d="M5 5a2 2 0 0 1 2-2h12v15H7a2 2 0 0 0-2 2z"' + S + '/><path d="M5 20a2 2 0 0 0 2 1h12M9.5 8h5.5"' + S + '/>'),
+    flag: svgIcon('<path d="M6 21V4"' + SK + '/><path d="M6 4.5h12l-2.6 4 2.6 4H6z" fill="currentColor"/>'),
+    book: svgIcon('<path d="M5 5a2 2 0 0 1 2-2h12v15H7a2 2 0 0 0-2 2z"' + SK + '/><path d="M5 20a2 2 0 0 0 2 1h12M9.5 8h5.5"' + SK + '/>'),
     user: svgIcon('<circle cx="12" cy="8" r="4.2" fill="currentColor"/><path d="M4 20.5c.9-4 4-6 8-6s7.1 2 8 6z" fill="currentColor"/>'),
-    enter: svgIcon('<path d="M19 5v7a3 3 0 0 1-3 3H6M10 10.5 5.5 15l4.5 4.5"' + S + '/>'),
-    redo: svgIcon('<path d="M19 12a7 7 0 1 1-2.3-5.2"' + S + '/><path d="M19.5 3.5v4.2h-4.2"' + S + '/>'),
-    share: svgIcon('<path d="M12 15V4M8 7.5l4-4 4 4M5 12v7.5h14V12"' + S + '/>'),
-    trophy: svgIcon('<path d="M7 4h10v5a5 5 0 0 1-10 0z" fill="currentColor"/><path d="M7 5.5H4.5c0 2 1 3.4 2.8 3.7M17 5.5h2.5c0 2-1 3.4-2.8 3.7M12 14v3.5M8.5 20.5h7"' + S + '/>'),
+    enter: svgIcon('<path d="M19 5v7a3 3 0 0 1-3 3H6M10 10.5 5.5 15l4.5 4.5"' + SK + '/>'),
+    redo: svgIcon('<path d="M19 12a7 7 0 1 1-2.3-5.2"' + SK + '/><path d="M19.5 3.5v4.2h-4.2"' + SK + '/>'),
+    share: svgIcon('<path d="M12 15V4M8 7.5l4-4 4 4M5 12v7.5h14V12"' + SK + '/>'),
+    trophy: svgIcon('<path d="M7 4h10v5a5 5 0 0 1-10 0z" fill="currentColor"/><path d="M7 5.5H4.5c0 2 1 3.4 2.8 3.7M17 5.5h2.5c0 2-1 3.4-2.8 3.7M12 14v3.5M8.5 20.5h7"' + SK + '/>'),
   };
+  // 吉祥物：一条小蛇。mood 为空是平常的样子，happy 是答对，sad 是答错
+  function mascot(mood, big) {
+    return '<svg class="mascot' + (mood ? ' is-' + mood : '') + (big ? ' is-big' : '') + '" viewBox="0 0 72 82" aria-hidden="true">' +
+      '<path class="m-tongue" d="M36 62v9M36 71l-4 5M36 71l4 5"/><circle class="m-skin" cx="36" cy="34" r="31"/>' +
+      '<circle class="m-cheek" cx="14" cy="43" r="5"/><circle class="m-cheek" cx="58" cy="43" r="5"/>' +
+      '<g class="m-open"><circle class="m-eye" cx="25" cy="29" r="9"/><circle class="m-eye" cx="47" cy="29" r="9"/>' +
+      '<circle class="m-pupil" cx="26.5" cy="31" r="4.5"/><circle class="m-pupil" cx="45.5" cy="31" r="4.5"/></g>' +
+      '<path class="m-line m-shut" d="M17 31q8-9 16 0M39 31q8-9 16 0"/>' +
+      '<path class="m-line m-smile" d="M28 46q8 7 16 0"/><path class="m-line m-frown" d="M29 50q7-6 14 0"/></svg>';
+  }
+  function mascotRow(html, mood) { return '<div class="mrow">' + mascot(mood) + '<div class="bubble">' + html + '</div></div>'; }
+  function setMood(m) { var el = $('.mrow .mascot'); if (el) el.setAttribute('class', 'mascot' + (m ? ' is-' + m : '')); }
 
   /* ---------- 进度计算 ---------- */
   function rankInfo(xp) {
@@ -3629,7 +4053,8 @@ var TypeCheck = (function () {
     var cur = RANKS[i], next = RANKS[i + 1];
     return { lv: i + 1, name: cur.name, next: next, pct: next ? Math.round((xp - cur.xp) / (next.xp - cur.xp) * 100) : 100, need: next ? next.xp - xp : 0 };
   }
-  function starsOf(i) { var r = state.levels[LEVELS[i].id]; return r ? r.stars : 0; }
+  function idOf(i) { return LEVELS[i].id; }
+  function starsOf(i) { var r = state.levels[idOf(i)]; return r ? r.stars : 0; }
   function totalStars() { var n = 0; for (var i = 0; i < LEVELS.length; i++) n += starsOf(i); return n; }
   function currentIndex() { for (var i = 0; i < LEVELS.length; i++) if (!starsOf(i)) return i; return LEVELS.length; }
   function unlocked(i) { return i <= currentIndex(); }
@@ -3637,6 +4062,25 @@ var TypeCheck = (function () {
     return Object.keys(state.wrong).filter(function (id) { return Q_INDEX[id]; })
       .sort(function (a, b) { return Q_INDEX[a].li - Q_INDEX[b].li || (a < b ? -1 : 1); });
   }
+  function handTyped(i) { var id = idOf(i); return !!(state.syn[id] && state.typed[id]); }
+  function stageDone(i, k) {
+    var id = idOf(i);
+    if (k === 0) return !!(state.learned[id] || state.syn[id] || state.typed[id] || starsOf(i));
+    if (k === 1) return !!state.syn[id];
+    if (k === 2) return !!state.typed[id];
+    return starsOf(i) > 0;
+  }
+  // 每一步都要先完成前一步；答题之前，语法和例子都必须亲手打过
+  function stageOpen(i, k) {
+    var id = idOf(i);
+    if (k === 0) return true;
+    if (k === 1) return stageDone(i, 0);
+    if (k === 2) return !!(state.syn[id] || state.typed[id]);
+    return handTyped(i);
+  }
+  function nextStage(i) { for (var k = 0; k < 4; k++) if (!stageDone(i, k)) return k; return 3; }
+  function lineCount(code) { return code.split('\n').filter(function (l) { return l.trim() !== ''; }).length; }
+  function syntaxLines(lv) { return lv.drills.reduce(function (n, d) { return n + lineCount(d.code); }, 0); }
 
   /* ---------- 路由（只用 #name）---------- */
   function route() {
@@ -3644,9 +4088,8 @@ var TypeCheck = (function () {
     if (h === 'notebook') return { v: 'book' };
     if (h === 'me') return { v: 'me' };
     if (h === 'review') return { v: 'review' };
-    if ((m = /^level-(\d+)$/.exec(h))) return { v: 'lesson', i: +m[1] - 1 };
-    if ((m = /^quiz-(\d+)$/.exec(h))) return { v: 'quiz', i: +m[1] - 1 };
-    if ((m = /^type-(\d+)$/.exec(h))) return { v: 'type', i: +m[1] - 1 };
+    if ((m = /^level-(\d+)$/.exec(h))) return { v: 'hub', i: +m[1] - 1 };
+    if ((m = /^(learn|syntax|type|quiz)-(\d+)$/.exec(h))) return { v: m[1], i: +m[2] - 1 };
     return { v: 'map' };
   }
   function go(name, replace) {
@@ -3657,40 +4100,46 @@ var TypeCheck = (function () {
   }
 
   var $view = $('#view'), $bar = $('#bar');
-  var quiz = null, pendingReview = null, resetAsk = false;
+  var S = null, pendingReview = null, resetAsk = false;
 
   function render() {
-    var r = route();
-    if ((r.v === 'lesson' || r.v === 'quiz' || r.v === 'type') && (!LEVELS[r.i] || !unlocked(r.i))) { go('levels', true); return; }
-    // 代码还没亲手打过，就不能答题
-    if (r.v === 'quiz' && !state.typed[LEVELS[r.i].id]) { go('type-' + (r.i + 1), true); return; }
-    resetAsk = false; clearFloat();
+    var r = route(), k = STAGE_OF[r.v];
+    document.body.classList.remove('has-sheet');
+    if (r.i != null) {
+      if (!LEVELS[r.i] || !unlocked(r.i)) { go('levels', true); return; }
+      if (k != null && !stageOpen(r.i, k)) { go('level-' + (r.i + 1), true); return; }
+    }
+    resetAsk = false; clearFx(); S = null;
     if (r.v === 'map') viewMap();
     else if (r.v === 'book') viewBook();
     else if (r.v === 'me') viewMe();
-    else if (r.v === 'lesson') viewLesson(r.i);
-    else if (r.v === 'type') { startTyping(r.i); viewTyping(); }
-    else if (r.v === 'quiz') { startLevelQuiz(r.i); viewQuiz(); }
+    else if (r.v === 'hub') viewHub(r.i);
+    else if (k != null) { startStage(r.i, k); viewSession(); }
     else if (r.v === 'review') {
       var ids = pendingReview || wrongIds(); pendingReview = null;
       ids = ids.filter(function (id) { return state.wrong[id]; });
       if (!ids.length) { go('notebook', true); return; }
-      startReview(ids); viewQuiz();
+      startReview(ids); viewSession();
     }
     if (r.v === 'map') focusMap(); else window.scrollTo(0, 0);
   }
 
   /* ---------- 公共片段 ---------- */
+  function rankBadge(lv) { return '<span class="rank-badge"><small>Lv</small>' + lv + '</span>'; }
+  function flameStat() {
+    return '<span class="stat stat-fire' + (state.streak ? '' : ' is-zero') + '" role="img" aria-label="连胜 ' + state.streak + ' 题">' + ICON.flame + '<span>' + state.streak + '</span></span>';
+  }
   function topMain() {
     var r = rankInfo(state.xp);
     return '<header class="top">' +
-      '<button class="rank" data-act="go" data-to="me" aria-label="等级 ' + r.lv + '，' + esc(r.name) + '，积分 ' + state.xp + '">' +
-      '<span class="rank-badge"><small>Lv</small>' + r.lv + '</span>' +
+      '<button class="rank" data-act="go" data-to="me" aria-label="等级 ' + r.lv + '，' + esc(r.name) + '，积分 ' + state.xp + '">' + rankBadge(r.lv) +
       '<span class="rank-main"><span class="rank-name">' + esc(r.name) + ' · <span class="num">' + state.xp + '</span> 分</span>' +
       '<span class="xpbar"><i style="width:' + r.pct + '%"></i></span></span></button>' +
-      '<span class="stat stat-star" role="img" aria-label="星星 ' + totalStars() + ' 颗">' + ICON.star + '<span>' + totalStars() + '</span></span>' +
-      '<span class="stat stat-fire' + (state.streak ? '' : ' is-zero') + '" role="img" aria-label="连胜 ' + state.streak + ' 题">' + ICON.flame + '<span>' + state.streak + '</span></span>' +
-      '</header>';
+      '<span class="stat stat-star" role="img" aria-label="星星 ' + totalStars() + ' 颗">' + ICON.star + '<span>' + totalStars() + '</span></span>' + flameStat() + '</header>';
+  }
+  function navTop(to, label, title) {
+    return '<header class="top top-nav"><button class="icon-btn" data-act="go" data-to="' + to + '" aria-label="' + label + '">' + ICON.back + '</button>' +
+      '<span class="top-title">' + title + '</span><span class="top-spacer"></span></header>';
   }
   function tabbar(on) {
     var wn = wrongIds().length;
@@ -3701,6 +4150,14 @@ var TypeCheck = (function () {
     return '<nav class="tabbar" aria-label="主导航"><div class="bar-in">' + tab('levels', '闯关', ICON.flag) + tab('notebook', '错题本', ICON.book, wn) + tab('me', '我的', ICON.user) + '</div></nav>';
   }
   function starRow(n) { var s = ''; for (var i = 0; i < 3; i++) s += i < n ? ICON.star : ICON.starOff; return s; }
+  function upCard(r0, r1) {
+    return r1 > r0 ? '<div class="levelup"><small>升级了</small><b>Lv' + r1 + ' ' + esc(RANKS[r1 - 1].name) + '</b></div>' : '';
+  }
+  function tiles(list) {
+    return '<div class="tiles">' + list.map(function (t) { return '<div class="tile"><b>' + t[0] + '</b><span>' + t[1] + '</span></div>'; }).join('') + '</div>';
+  }
+  function levelName(li) { return '第 ' + (li + 1) + ' 关 ' + esc(LEVELS[li].title); }
+  function chapterOf(lv) { return CHAPTERS.filter(function (c) { return c.id === lv.ch; })[0]; }
 
   /* ---------- 地图 ---------- */
   function mapLayout() {
@@ -3726,14 +4183,15 @@ var TypeCheck = (function () {
   }
   var HEAD_SVG = '<svg class="head" viewBox="0 0 84 100" aria-hidden="true"><circle class="ring" cx="42" cy="42" r="40"/>' +
     '<path class="tongue" d="M42 80v10M42 90l-5 7M42 90l5 7"/><circle class="skin" cx="42" cy="42" r="38"/>' +
-    '<circle class="eye" cx="28" cy="38" r="10"/><circle class="eye" cx="56" cy="38" r="10"/>' +
-    '<circle class="pupil" cx="29.5" cy="41.5" r="5"/><circle class="pupil" cx="54.5" cy="41.5" r="5"/></svg>';
+    '<g class="eyes"><circle class="eye" cx="28" cy="38" r="10"/><circle class="eye" cx="56" cy="38" r="10"/>' +
+    '<circle class="pupil" cx="29.5" cy="41.5" r="5"/><circle class="pupil" cx="54.5" cy="41.5" r="5"/></g></svg>';
 
   function viewMap() {
     var lay = mapLayout(), cur = currentIndex(), allDone = cur >= LEVELS.length;
     var headIdx = allDone ? LEVELS.length - 1 : cur;
+    var fresh = !state.answered && !Object.keys(state.learned).length && !Object.keys(state.typed).length && !Object.keys(state.syn).length;
     var html = topMain();
-    if (!state.answered && !Object.keys(state.typed).length) html += '<p class="hello"><b>欢迎来到蟒蛇闯关。</b>一关只学一个知识点：先看讲解和图示，再把例子代码亲手打一遍，最后做几道题。点蛇头，从第 1 关开始。</p>';
+    if (fresh) html += '<p class="hello"><b>欢迎来到蟒蛇闯关。</b>每一关四步：看讲解，亲手打语法，亲手打例子，最后答题。点蛇头，从第 1 关开始。</p>';
     html += '<div class="map" style="height:' + lay.h + 'px">';
     var n0 = lay.nodes[0];
     html += '<svg class="snake" viewBox="0 0 100 ' + lay.h + '" preserveAspectRatio="none" aria-hidden="true">' +
@@ -3742,20 +4200,25 @@ var TypeCheck = (function () {
       (headIdx > 0 ? '<path class="body" d="' + pathThrough(lay.nodes, 0, headIdx) + '"/><path class="belly" d="' + pathThrough(lay.nodes, 0, headIdx) + '"/>' : '') +
       '</svg>';
     lay.heads.forEach(function (hd) {
-      var ids = LEVELS.filter(function (l) { return l.ch === hd.ch.id; });
-      var done = ids.filter(function (l) { return state.levels[l.id] && state.levels[l.id].stars; }).length;
+      var ls = LEVELS.filter(function (l) { return l.ch === hd.ch.id; });
+      var done = ls.filter(function (l) { return state.levels[l.id] && state.levels[l.id].stars; }).length;
       html += '<div class="chap" style="top:' + hd.y + 'px"><span class="chap-no">第' + CN[hd.ci] + '章</span>' +
         '<span class="chap-main"><span class="chap-title">' + esc(hd.ch.title) + '</span><span class="chap-sub">' + esc(hd.ch.sub) + '</span></span>' +
-        '<span class="chap-prog" aria-label="已通过 ' + done + ' 关，共 ' + ids.length + ' 关">' + done + '/' + ids.length + '</span></div>';
+        '<span class="chap-prog" aria-label="已通过 ' + done + ' 关，共 ' + ls.length + ' 关">' + done + '/' + ls.length + '</span></div>';
     });
     lay.nodes.forEach(function (n) {
-      var lv = LEVELS[n.i], st = starsOf(n.i), rec = state.levels[lv.id];
+      var lv = LEVELS[n.i], st = starsOf(n.i);
       var status = (!allDone && n.i === headIdx) ? 'current' : (st ? 'done' : 'locked');
       var side = n.x < 50 ? 'on-left' : 'on-right';
       var inner, extra = '', aria = '第 ' + (n.i + 1) + ' 关，' + lv.title;
-      if (status === 'current') { inner = HEAD_SVG; extra = '<span class="node-go">' + (rec && rec.plays ? '再挑战' : (state.typed[lv.id] || state.tpos[lv.id]) ? '继续' : '开始') + '</span>'; aria += '，当前关卡'; }
-      else if (status === 'done') { inner = '<span class="node-dot">' + (n.i + 1) + '</span>'; extra = '<span class="node-stars">' + starRow(st) + '</span>' + (state.typed[lv.id] ? '' : '<span class="node-note">代码还没手打</span>'); aria += '，已获得 ' + st + ' 颗星'; }
-      else { inner = '<span class="node-dot">' + ICON.lock + '</span>'; aria += '，未解锁'; }
+      if (status === 'current') {
+        inner = HEAD_SVG;
+        extra = '<span class="node-go">' + (nextStage(n.i) > 0 ? '继续' : '开始') + '</span>'; aria += '，当前关卡';
+      } else if (status === 'done') {
+        inner = '<span class="node-dot">' + (n.i + 1) + '</span>';
+        extra = '<span class="node-stars">' + starRow(st) + '</span>' + (handTyped(n.i) ? '' : '<span class="node-note">代码还没手打</span>');
+        aria += '，已获得 ' + st + ' 颗星';
+      } else { inner = '<span class="node-dot">' + ICON.lock + '</span>'; aria += '，未解锁'; }
       html += '<button class="node is-' + status + ' ' + side + '" style="left:' + n.x + '%;top:' + n.y + 'px" data-act="open" data-i="' + n.i + '" aria-label="' + esc(aria) + '">' +
         inner + '<span class="node-label"><span class="node-no">第 ' + pad2(n.i + 1) + ' 关</span><span class="node-title">' + esc(lv.title) + '</span>' + extra + '</span></button>';
     });
@@ -3771,125 +4234,311 @@ var TypeCheck = (function () {
     else window.scrollTo(0, 0);
   }
 
-  /* ---------- 讲解 ---------- */
-  function sec(tag, body, cls) { return '<section class="sec' + (cls ? ' ' + cls : '') + '"><h2 class="sec-tag">' + tag + '</h2>' + body + '</section>'; }
-  function viewLesson(i) {
-    var lv = LEVELS[i], d = DIAGRAMS[lv.id], ch = CHAPTERS.filter(function (c) { return c.id === lv.ch; })[0];
-    var html = '<header class="top top-nav"><button class="icon-btn" data-act="go" data-to="levels" aria-label="返回地图">' + ICON.back + '</button>' +
-      '<span class="top-title">第 ' + (i + 1) + ' 关 / 共 ' + LEVELS.length + ' 关</span><span class="top-spacer"></span></header>';
-    html += '<article class="lesson"><div class="lesson-head"><span class="eyebrow">第 ' + pad2(i + 1) + ' 关 · ' + esc(ch.title) + '</span>' +
-      '<h1>' + esc(lv.title) + '</h1><p class="hook">' + fmt(lv.hook) + '</p></div>';
-    html += '<figure class="fig">' + d.svg + '<figcaption>' + fmt(d.cap) + '</figcaption></figure>';
-    html += sec('怎么写', '<pre class="code" tabindex="0">' + hl(lv.syntax) + '</pre><ul>' + lv.how.map(function (t) { return '<li>' + fmt(t) + '</li>'; }).join('') + '</ul>');
-    html += sec('什么意思', '<p>' + fmt(lv.mean) + '</p>');
-    html += sec('有什么用', '<p>' + fmt(lv.use) + '</p>');
-    html += sec('试一试', '<div class="demo"><pre class="code" tabindex="0">' + hl(lv.example.code) + '</pre>' +
-      '<div class="demo-bar"><button class="demo-btn demo-run" data-act="run" data-i="' + i + '">' + ICON.play + '运行</button>' +
-      '<button class="demo-btn demo-copy" data-act="copy" data-i="' + i + '">复制代码</button></div>' +
-      '<div class="demo-out" id="demo-out" hidden><div class="demo-out-label">运行结果</div><pre id="demo-pre" aria-live="polite"></pre></div></div>' +
-      '<p class="demo-note">' + (lv.example.note ? esc(lv.example.note) + ' ' : '') + '先猜一猜会显示什么，再点“运行”。看懂之后，下一步要把这段代码亲手打一遍。</p>');
-    html += sec('小心', '<p>' + fmt(lv.tip) + '</p>', 'sec-tip');
-    html += '</article>';
+  /* ---------- 关卡页：四个步骤 ---------- */
+  function viewHub(i) {
+    var lv = LEVELS[i], id = lv.id, no = i + 1, nx = nextStage(i), all = stageDone(i, 3) && handTyped(i);
+    var subs = ['看图示和讲解 · 4 张卡片', '拼一拼，再亲手打 · ' + syntaxLines(lv) + ' 行', '把完整的例子程序打出来 · ' + lineCount(lv.example.code) + ' 行',
+      lv.questions.length + ' 道题 · ' + HEARTS + ' 颗红心'];
+    var html = navTop('levels', '返回地图', '第 ' + no + ' 关 / 共 ' + LEVELS.length + ' 关');
+    html += '<div class="hub"><div class="lesson-head"><span class="eyebrow">第 ' + pad2(no) + ' 关 · ' + esc(chapterOf(lv).title) + '</span><h1>' + esc(lv.title) + '</h1></div>' +
+      mascotRow('<p class="bubble-text">' + fmt(lv.hook) + '</p>', all ? 'happy' : '') + '<ol class="stages">';
+    STAGES.forEach(function (sg, k) {
+      var done = stageDone(i, k), open = stageOpen(i, k), isNext = !all && k === nx && open;
+      var stateHtml = '', going = (k === 1 && state.spos[id] > 0) || (k === 2 && state.tpos[id] > 0);
+      if (done) stateHtml = k === 3 ? '<span class="stage-stars">' + starRow(starsOf(i)) + '</span>' : '完成';
+      else if (!open) stateHtml = ICON.lock;
+      else if (going) stateHtml = '进行中';
+      html += '<li><button class="stage' + (done ? ' is-done' : '') + (isNext ? ' is-next' : '') + (open ? '' : ' is-locked') + '" data-act="stage" data-i="' + i + '" data-k="' + k + '">' +
+        '<span class="stage-no">' + (done ? ICON.check : (k + 1)) + '</span><span class="stage-main"><b>' + sg.name + '</b><span>' + subs[k] + '</span></span>' +
+        '<span class="stage-state">' + stateHtml + '</span></button></li>';
+    });
+    html += '</ol></div>';
     $view.innerHTML = html;
-    $bar.innerHTML = '<div class="actionbar"><div class="bar-in">' + (state.typed[lv.id]
-      ? '<div class="bar-row"><button class="btn btn-ghost bar-side" data-act="go" data-to="type-' + (i + 1) + '">再打一遍</button>' +
-        '<button class="btn" data-act="start" data-i="' + i + '">开始答题 · ' + lv.questions.length + ' 题</button></div>'
-      : '<button class="btn" data-act="go" data-to="type-' + (i + 1) + '">下一步：手打代码 · ' + typeTodo(lv).length + ' 行</button>') + '</div></div>';
+    var label = all ? (starsOf(i) < 3 ? '再闯一次，冲三星' : '再闯一次') : STAGES[nx].go;
+    $bar.innerHTML = '<div class="actionbar"><div class="bar-in"><button class="btn" data-act="stage" data-i="' + i + '" data-k="' + (all ? 3 : nx) + '">' + label + '</button></div></div>';
+  }
+
+  /* ---------- 一步一屏的流程 ---------- */
+  function newSession(mode, li, steps) {
+    return { mode: mode, li: li, steps: steps, pos: 0, total: steps.length, right: 0, gain: 0, fails: 0, missed: 0, cleared: 0,
+      hearts: mode === 'quiz' ? HEARTS : 0, first: true, done: false, failed: false, sheet: null, peek: false, lastPct: 0, rank0: rankInfo(state.xp).lv };
+  }
+  function sec(tag, body, cls) { return '<section class="sec' + (cls ? ' ' + cls : '') + '"><h2 class="sec-tag">' + tag + '</h2>' + body + '</section>'; }
+  function makeGroup(say, code, mode, tag) {
+    var ls = code.split('\n'), todo = [];
+    ls.forEach(function (ln, k) { if (ln.trim() !== '') todo.push(k); });
+    return { say: say, lines: ls, todo: todo, mode: mode, tag: tag };
+  }
+  function typeSteps(g) { return g.todo.map(function (_, j) { return { kind: 'type', g: g, j: j }; }); }
+  // 适合拼积木的：单行、不是注释、词数不多
+  function buildable(d) {
+    if (d.code.indexOf('\n') >= 0 || /^\s*#/.test(d.code)) return false;
+    var n = TypeCheck.tokenize(d.code).length;
+    return n >= 3 && n <= 9;
+  }
+  // 混进去的干扰积木：都是初学者常见的写错方式
+  function decoys(toks) {
+    var have = {}, out = [];
+    toks.forEach(function (t) { have[t.raw] = 1; });
+    function add(s) { if (!have[s] && out.indexOf(s) < 0 && out.length < 2) out.push(s); }
+    toks.forEach(function (t) {
+      if (t.t === 'name' && BI.test(t.s)) add(t.s.charAt(0).toUpperCase() + t.s.slice(1));
+      if (t.t === 'name' && /^(True|False|None)$/.test(t.s)) add(t.s.toLowerCase());
+      if (t.t === 'str' && !t.p && /^[一-鿿A-Za-z]+$/.test(t.s)) add(t.s);
+      if (t.t === 'op') {
+        var swap = { '=': '==', '==': '=', ':': ';', '(': '[', '[': '(', '**': '^', '//': '\\', '!=': '<>', '>=': '=>', '<=': '=<' }[t.s];
+        if (swap) add(swap);
+      }
+    });
+    if (!out.length) add(';');
+    return out;
+  }
+  function makeBuild(d) {
+    var toks = TypeCheck.tokenize(d.code);
+    var chips = toks.map(function (t) { return t.raw; }).concat(decoys(toks)).map(function (s, k) { return { id: k, s: s }; });
+    return { kind: 'build', say: d.say, answer: d.code, chips: shuffle(chips), picked: [] };
+  }
+  function makeQ(q, li, retry) {
+    var st = { kind: 'q', q: q, li: li, retry: !!retry, done: false, ok: false, picked: -1, input: '', gain: 0, bonus: 0 };
+    if (q.type !== 'fill') st.opts = shuffle(q.opts);
+    return st;
   }
   function demoLines(ex) {
     var text = ex.out.replace(/⟦(\d+)-(\d+)⟧/g, function (m, a, b) { return String(+a + Math.floor(Math.random() * (+b - +a + 1))); });
     return text.split('\n').map(function (ln) { return esc(ln).replace(/«([^»]*)»/g, '<span class="typed">$1</span>'); });
   }
-  var runTimers = [];
-  function runDemo(i) {
-    var ex = LEVELS[i].example, box = $('#demo-out'), pre = $('#demo-pre');
-    if (!box) return;
-    runTimers.forEach(clearTimeout); runTimers = [];
-    var lines = demoLines(ex);
-    box.hidden = false; pre.innerHTML = '';
-    var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (reduce) { pre.innerHTML = lines.join('\n'); return; }
-    lines.forEach(function (ln, k) {
-      runTimers.push(setTimeout(function () {
-        pre.insertAdjacentHTML('beforeend', '<span class="ln-in">' + (ln || ' ') + '</span>');
-        if (k === 0) { try { box.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); } catch (e) {} }
-      }, k * 110));
-    });
+  function learnSteps(i) {
+    var lv = LEVELS[i], d = DIAGRAMS[lv.id];
+    return [
+      { kind: 'card', html: '<div class="lesson-head"><span class="eyebrow">第 ' + pad2(i + 1) + ' 关 · ' + esc(chapterOf(lv).title) + '</span><h1>' + esc(lv.title) + '</h1>' +
+        '<p class="hook">' + fmt(lv.hook) + '</p></div><figure class="fig">' + d.svg + '<figcaption>' + fmt(d.cap) + '</figcaption></figure>' },
+      { kind: 'card', html: sec('怎么写', '<pre class="code" tabindex="0">' + hl(lv.syntax) + '</pre><ul>' + lv.how.map(function (t) { return '<li>' + fmt(t) + '</li>'; }).join('') + '</ul>') },
+      { kind: 'card', html: sec('什么意思', '<p>' + fmt(lv.mean) + '</p>') + sec('有什么用', '<p>' + fmt(lv.use) + '</p>') },
+      { kind: 'card', html: sec('试一试', '<div class="demo"><pre class="code" tabindex="0">' + hl(lv.example.code) + '</pre>' +
+        '<div class="demo-bar"><button class="demo-btn demo-run" data-act="run" data-i="' + i + '">' + ICON.play + '运行</button>' +
+        '<button class="demo-btn demo-copy" data-act="copy" data-i="' + i + '">复制代码</button></div>' +
+        '<div class="demo-out" id="demo-out" hidden><div class="demo-out-label">运行结果</div><pre id="demo-pre" aria-live="polite"></pre></div></div>' +
+        '<p class="demo-note">' + (lv.example.note ? esc(lv.example.note) + ' ' : '') + '先猜一猜会显示什么，再点“运行”。后面要把这段代码亲手打一遍。</p>') +
+        sec('小心', '<p>' + fmt(lv.tip) + '</p>', 'sec-tip') },
+    ];
+  }
+  function startStage(i, k) {
+    var lv = LEVELS[i], id = lv.id, steps = [], pos = 0;
+    if (k === 0) {
+      var firstLook = !stageDone(i, 0);
+      S = newSession('learn', i, learnSteps(i)); S.first = firstLook;
+    } else if (k === 1) {
+      var nb = 0, key = lv.drills[0];
+      lv.drills.forEach(function (d) {
+        if (nb < 2 && buildable(d)) { steps.push(makeBuild(d)); nb++; }
+        steps = steps.concat(typeSteps(makeGroup(d.say, d.code, 'copy', 'syn')));
+        if (d.key) key = d;
+      });
+      steps = steps.concat(typeSteps(makeGroup(key.say, key.code, 'recall', 'recall')));
+      S = newSession('syntax', i, steps); S.first = !state.syn[id]; pos = state.spos[id] || 0;
+    } else if (k === 2) {
+      S = newSession('type', i, typeSteps(makeGroup('把完整的例子程序打出来', lv.example.code, 'copy', 'ex')));
+      S.first = !state.typed[id]; pos = state.tpos[id] || 0;
+    } else {
+      S = newSession('quiz', i, lv.questions.map(function (q) { return makeQ(q, i); }));
+    }
+    S.pos = pos > 0 && pos < S.steps.length ? pos : 0;
+    S.lastPct = pct();
+  }
+  function startReview(ids) {
+    S = newSession('review', -1, shuffle(ids).map(function (id) { return makeQ(Q_INDEX[id].q, Q_INDEX[id].li); }));
+  }
+  function pct() {
+    if (S.mode === 'quiz' || S.mode === 'review') return Math.round(S.right / S.total * 100);
+    return Math.round(S.pos / S.steps.length * 100);
+  }
+  function heartsHtml(lost) {
+    var s = '';
+    for (var h = 0; h < HEARTS; h++) s += h < S.hearts ? ICON.heart : (h === lost ? ICON.heartOff.replace('class="ic off"', 'class="ic off lost"') : ICON.heartOff);
+    return s;
+  }
+  function sessionTop() {
+    var right;
+    if (S.mode === 'quiz') right = '<span class="hearts" id="hearts" role="img" aria-label="还剩 ' + S.hearts + ' 颗红心">' + heartsHtml(-1) + '</span>';
+    else if (S.mode === 'review') right = flameStat();
+    else right = '<span class="top-count num" id="s-count">' + (S.pos + 1) + '/' + S.steps.length + '</span>';
+    return '<header class="top top-nav"><button class="icon-btn" data-act="quit" aria-label="退出">' + ICON.x + '</button>' +
+      '<div class="pbar" id="pbar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="' + pct() + '"><i style="width:' + S.lastPct + '%"></i></div>' + right + '</header>';
+  }
+  function tickBar() {
+    var b = $('#pbar');
+    if (!b) return;
+    var p = pct(), bar = b.firstChild;
+    S.lastPct = p; b.setAttribute('aria-valuenow', p);
+    requestAnimationFrame(function () { bar.style.width = p + '%'; });
+  }
+  function stepMeta(tag, from) { return '<div class="q-meta"><span class="q-type">' + tag + '</span>' + (from ? '<span class="q-from">' + from + '</span>' : '') + '</div>'; }
+  function viewSession() {
+    var st = S.steps[S.pos];
+    $view.innerHTML = sessionTop() + '<div class="step anim-in" id="step">' + stepHtml(st) + '</div>';
+    $bar.innerHTML = barHtml(st);
+    tickBar();
+    if (st.kind === 'type') refreshTyping();
+  }
+  function stepHtml(st) {
+    if (st.kind === 'card') return st.html;
+    if (st.kind === 'build') return buildHtml(st);
+    if (st.kind === 'type') return typeHtml();
+    return qHtml(st);
+  }
+  function barHtml(st) {
+    var btn = '';
+    if (st.kind === 'card') {
+      var last = S.pos === S.steps.length - 1;
+      btn = '<button class="btn" data-act="next">' + (last ? (nextStage(S.li) <= 1 ? '学完了，去打语法' : '学完了') : '继续') + '</button>';
+    } else if (st.kind === 'build') btn = '<button class="btn" id="check" data-act="check"' + (st.picked.length ? '' : ' disabled') + '>检查</button>';
+    else if (st.kind === 'q') btn = '<button class="btn" id="check" data-act="check"' + (canCheck(st) ? '' : ' disabled') + '>检查</button>';
+    return btn ? '<div class="actionbar"><div class="bar-in">' + btn + '</div></div>' : '';
+  }
+  function showSheet(good, bodyHtml, btnText, act) {
+    S.sheet = act;
+    document.body.classList.add('has-sheet');
+    $bar.innerHTML = '<div class="sheet ' + (good ? 'good' : 'bad') + '" id="sheet" role="status"><div class="bar-in"><div class="sheet-body">' + bodyHtml + '</div>' +
+      '<button class="btn ' + (good ? 'btn-good' : 'btn-bad') + '" data-act="sheet-ok">' + btnText + '</button></div></div>';
+  }
+  function closeSheet() { if (S) S.sheet = null; document.body.classList.remove('has-sheet'); }
+  function advance() {
+    if (!S || S.done) return;
+    var prev = S.steps[S.pos];
+    closeSheet();
+    if (S.failed) { finishSession(); return; }
+    S.pos++; S.peek = false;
+    if (S.mode === 'syntax') state.spos[idOf(S.li)] = S.pos;
+    else if (S.mode === 'type') state.tpos[idOf(S.li)] = S.pos;
+    if (S.pos >= S.steps.length) { finishSession(); return; }
+    save();
+    var st = S.steps[S.pos];
+    if (prev.kind === 'type' && st.kind === 'type' && $('#type-input')) {
+      // 连着打字时不重画整屏，输入框不失去焦点，键盘就不会收起
+      refreshTyping(st.g === prev.g ? '打对了！接着打下一行。' : st.g.mode === 'recall' ? '打对了！最后一步：不看答案，自己打一遍。' : '打对了！下一句。', 'good');
+      tickBar();
+      var c = $('#s-count'); if (c) c.textContent = (S.pos + 1) + '/' + S.steps.length;
+      var tg = $('#type-target'); tg.classList.remove('flash'); void tg.offsetWidth; tg.classList.add('flash');
+      $('#type-input').focus();
+      try { $('#type-label').scrollIntoView({ block: 'nearest' }); } catch (e) {}
+    } else { viewSession(); window.scrollTo(0, 0); }
   }
 
-  /* ---------- 手打代码 ---------- */
-  var DOT = '<i class="sp">·</i>';
-  var TYPE_KEYS = ['(', ')', '"', "'", ':', '=', ',', '.', '[', ']', '{', '}', '+', '-', '*', '/', '%', '<', '>', '!', '_', '#'];
-  var typing = null;
-  function typeTodo(lv) {
-    var todo = [];
-    lv.example.code.split('\n').forEach(function (ln, k) { if (ln.trim() !== '') todo.push(k); });
-    return todo;
+  /* ---------- 拼积木 ---------- */
+  function chipOf(st, id) { return st.chips.filter(function (c) { return c.id === id; })[0]; }
+  function chipBtn(c) { return '<button class="chip" type="button" data-act="chip" data-id="' + c.id + '">' + esc(c.s) + '</button>'; }
+  function trayHtml(st) {
+    return st.picked.length ? st.picked.map(function (id) { return chipBtn(chipOf(st, id)); }).join('') : '<span class="tray-empty">点下面的积木，按顺序拼出这行代码</span>';
   }
-  function startTyping(i) {
-    var lv = LEVELS[i], todo = typeTodo(lv), pos = state.tpos[lv.id] || 0;
-    if (pos < 0 || pos >= todo.length) pos = 0;
-    typing = { li: i, lines: lv.example.code.split('\n'), todo: todo, pos: pos, fails: 0, gain: 0, finished: false, rank0: rankInfo(state.xp).lv };
+  function bankHtml(st) {
+    return st.chips.map(function (c) { return st.picked.indexOf(c.id) >= 0 ? '<span class="chip chip-ghost" aria-hidden="true">' + esc(c.s) + '</span>' : chipBtn(c); }).join('');
   }
-  function targetHtml(line) {
-    var ind = /^ */.exec(line)[0];
-    return ind.replace(/ /g, DOT) + hl(line.slice(ind.length), '', true);
+  function buildHtml(st) {
+    return stepMeta('拼代码', levelName(S.li)) + mascotRow('<h1 class="q-stem">' + fmt(st.say) + '</h1>', '') +
+      '<div class="tray" id="tray" aria-label="你拼出的代码">' + trayHtml(st) + '</div><div class="bank" id="bank" aria-label="可以用的积木">' + bankHtml(st) + '</div>';
   }
-  function typeCodeHtml() {
-    var no = 0;
-    return typing.lines.map(function (ln) {
-      if (ln.trim() === '') return '<span class="tline is-blank"><i></i> </span>';
-      var j = no++, cls = (typing.finished || j < typing.pos) ? 'is-done' : j === typing.pos ? 'is-now' : 'is-todo';
-      return '<span class="tline ' + cls + '"><i>' + (j + 1) + '</i>' + hl(ln) + '</span>';
-    }).join('');
+  function tapChip(el) {
+    var st = S && !S.done ? S.steps[S.pos] : null;
+    if (!st || st.kind !== 'build' || S.sheet) return;
+    var id = +el.getAttribute('data-id'), from = el.getBoundingClientRect(), k = st.picked.indexOf(id);
+    if (k >= 0) st.picked.splice(k, 1); else st.picked.push(id);
+    $('#tray').innerHTML = trayHtml(st); $('#bank').innerHTML = bankHtml(st);
+    var c = $('#check'); if (c) c.disabled = !st.picked.length;
+    sfx('tap');
+    var now = document.querySelector('button.chip[data-id="' + id + '"]');
+    if (now && !reduceMotion()) {   // 让积木从原来的位置“飞”到新位置
+      var to = now.getBoundingClientRect();
+      now.style.transition = 'none';
+      now.style.transform = 'translate(' + (from.left - to.left) + 'px,' + (from.top - to.top) + 'px)';
+      void now.offsetWidth;
+      now.style.transition = 'transform .2s ease'; now.style.transform = '';
+    }
   }
-  function setHint(msg, cls) {
-    var h = $('#type-hint'); if (!h) return;
-    h.innerHTML = fmt(msg || ''); h.className = 'type-hint' + (cls ? ' ' + cls : '');
+  function checkBuild(st) {
+    var text = st.picked.map(function (id) { return chipOf(st, id).s; }).join(' ');
+    var r = TypeCheck.analyze(st.answer, text, false);
+    if (r.state === 'done') {
+      var g = S.first ? 2 : 0;
+      state.xp += g; S.gain += g; touchDay(); save();
+      sfx('ok'); buzz(12); setMood('happy');
+      showSheet(true, '<div class="fb-head">' + ICON.check + '<span>拼对了！</span>' + (g ? '<span class="fb-gain">+' + g + ' 分</span>' : '') + '</div>' +
+        '<div class="fb-block"><div class="fb-label">接下来亲手把它打一遍</div><div class="fb-ans">' + esc(st.answer) + '</div></div>', '继续', 'next');
+    } else {
+      S.fails++; sfx('bad'); buzz([30, 40, 30]); setMood('sad');
+      var msg = r.msg.replace(/你打的是/g, '你拼的是').replace('还没打完', '还没拼完').replace('多打了', '多拼了').replace('这一行还没有打', '还没有拼');
+      showSheet(false, '<div class="fb-head">' + ICON.x + '<span>还不对</span></div><div class="fb-block"><div class="fb-label is-why">哪里不对</div><p>' + fmt(msg) + '</p></div>', '再试一次', 'retry');
+    }
   }
-  function viewTyping() {
-    if (typing.finished) { viewTypingDone(); return; }
-    var lv = LEVELS[typing.li];
-    var html = '<header class="top top-nav"><button class="icon-btn" data-act="go" data-to="level-' + (typing.li + 1) + '" aria-label="回到讲解">' + ICON.back + '</button>' +
-      '<div class="progress" id="type-prog" role="img"></div><span class="top-count num" id="type-count"></span></header>';
-    html += '<div class="typing"><div class="q-meta"><span class="q-type">手打代码</span><span class="q-from">第 ' + (typing.li + 1) + ' 关 ' + esc(lv.title) + '</span></div>' +
-      '<h1 class="q-stem">照着例子，把代码一行一行打出来</h1>' +
-      '<p class="type-intro">每一行打对了才能到下一行，全部打完才能答题。引号外的空格多一个少一个没关系；缩进、符号和大小写必须对。</p>' +
-      '<pre class="code type-code" id="type-code" tabindex="0"></pre>' +
+
+  /* ---------- 手打 ---------- */
+  var TYPE_KEYS = ['(', ')', '"', "'", ':', '=', ',', '.', '[', ']', '{', '}', '+', '-', '*', '/', '%', '<', '>', '!', '_', '#', '&', '|'];
+  function typeHtml() {
+    return stepMeta('<span id="t-tag"></span>', levelName(S.li)) + mascotRow('<h1 class="q-stem" id="t-say"></h1>', '') +
+      '<pre class="code type-code" id="type-code" tabindex="0" hidden></pre>' +
       '<div class="type-now"><div class="type-now-label" id="type-label"></div><pre class="code type-target" id="type-target" tabindex="0"></pre></div>' +
-      '<div class="type-row"><input class="fill-input type-input" id="type-input" type="text" inputmode="text" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="enter" aria-label="在这里打出这一行代码" placeholder="在这里打这一行">' +
+      '<div class="type-row"><input class="fill-input type-input" id="type-input" type="text" inputmode="text" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="enter" aria-label="在这里打出这一行代码" placeholder="在这里打">' +
       '<button class="type-enter" id="type-ok" type="button" data-act="type-ok" data-keepfocus="1" aria-label="确定这一行" disabled>' + ICON.enter + '</button></div>' +
       '<p class="type-hint" id="type-hint" role="status"></p>' +
       '<div class="keys" aria-label="常用符号"><button class="key key-wide" type="button" data-act="key" data-ch="    " aria-label="缩进，输入 4 个空格">缩进</button>' +
-      TYPE_KEYS.map(function (c) { return '<button class="key" type="button" data-act="key" data-ch="' + esc(c) + '" aria-label="输入 ' + esc(c) + '">' + esc(c) + '</button>'; }).join('') + '</div></div>';
-    $view.innerHTML = html;
-    $bar.innerHTML = '';
-    updateTyping();
+      TYPE_KEYS.map(function (c) { return '<button class="key" type="button" data-act="key" data-ch="' + esc(c) + '" aria-label="输入 ' + esc(c) + '">' + esc(c) + '</button>'; }).join('') + '</div>' +
+      '<button class="btn-text peek" id="peek" type="button" data-act="peek" data-keepfocus="1" hidden>想不起来？看答案</button>';
   }
-  function updateTyping(msg, cls) {
-    var n = typing.todo.length, line = typing.lines[typing.todo[typing.pos]];
-    var prog = $('#type-prog');
-    prog.innerHTML = typing.todo.map(function (_, j) { return '<i class="' + (j < typing.pos ? 'is-right' : j === typing.pos ? 'is-now' : '') + '"></i>'; }).join('');
-    prog.setAttribute('aria-label', '第 ' + (typing.pos + 1) + ' 行，共 ' + n + ' 行');
-    $('#type-count').textContent = (typing.pos + 1) + '/' + n;
-    $('#type-code').innerHTML = typeCodeHtml();
+  function curLine() { var st = S.steps[S.pos]; return st.g.lines[st.g.todo[st.j]]; }
+  function isMasked() { var st = S.steps[S.pos]; return st.g.mode === 'recall' && !S.peek; }
+  // 目标行：打对的词会点亮；默写时没打到的词用圆点盖住
+  function targetHtml(line, hit, mask) {
+    var ind = /^ */.exec(line)[0], body = line.slice(ind.length), toks = TypeCheck.tokenize(body);
+    var out = ind.replace(/ /g, DOT), at = 0, n = 0;
+    toks.forEach(function (t) {
+      out += esc(body.slice(at, t.a));
+      var com = t.t === 'com', hidden = mask && !com && n >= hit;
+      out += '<span class="tk' + (!com && n < hit ? ' hit' : '') + (hidden ? ' mask' : '') + '">' + (hidden ? t.raw.replace(/[^\s]/g, '•') : hl(t.raw, '', true)) + '</span>';
+      if (!com) n++;
+      at = t.b;
+    });
+    return out + esc(body.slice(at));
+  }
+  function codePanelHtml(g, j, mask) {
+    var no = 0;
+    return g.lines.map(function (ln) {
+      if (ln.trim() === '') return '<span class="tline is-blank"><i></i> </span>';
+      var k = no++, cls = k < j ? 'is-done' : k === j ? 'is-now' : 'is-todo';
+      return '<span class="tline ' + cls + '"><i>' + (k + 1) + '</i>' + (mask && k >= j ? esc(ln.replace(/[^\s]/g, '•')) : hl(ln)) + '</span>';
+    }).join('');
+  }
+  function setHint(msg, cls) {
+    var h = $('#type-hint');
+    if (!h) return;
+    h.innerHTML = fmt(msg || ''); h.className = 'type-hint' + (cls ? ' ' + cls : '');
+  }
+  function refreshTyping(msg, cls) {
+    var st = S.steps[S.pos], g = st.g, n = g.todo.length, line = curLine(), recall = g.mode === 'recall', mask = isMasked();
+    $('#t-tag').textContent = g.tag === 'ex' ? '打例子' : recall ? '默写' : '照着打';
+    $('#t-say').innerHTML = fmt(g.say);
+    var panel = $('#type-code');
+    panel.hidden = n < 2;
+    panel.innerHTML = n < 2 ? '' : codePanelHtml(g, st.j, mask);
     var indent = /^ */.exec(line)[0].length, body = line.slice(indent), note = '';
     var inStr = /(["'])(?:[^"'\\\n]|\\.)* (?:[^"'\\\n]|\\.)*\1/.test(body);
-    if (/^#/.test(body)) note = '这是注释：以 # 开头，后面写什么都可以';
+    if (mask) note = '每个 • 是一个字符。打对一个词，它就会显示出来';
+    else if (/^#/.test(body)) note = '这是注释：以 # 开头，后面写什么都可以';
     else if (indent) note = '开头的 · 是缩进：点 ' + (indent / 4) + ' 次“缩进”键' + (inStr ? '。引号里的 · 是空格' : '');
     else if (inStr) note = '引号里的 · 代表一个空格';
-    $('#type-label').innerHTML = '现在打第 ' + (typing.pos + 1) + ' 行' + (note ? '<span class="type-legend">' + esc(note) + '</span>' : '');
-    $('#type-target').innerHTML = targetHtml(line);
+    var head = n > 1 ? '第 ' + (st.j + 1) + ' 行，共 ' + n + ' 行' : recall ? '不看答案，自己打出来' : '照着打这一行';
+    $('#type-label').innerHTML = head + (note ? '<span class="type-legend">' + esc(note) + '</span>' : '');
+    $('#type-target').innerHTML = targetHtml(line, 0, mask);
+    $('#peek').hidden = !mask;
     var el = $('#type-input'); el.value = ''; el.className = 'fill-input type-input';
     var ok = $('#type-ok'); ok.disabled = true; ok.classList.remove('is-ready');
     setHint(msg, cls);
   }
   function liveTyping() {
-    var el = $('#type-input');
-    if (!el || !typing || typing.finished) return;
+    var el = $('#type-input'), st = S && !S.done ? S.steps[S.pos] : null;
+    if (!el || !st || st.kind !== 'type') return;
     var fixed = TypeCheck.normQuotes(el.value);
     if (fixed !== el.value) { var caret = el.selectionStart; el.value = fixed; try { el.setSelectionRange(caret, caret); } catch (e) {} }
-    var r = TypeCheck.analyze(typing.lines[typing.todo[typing.pos]], el.value, true), ok = $('#type-ok');
+    var mask = isMasked(), r = TypeCheck.analyze(curLine(), el.value, true, mask), ok = $('#type-ok');
+    $('#type-target').innerHTML = targetHtml(curLine(), r.hit || 0, mask);
     el.classList.remove('is-wrong', 'is-right', 'is-ok', 'shake');
     ok.disabled = r.state === 'empty';
     ok.classList.toggle('is-ready', r.state === 'done');
@@ -3898,230 +4547,207 @@ var TypeCheck = (function () {
     else { if (r.state === 'ok') el.classList.add('is-ok'); setHint('', ''); }
   }
   function submitLine() {
-    var el = $('#type-input');
-    if (!el || !typing || typing.finished) return;
-    var r = TypeCheck.analyze(typing.lines[typing.todo[typing.pos]], el.value, false);
+    var el = $('#type-input'), st = S && !S.done ? S.steps[S.pos] : null;
+    if (!el || !st || st.kind !== 'type') return;
+    var r = TypeCheck.analyze(curLine(), el.value, false, isMasked());
     if (r.state !== 'done') {
-      typing.fails++;
+      S.fails++; sfx('bad'); buzz([30, 40, 30]);
       el.classList.remove('is-ok', 'is-right', 'shake'); void el.offsetWidth; el.classList.add('is-wrong', 'shake');
       setHint(r.msg, 'bad'); el.focus();
       return;
     }
-    var lv = LEVELS[typing.li];
-    typing.pos++; touchDay();
-    if (typing.pos >= typing.todo.length) {
-      typing.finished = true;
-      if (!state.typed[lv.id]) { typing.gain = typing.todo.length * 3; state.xp += typing.gain; state.typed[lv.id] = true; }
-      delete state.tpos[lv.id];
-      typing.rank1 = rankInfo(state.xp).lv;
-      save(); viewTypingDone(); window.scrollTo(0, 0);
-      return;
-    }
-    state.tpos[lv.id] = typing.pos; save();
-    updateTyping('第 ' + typing.pos + ' 行打对了。接着打第 ' + (typing.pos + 1) + ' 行。', 'good');
-    el.focus();
-    try { $('#type-label').scrollIntoView({ block: 'nearest' }); } catch (e) {}
-  }
-  function viewTypingDone() {
-    var lv = LEVELS[typing.li], n = typing.todo.length, no = typing.li + 1;
-    var up = typing.rank1 > typing.rank0 ? '<div class="levelup"><small>升级了</small><b>Lv' + typing.rank1 + ' ' + esc(RANKS[typing.rank1 - 1].name) + '</b></div>' : '';
-    var html = '<header class="top top-nav"><button class="icon-btn" data-act="go" data-to="level-' + no + '" aria-label="回到讲解">' + ICON.back + '</button>' +
-      '<span class="top-title">第 ' + no + ' 关 ' + esc(lv.title) + '</span><span class="top-spacer"></span></header>';
-    html += '<div class="result"><div class="done-mark">' + ICON.check + '</div><h1>代码全部打对了！</h1>' +
-      '<p class="result-sub">你亲手打完了这 ' + n + ' 行代码。这个程序运行起来是这样：</p>' +
-      '<div class="demo type-done"><pre class="code" tabindex="0">' + hl(lv.example.code) + '</pre>' +
-      '<div class="demo-out"><div class="demo-out-label">运行结果</div><pre>' + demoLines(lv.example).join('\n') + '</pre></div></div>' +
-      '<div class="tiles"><div class="tile"><b>+' + typing.gain + '</b><span>' + (typing.gain ? '手打得分' : '重打不加分') + '</span></div>' +
-      '<div class="tile"><b>' + n + '</b><span>打了几行</span></div><div class="tile"><b>' + typing.fails + '</b><span>改错次数</span></div></div>' + up +
-      '<div class="result-actions"><button class="btn" data-act="go" data-to="quiz-' + no + '" data-replace="1">开始答题 · ' + lv.questions.length + ' 题</button>' +
-      '<button class="btn-text" data-act="go" data-to="level-' + no + '" data-replace="1">回到讲解</button></div></div>';
-    $view.innerHTML = html;
-    $bar.innerHTML = '';
+    if (S.first) { var g = st.g.tag === 'recall' ? 5 : 3; state.xp += g; S.gain += g; }
+    touchDay(); sfx('line'); buzz(10);
+    advance();
   }
 
   /* ---------- 答题 ---------- */
-  function makeItem(q, li) {
-    var it = { q: q, li: li, done: false, ok: false, picked: -1, input: '', gain: 0, bonus: 0 };
-    if (q.type !== 'fill') it.opts = shuffle(q.opts);
-    return it;
-  }
-  function startLevelQuiz(i) {
-    var lv = LEVELS[i];
-    quiz = { mode: 'level', li: i, pos: 0, right: 0, gain: 0, cleared: 0, finished: false, rank0: rankInfo(state.xp).lv,
-      items: lv.questions.map(function (q) { return makeItem(q, i); }) };
-  }
-  function startReview(ids) {
-    quiz = { mode: 'review', li: -1, pos: 0, right: 0, gain: 0, cleared: 0, finished: false, rank0: rankInfo(state.xp).lv,
-      items: shuffle(ids).map(function (id) { return makeItem(Q_INDEX[id].q, Q_INDEX[id].li); }) };
-  }
   function optBody(q, o) {
     if (o.err) return '<span class="opt-note">会报错</span>';
     if (o.none) return '<span class="opt-note">什么都不显示</span>';
     return q.type === 'output' ? '<pre>' + esc(o.t) + '</pre>' : fmt(o.t);
   }
-  function optPlain(q, o) { return o.err ? '会报错' : o.none ? '什么都不显示' : o.t; }
-
-  function viewQuiz() {
-    if (quiz.finished) { viewResult(); return; }
-    var it = quiz.items[quiz.pos], q = it.q, n = quiz.items.length;
-    var html = '<header class="top top-nav"><button class="icon-btn" data-act="quit" aria-label="退出答题">' + ICON.x + '</button>' +
-      '<div class="progress" role="img" aria-label="第 ' + (quiz.pos + 1) + ' 题，共 ' + n + ' 题">' +
-      quiz.items.map(function (x, k) { return '<i class="' + (x.done ? (x.ok ? 'is-right' : 'is-wrong') : (k === quiz.pos ? 'is-now' : '')) + '"></i>'; }).join('') + '</div>' +
-      '<span class="stat stat-fire' + (state.streak ? '' : ' is-zero') + '" role="img" aria-label="连胜 ' + state.streak + ' 题">' + ICON.flame + '<span>' + state.streak + '</span></span></header>';
-    html += '<div class="quiz"><div class="q-meta"><span class="q-type">' + TYPE_NAME[q.type] + '</span>' +
-      '<span class="q-from">' + (quiz.mode === 'review' ? '错题重练 · ' : '') + '第 ' + (it.li + 1) + ' 关 ' + esc(LEVELS[it.li].title) + ' · ' + (quiz.pos + 1) + '/' + n + '</span></div>';
-    html += '<h1 class="q-stem">' + fmt(q.q) + '</h1>';
-    if (q.code) html += '<pre class="code" tabindex="0">' + hl(q.code, q.type === 'fill' && it.done ? q.answers[0] : '') + '</pre>';
+  function optPlain(o) { return o.err ? '会报错' : o.none ? '什么都不显示' : o.t; }
+  function canCheck(st) { return st.q.type === 'fill' ? norm(st.input) !== '' : st.picked >= 0; }
+  function qHtml(st) {
+    var q = st.q, from = S.mode === 'review' ? '错题重练 · ' + levelName(st.li) : st.retry ? '刚才答错的，再试一次' : levelName(st.li);
+    var html = stepMeta(TYPE_NAME[q.type], from) + mascotRow('<h1 class="q-stem">' + fmt(q.q) + '</h1>', st.done ? (st.ok ? 'happy' : 'sad') : '');
+    if (q.code) html += '<pre class="code" tabindex="0">' + hl(q.code, q.type === 'fill' && st.done ? q.answers[0] : '') + '</pre>';
     if (q.type === 'fill') {
       html += '<div class="fill"><label class="fill-label" for="fill">在这里输入问号处应该填的内容</label>' +
-        '<input class="fill-input' + (it.done ? (it.ok ? ' is-right' : ' is-wrong') : '') + '" id="fill" type="text" inputmode="text" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="done" placeholder="点这里输入" value="' + esc(it.input) + '"' + (it.done ? ' disabled' : '') + '>';
-      if (!it.done) html += '<div class="keys" aria-label="常用符号">' + ['(', ')', '[', ']', '"', ':', '=', '+', '-', '*', '/', '%', '<', '>', '!', '_', '.', ','].map(function (c) {
+        '<input class="fill-input' + (st.done ? (st.ok ? ' is-right' : ' is-wrong') : '') + '" id="fill" type="text" inputmode="text" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="done" placeholder="点这里输入" value="' + esc(st.input) + '"' + (st.done ? ' disabled' : '') + '>';
+      if (!st.done) html += '<div class="keys" aria-label="常用符号">' + ['(', ')', '[', ']', '"', ':', '=', '+', '-', '*', '/', '%', '<', '>', '!', '_', '.', ','].map(function (c) {
         return '<button class="key" type="button" data-act="key" data-ch="' + esc(c) + '" aria-label="输入 ' + esc(c) + '">' + esc(c) + '</button>';
       }).join('') + '</div>';
-      html += '</div>';
-    } else {
-      html += '<div class="opts" role="group" aria-label="选项">' + it.opts.map(function (o, k) {
-        var cls = 'opt', key = 'ABCD'.charAt(k);
-        if (it.done) {
-          if (o.ok) { cls += ' is-right'; key = ICON.check; }
-          else if (k === it.picked) { cls += ' is-wrong'; key = ICON.x; }
-          else cls += ' is-dim';
-        } else if (k === it.picked) cls += ' is-picked';
-        return '<button class="' + cls + '" data-act="pick" data-k="' + k + '"' + (it.done ? ' disabled' : '') + ' aria-pressed="' + (k === it.picked) + '">' +
-          '<span class="opt-key">' + key + '</span><span class="opt-body">' + optBody(q, o) + '</span></button>';
-      }).join('') + '</div>';
-    }
-    if (it.done) html += feedback(it);
-    html += '</div>';
-    $view.innerHTML = html;
-    var last = quiz.pos === n - 1;
-    $bar.innerHTML = '<div class="actionbar"><div class="bar-in">' + (it.done
-      ? '<button class="btn ' + (it.ok ? 'btn-good' : 'btn-bad') + '" data-act="next">' + (last ? '看结果' : '下一题') + '</button>'
-      : '<button class="btn" id="confirm" data-act="confirm"' + (canConfirm(it) ? '' : ' disabled') + '>确定</button>') + '</div></div>';
-  }
-  function canConfirm(it) { return it.q.type === 'fill' ? norm(it.input) !== '' : it.picked >= 0; }
-  function fbBlock(label, bodyHtml, cls) { return '<div class="fb-block"><div class="fb-label' + (cls ? ' ' + cls : '') + '">' + label + '</div>' + bodyHtml + '</div>'; }
-  function feedback(it) {
-    var q = it.q, html;
-    if (it.ok) {
-      html = '<div class="fb good" id="fb" role="status"><div class="fb-head">' + ICON.check + '<span>答对了！</span><span class="fb-gain">+' + it.gain + ' 分</span></div>';
-      if (it.bonus > 0) html += '<div class="fb-streak">' + ICON.flame + '连胜 ' + it.streak + ' 题，多加 ' + it.bonus + ' 分</div>';
-      html += fbBlock('解析', '<p>' + fmt(q.explain) + '</p>');
-      if (it.cn) html += '<p class="fb-note">注意：你输入的是中文符号。真正写代码时要切换到英文输入法，否则 Python 会报错。</p>';
-      if (quiz.mode === 'review') html += '<p class="fb-note">这道题已经掌握，从错题本里移走了。</p>';
       return html + '</div>';
     }
-    html = '<div class="fb bad" id="fb" role="status"><div class="fb-head">' + ICON.x + '<span>答错了</span></div>';
+    return html + '<div class="opts" role="group" aria-label="选项">' + st.opts.map(function (o, k) {
+      var cls = 'opt', key = 'ABCD'.charAt(k);
+      if (st.done) {
+        if (o.ok) { cls += ' is-right'; key = ICON.check; }
+        else if (k === st.picked) { cls += ' is-wrong'; key = ICON.x; }
+        else cls += ' is-dim';
+      } else if (k === st.picked) cls += ' is-picked';
+      return '<button class="' + cls + '" data-act="pick" data-k="' + k + '"' + (st.done ? ' disabled' : '') + ' aria-pressed="' + (k === st.picked) + '">' +
+        '<span class="opt-key">' + key + '</span><span class="opt-body">' + optBody(q, o) + '</span></button>';
+    }).join('') + '</div>';
+  }
+  function fbBlock(label, bodyHtml, cls) { return '<div class="fb-block"><div class="fb-label' + (cls ? ' ' + cls : '') + '">' + label + '</div>' + bodyHtml + '</div>'; }
+  function feedbackHtml(st) {
+    var q = st.q, html;
+    if (st.ok) {
+      html = '<div class="fb-head">' + ICON.check + '<span>' + (st.streak >= 3 && st.bonus ? '连对 ' + st.streak + ' 题！' : PRAISE[Math.floor(Math.random() * PRAISE.length)]) + '</span><span class="fb-gain">+' + st.gain + ' 分</span></div>';
+      if (st.bonus > 0) html += '<div class="fb-streak">' + ICON.flame + '连胜加分 +' + st.bonus + '</div>';
+      html += fbBlock('解析', '<p>' + fmt(q.explain) + '</p>');
+      if (st.cn) html += '<p class="fb-note">注意：你输入的是中文符号。真正写代码时要切换到英文输入法，否则 Python 会报错。</p>';
+      if (S.mode === 'review') html += '<p class="fb-note">这道题已经掌握，从错题本里移走了。</p>';
+      return html;
+    }
+    html = '<div class="fb-head">' + ICON.x + '<span>答错了</span>' + (S.mode === 'quiz' ? '<span class="fb-gain fb-heart">' + ICON.heart + '−1</span>' : '') + '</div>';
     if (q.type === 'fill') {
-      var hint = null, key = norm(it.input);
+      var hint = null, key = norm(st.input);
       Object.keys(q.hints || {}).forEach(function (h) { if (norm(h) === key) hint = q.hints[h]; });
-      html += fbBlock('为什么错', '<p>你填的是 <code>' + esc(it.input.trim()) + '</code>。' + (hint ? fmt(hint) : '把它填进去，代码得不到题目要的结果。') + '</p>', 'is-why');
+      html += fbBlock('为什么错', '<p>你填的是 <code>' + esc(st.input.trim()) + '</code>。' + (hint ? fmt(hint) : '把它填进去，代码得不到题目要的结果。') + '</p>', 'is-why');
       html += fbBlock('正确答案', '<div class="fb-ans">' + q.answers.map(esc).join('  或  ') + '</div>');
     } else {
-      var picked = it.opts[it.picked], right = it.opts.filter(function (o) { return o.ok; })[0];
+      var picked = st.opts[st.picked], right = st.opts.filter(function (o) { return o.ok; })[0];
       html += fbBlock('为什么错', '<p>' + fmt(picked.why) + '</p>', 'is-why');
-      html += fbBlock('正确答案', q.type === 'output' && right.t ? '<div class="fb-ans">' + esc(right.t) + '</div>' : '<div class="fb-ans plain">' + (right.t ? fmt(right.t) : esc(optPlain(q, right))) + '</div>');
+      html += fbBlock('正确答案', q.type === 'output' && right.t ? '<div class="fb-ans">' + esc(right.t) + '</div>' : '<div class="fb-ans plain">' + (right.t ? fmt(right.t) : esc(optPlain(right))) + '</div>');
     }
     html += fbBlock('解析', '<p>' + fmt(q.explain) + '</p>');
-    html += '<p class="fb-note">' + (quiz.mode === 'review' ? '这道题还留在错题本里，下次再练。' : '这道题已经放进错题本，可以随时重练。') + '</p>';
-    return html + '</div>';
+    return html + '<p class="fb-note">' + (S.mode === 'review' ? '这道题还留在错题本里，下次再练。'
+      : S.failed ? '这道题已经放进错题本。' : '这道题已经放进错题本，这一轮最后还会再考你一次。') + '</p>';
   }
-  function confirmAnswer() {
-    var it = quiz.items[quiz.pos], q = it.q;
-    if (it.done || !canConfirm(it)) return;
+  function checkQ(st) {
+    var q = st.q;
+    if (st.done || !canCheck(st)) return;
     var ok;
     if (q.type === 'fill') {
-      var v = norm(it.input);
+      var v = norm(st.input);
       ok = q.answers.some(function (a) { return norm(a) === v; });
-      it.cn = ok && hasCnPunct(it.input);
-    } else ok = !!it.opts[it.picked].ok;
-    it.done = true; it.ok = ok;
+      st.cn = ok && hasCnPunct(st.input);
+    } else ok = !!st.opts[st.picked].ok;
+    st.done = true; st.ok = ok;
     state.answered++; touchDay();
+    var lost = -1;
     if (ok) {
       state.correct++; state.streak++;
       if (state.streak > state.best) state.best = state.streak;
-      it.streak = state.streak;
-      it.bonus = Math.min((state.streak - 1) * 2, 10);
-      it.gain = (quiz.mode === 'review' ? 5 : 10) + it.bonus;
-      state.xp += it.gain; quiz.gain += it.gain; quiz.right++;
-      if (quiz.mode === 'review') { delete state.wrong[q.id]; quiz.cleared++; }
+      st.streak = state.streak;
+      st.bonus = st.retry ? 0 : Math.min((state.streak - 1) * 2, 10);
+      st.gain = (S.mode === 'review' || st.retry ? 5 : 10) + st.bonus;
+      state.xp += st.gain; S.gain += st.gain; S.right++;
+      if (S.mode === 'review') { delete state.wrong[q.id]; S.cleared++; }
     } else {
-      state.streak = 0;
+      state.streak = 0; S.missed++;
       var w = state.wrong[q.id] || { n: 0, t: 0 };
       w.n++; w.t = Date.now(); state.wrong[q.id] = w;
+      if (S.mode === 'quiz') {
+        S.hearts--; lost = S.hearts;
+        if (S.hearts <= 0) S.failed = true; else S.steps.push(makeQ(q, st.li, true));   // 答错的题排到最后再考一次
+      }
     }
     save();
-    viewQuiz();
-    if (ok) {
-      var f = document.createElement('div'); f.className = 'float-gain'; f.textContent = '+' + it.gain; f.setAttribute('aria-hidden', 'true');
-      document.body.appendChild(f); setTimeout(function () { if (f.parentNode) f.parentNode.removeChild(f); }, 950);
-    }
-    var fb = $('#fb');
-    if (fb) { try { fb.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); } catch (e) {} }
+    $('#step').innerHTML = qHtml(st);
+    var hb = $('#hearts'); if (hb) { hb.innerHTML = heartsHtml(lost); hb.setAttribute('aria-label', '还剩 ' + S.hearts + ' 颗红心'); }
+    tickBar();
+    if (ok) { sfx('ok'); buzz(12); floatGain(st.gain); } else { sfx('bad'); buzz([30, 40, 30]); }
+    showSheet(ok, feedbackHtml(st), '继续', 'next');
   }
-  function clearFloat() {
-    Array.prototype.forEach.call(document.querySelectorAll('.float-gain'), function (f) { f.parentNode.removeChild(f); });
-  }
-  function nextQuestion() {
-    if (!quiz || quiz.finished) return;
-    clearFloat();
-    if (quiz.pos < quiz.items.length - 1) { quiz.pos++; viewQuiz(); window.scrollTo(0, 0); return; }
-    quiz.finished = true;
-    if (quiz.mode === 'level') {
-      var lv = LEVELS[quiz.li], total = quiz.items.length, wrongN = total - quiz.right;
-      var passed = quiz.right >= Math.ceil(total / 2);
-      var stars = !passed ? 0 : wrongN === 0 ? 3 : wrongN === 1 ? 2 : 1;
-      var rec = state.levels[lv.id] || { stars: 0, plays: 0 };
-      rec.plays++;
-      quiz.starBonus = Math.max(0, stars - rec.stars) * 10;
-      rec.stars = Math.max(rec.stars, stars);
-      state.levels[lv.id] = rec; state.xp += quiz.starBonus; quiz.gain += quiz.starBonus;
-      quiz.stars = stars; quiz.passed = passed; state.last = lv.id;
-    }
-    quiz.rank1 = rankInfo(state.xp).lv;
-    save();
-    viewResult(); window.scrollTo(0, 0);
+  function checkStep() {
+    var st = S && !S.done ? S.steps[S.pos] : null;
+    if (!st || S.sheet) return;
+    if (st.kind === 'build') checkBuild(st); else if (st.kind === 'q') checkQ(st);
   }
 
-  /* ---------- 结算 ---------- */
-  function viewResult() {
-    var n = quiz.items.length, wrongN = n - quiz.right, html, actions = '';
-    var up = quiz.rank1 > quiz.rank0 ? '<div class="levelup"><small>升级了</small><b>Lv' + quiz.rank1 + ' ' + esc(RANKS[quiz.rank1 - 1].name) + '</b></div>' : '';
-    html = '<header class="top top-nav"><button class="icon-btn" data-act="go" data-to="levels" aria-label="返回地图">' + ICON.back + '</button><span class="top-title">' + (quiz.mode === 'review' ? '错题重练' : '第 ' + (quiz.li + 1) + ' 关 ' + esc(LEVELS[quiz.li].title)) + '</span><span class="top-spacer"></span></header>';
+  /* ---------- 一轮结束 ---------- */
+  function finishSession() {
+    var i = S.li, id = i >= 0 ? idOf(i) : '', no = i + 1;
+    S.done = true;
+    if (S.mode === 'learn') {
+      if (S.first) { state.xp += 5; toast('讲解看完了，+5 分'); }
+      state.learned[id] = true; touchDay(); save();
+      go(nextStage(i) === 1 ? 'syntax-' + no : 'level-' + no, true);
+      return;
+    }
+    if (S.mode === 'syntax') { state.syn[id] = true; delete state.spos[id]; }
+    else if (S.mode === 'type') { state.typed[id] = true; delete state.tpos[id]; }
+    else if (S.mode === 'quiz') {
+      var rec = state.levels[id] || { stars: 0, plays: 0 };
+      rec.plays++;
+      S.stars = S.failed ? 0 : S.hearts;
+      S.starBonus = Math.max(0, S.stars - rec.stars) * 10;
+      rec.stars = Math.max(rec.stars, S.stars);
+      state.levels[id] = rec; state.xp += S.starBonus; S.gain += S.starBonus; state.last = id;
+    }
+    S.rank1 = rankInfo(state.xp).lv;
+    save();
+    viewDone(); window.scrollTo(0, 0);
+    if (S.failed) sfx('lose'); else { sfx('win'); confetti(); }
+  }
+  function viewDone() {
+    var i = S.li, lv = i >= 0 ? LEVELS[i] : null, no = i + 1, up = upCard(S.rank0, S.rank1), html, actions = '';
+    html = lv ? navTop('level-' + no, '回到关卡', levelName(i)) : navTop('notebook', '回到错题本', '错题重练');
     html += '<div class="result">';
-    if (quiz.mode === 'level') {
-      var need = Math.ceil(n / 2), isLast = quiz.li === LEVELS.length - 1;
-      html += '<div class="stars" role="img" aria-label="获得 ' + quiz.stars + ' 颗星">' + starRow(quiz.stars) + '</div>';
-      if (quiz.passed) {
-        html += '<h1>' + (quiz.stars === 3 ? '满分通关！' : quiz.stars === 2 ? '通关！' : '过关了') + '</h1>' +
-          '<p class="result-sub">答对 ' + quiz.right + ' / ' + n + ' 题。' + (isLast ? '你已经学完了 Python 入门的全部内容。' : quiz.stars === 3 ? '这一关的知识点你已经掌握了。' : '再练一次全对，就能拿到三颗星。') + '</p>';
-      } else {
-        html += '<h1>差一点点</h1><p class="result-sub">答对 ' + quiz.right + ' / ' + n + ' 题，至少答对 ' + need + ' 题才能过关。再看一遍讲解，马上重来。</p>';
-      }
-      html += '<div class="tiles"><div class="tile"><b>+' + quiz.gain + '</b><span>本关得分</span></div><div class="tile"><b>' + state.streak + '</b><span>当前连胜</span></div><div class="tile"><b>' + wrongN + '</b><span>进错题本</span></div></div>' + up;
-      if (quiz.passed) {
-        actions += isLast ? '<button class="btn" data-act="go" data-to="levels" data-replace="1">回到地图</button>'
-          : '<button class="btn" data-act="go" data-to="level-' + (quiz.li + 2) + '" data-replace="1">下一关：' + esc(LEVELS[quiz.li + 1].title) + '</button>';
-        if (wrongN) actions += '<button class="btn btn-ghost" data-act="review-these">重练刚才的错题</button>';
-        if (quiz.stars < 3) actions += '<button class="btn btn-ghost" data-act="retry">再练一次，冲三星</button>';
+    if (S.mode === 'syntax') {
+      html += mascot('happy', true) + '<h1>语法都打对了！</h1><p class="result-sub">这一关的语法，你拼过、照着打过，也默写过了。接下来把完整的例子打出来。</p>' +
+        tiles([['+' + S.gain, S.first ? '语法得分' : '重打不加分'], [syntaxLines(lv), '打了几行'], [S.fails, '改错次数']]) + up;
+      actions = '<button class="btn" data-act="go" data-to="type-' + no + '" data-replace="1">下一步：打例子 · ' + lineCount(lv.example.code) + ' 行</button>' +
+        '<button class="btn-text" data-act="go" data-to="level-' + no + '" data-replace="1">回到关卡</button>';
+    } else if (S.mode === 'type') {
+      var n = lineCount(lv.example.code), canQuiz = stageOpen(i, 3);
+      html += mascot('happy', true) + '<h1>代码全部打对了！</h1><p class="result-sub">你亲手打完了这 ' + n + ' 行代码。这个程序运行起来是这样：</p>' +
+        '<div class="demo type-done"><pre class="code" tabindex="0">' + hl(lv.example.code) + '</pre>' +
+        '<div class="demo-out"><div class="demo-out-label">运行结果</div><pre>' + demoLines(lv.example).join('\n') + '</pre></div></div>' +
+        tiles([['+' + S.gain, S.first ? '手打得分' : '重打不加分'], [n, '打了几行'], [S.fails, '改错次数']]) + up;
+      actions = (canQuiz ? '<button class="btn" data-act="go" data-to="quiz-' + no + '" data-replace="1">下一步：闯关答题 · ' + lv.questions.length + ' 题</button>' : '') +
+        '<button class="' + (canQuiz ? 'btn-text' : 'btn') + '" data-act="go" data-to="level-' + no + '" data-replace="1">回到关卡</button>';
+    } else if (S.mode === 'quiz') {
+      var isLast = i === LEVELS.length - 1;
+      if (!S.failed) {
+        html += '<div class="stars" role="img" aria-label="获得 ' + S.stars + ' 颗星">' + starRow(S.stars) + '</div>' +
+          '<h1>' + (S.stars === 3 ? '满分通关！' : S.stars === 2 ? '通关！' : '过关了') + '</h1><p class="result-sub">' +
+          (isLast ? '你已经学完了 Python 入门的全部内容。' : S.stars === 3 ? '一颗红心都没丢，这一关的知识点你已经掌握了。' : '还剩 ' + S.stars + ' 颗红心。再闯一次不丢红心，就能拿到三颗星。') + '</p>' +
+          tiles([['+' + S.gain, '本关得分'], [state.streak, '当前连胜'], [S.missed, '进错题本']]) + up;
+        actions = isLast ? '<button class="btn" data-act="go" data-to="levels" data-replace="1">回到地图</button>'
+          : '<button class="btn" data-act="go" data-to="level-' + (no + 1) + '" data-replace="1">下一关：' + esc(LEVELS[i + 1].title) + '</button>';
+        if (S.missed) actions += '<button class="btn btn-ghost" data-act="review-these">重练刚才的错题</button>';
+        if (S.stars < 3) actions += '<button class="btn btn-ghost" data-act="retry">再闯一次，冲三星</button>';
         if (!isLast) actions += '<button class="btn-text" data-act="go" data-to="levels" data-replace="1">回到地图</button>';
       } else {
-        actions += '<button class="btn" data-act="go" data-to="level-' + (quiz.li + 1) + '" data-replace="1">再看一遍讲解</button>' +
-          '<button class="btn btn-ghost" data-act="retry">直接重新挑战</button>' +
+        html += mascot('sad', true) + '<h1>红心用完了</h1><p class="result-sub">这次答错了 ' + HEARTS + ' 题。回去看看讲解，或者直接再闯一次。</p>' +
+          tiles([['+' + S.gain, '本关得分'], [S.right + '/' + S.total, '答对题数'], [S.missed, '进错题本']]) + up;
+        actions = '<button class="btn" data-act="retry">再闯一次</button><button class="btn btn-ghost" data-act="go" data-to="learn-' + no + '" data-replace="1">再看一遍讲解</button>' +
           '<button class="btn-text" data-act="go" data-to="levels" data-replace="1">回到地图</button>';
       }
     } else {
-      var left = wrongIds().length;
-      html += '<div class="stars" role="img" aria-label="重练完成">' + starRow(quiz.cleared === n ? 3 : quiz.cleared > 0 ? (quiz.cleared * 2 >= n ? 2 : 1) : 0) + '</div>';
-      html += '<h1>' + (quiz.cleared === n ? '全部掌握！' : quiz.cleared ? '有进步' : '再来一次') + '</h1>' +
-        '<p class="result-sub">这次掌握了 ' + quiz.cleared + ' 题' + (left ? '，错题本里还剩 ' + left + ' 题。' : '，错题本已经清空。') + '</p>';
-      html += '<div class="tiles"><div class="tile"><b>+' + quiz.gain + '</b><span>重练得分</span></div><div class="tile"><b>' + state.streak + '</b><span>当前连胜</span></div><div class="tile"><b>' + left + '</b><span>剩余错题</span></div></div>' + up;
+      var left = wrongIds().length, nq = S.total;
+      html += '<div class="stars" role="img" aria-label="重练完成">' + starRow(S.cleared === nq ? 3 : S.cleared > 0 ? (S.cleared * 2 >= nq ? 2 : 1) : 0) + '</div>' +
+        '<h1>' + (S.cleared === nq ? '全部掌握！' : S.cleared ? '有进步' : '再来一次') + '</h1>' +
+        '<p class="result-sub">这次掌握了 ' + S.cleared + ' 题' + (left ? '，错题本里还剩 ' + left + ' 题。' : '，错题本已经清空。') + '</p>' +
+        tiles([['+' + S.gain, '重练得分'], [state.streak, '当前连胜'], [left, '剩余错题']]) + up;
       if (left) actions += '<button class="btn" data-act="go" data-to="review">继续重练剩下的 ' + left + ' 题</button>';
       actions += '<button class="btn' + (left ? ' btn-ghost' : '') + '" data-act="go" data-to="levels" data-replace="1">回到地图</button>';
     }
     html += '<div class="result-actions">' + actions + '</div></div>';
     $view.innerHTML = html;
     $bar.innerHTML = '';
+  }
+  var runTimers = [];
+  function runDemo(i) {
+    var ex = LEVELS[i].example, box = $('#demo-out'), pre = $('#demo-pre');
+    if (!box) return;
+    runTimers.forEach(clearTimeout); runTimers = [];
+    var ls = demoLines(ex);
+    box.hidden = false; pre.innerHTML = '';
+    sfx('tap');
+    if (reduceMotion()) { pre.innerHTML = ls.join('\n'); return; }
+    ls.forEach(function (ln, k) {
+      runTimers.push(setTimeout(function () {
+        pre.insertAdjacentHTML('beforeend', '<span class="ln-in">' + (ln || ' ') + '</span>');
+        if (k === 0) { try { box.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); } catch (e) {} }
+      }, k * 110));
+    });
   }
 
   /* ---------- 错题本 ---------- */
@@ -4148,16 +4774,16 @@ var TypeCheck = (function () {
 
   /* ---------- 我的 ---------- */
   function viewMe() {
-    var r = rankInfo(state.xp), passed = 0;
-    for (var i = 0; i < LEVELS.length; i++) if (starsOf(i)) passed++;
+    var r = rankInfo(state.xp), passed = 0, typed = 0;
+    for (var i = 0; i < LEVELS.length; i++) { if (starsOf(i)) passed++; if (handTyped(i)) typed++; }
     var acc = state.answered ? Math.round(state.correct / state.answered * 100) + '%' : '—';
     var html = topMain() + '<div class="page-head"><h1>我的</h1></div>';
     if (!saveOk) html += '<p class="warn" style="margin-top:12px">这个浏览器现在不能保存进度（可能开了无痕模式，或者禁用了网站数据）。关掉页面后进度会丢失。</p>';
-    html += '<div class="card"><div class="me-rank"><span class="rank-badge"><small>Lv</small>' + r.lv + '</span><div class="me-rank-main"><div class="me-rank-name">' + esc(r.name) + '</div>' +
+    html += '<div class="card"><div class="me-rank">' + rankBadge(r.lv) + '<div class="me-rank-main"><div class="me-rank-name">' + esc(r.name) + '</div>' +
       '<div class="xpbar" role="img" aria-label="升级进度 ' + r.pct + '%"><i style="width:' + r.pct + '%"></i></div>' +
       '<div class="me-rank-next">' + (r.next ? '再得 <span class="num">' + r.need + '</span> 分升到 Lv' + (r.lv + 1) + ' ' + esc(r.next.name) : '已经是最高等级') + '</div></div></div>' +
       '<div class="grid2"><div class="tile"><b>' + state.xp + '</b><span>总积分</span></div><div class="tile"><b>' + totalStars() + '/' + LEVELS.length * 3 + '</b><span>星星</span></div>' +
-      '<div class="tile"><b>' + passed + '/' + LEVELS.length + '</b><span>已通关</span></div><div class="tile"><b>' + Object.keys(state.typed).length + '/' + LEVELS.length + '</b><span>代码已手打</span></div>' +
+      '<div class="tile"><b>' + passed + '/' + LEVELS.length + '</b><span>已通关</span></div><div class="tile"><b>' + typed + '/' + LEVELS.length + '</b><span>代码已手打</span></div>' +
       '<div class="tile"><b>' + state.best + '</b><span>最高连胜</span></div><div class="tile"><b>' + dayStreak() + '</b><span>连续学习天数</span></div>' +
       '<div class="tile"><b>' + acc + '</b><span>正确率（共答 ' + state.answered + ' 题）</span></div><div class="tile"><b>' + wrongIds().length + '</b><span>错题本里的题</span></div></div></div>';
     html += '<div class="card"><h2>各章进度</h2><div class="chap-rows">' + CHAPTERS.map(function (ch, ci) {
@@ -4165,6 +4791,8 @@ var TypeCheck = (function () {
       var d = ls.filter(function (l) { return state.levels[l.id] && state.levels[l.id].stars; }).length;
       return '<div class="chap-row"><b>第' + CN[ci] + '章 ' + esc(ch.title) + '</b><span>' + d + '/' + ls.length + '</span><div class="xpbar"><i style="width:' + Math.round(d / ls.length * 100) + '%"></i></div></div>';
     }).join('') + '</div></div>';
+    html += '<div class="card"><h2>设置</h2><button class="switch-row" data-act="sound" role="switch" aria-checked="' + state.sound + '"><span>音效</span>' +
+      '<span class="switch' + (state.sound ? ' is-on' : '') + '"></span></button></div>';
     html += '<div class="card"><h2>分享给朋友</h2><p>把这个页面的链接发给朋友，对方打开就能玩，不用注册。每个人的进度只保存在自己的手机里，互不影响。</p>' +
       (STANDALONE ? '<button class="btn btn-ghost" data-act="share">' + ICON.share + '分享链接</button>' : '') + '</div>';
     html += '<div class="card"><h2>添加到手机桌面</h2><ol class="steps">' +
@@ -4182,52 +4810,75 @@ var TypeCheck = (function () {
   document.addEventListener('click', function (e) {
     var el = e.target.closest ? e.target.closest('[data-act]') : null;
     if (!el) return;
-    var act = el.getAttribute('data-act'), it;
+    var act = el.getAttribute('data-act'), st = S && !S.done ? S.steps[S.pos] : null, i, k;
     if (act === 'go') go(el.getAttribute('data-to'), !!el.getAttribute('data-replace'));
     else if (act === 'open') {
-      var i = +el.getAttribute('data-i');
+      i = +el.getAttribute('data-i');
       if (unlocked(i)) go('level-' + (i + 1));
       else toast('先通过第 ' + (currentIndex() + 1) + ' 关，才能解锁这一关');
     }
-    else if (act === 'start') go('quiz-' + (+el.getAttribute('data-i') + 1));
+    else if (act === 'stage') {
+      i = +el.getAttribute('data-i'); k = +el.getAttribute('data-k');
+      if (stageOpen(i, k)) go(STAGES[k].key + '-' + (i + 1));
+      else toast(k === 3 ? '语法和例子都亲手打过，才能答题' : '先完成上一步：' + STAGES[k - 1].name);
+    }
+    else if (act === 'next') { if (st && st.kind === 'card') { sfx('tap'); advance(); } }
     else if (act === 'run') runDemo(+el.getAttribute('data-i'));
     else if (act === 'copy') copyText(LEVELS[+el.getAttribute('data-i')].example.code, '代码已复制');
+    else if (act === 'chip') tapChip(el);
     else if (act === 'pick') {
-      it = quiz && quiz.items[quiz.pos];
-      if (!it || it.done) return;
-      it.picked = +el.getAttribute('data-k');
-      Array.prototype.forEach.call(document.querySelectorAll('.opt'), function (b, k) {
-        b.classList.toggle('is-picked', k === it.picked); b.setAttribute('aria-pressed', k === it.picked);
+      if (!st || st.kind !== 'q' || st.done) return;
+      st.picked = +el.getAttribute('data-k'); sfx('tap');
+      Array.prototype.forEach.call(document.querySelectorAll('.opt'), function (b, n) {
+        b.classList.toggle('is-picked', n === st.picked); b.setAttribute('aria-pressed', n === st.picked);
       });
-      var c = $('#confirm'); if (c) c.disabled = false;
+      var c = $('#check'); if (c) c.disabled = false;
     }
-    else if (act === 'confirm') confirmAnswer();
-    else if (act === 'next') nextQuestion();
+    else if (act === 'check') checkStep();
+    else if (act === 'sheet-ok') {
+      if (!S || !S.sheet) return;
+      if (S.sheet === 'retry') { closeSheet(); $bar.innerHTML = barHtml(S.steps[S.pos]); setMood(''); }
+      else advance();
+    }
     else if (act === 'key') insertKey(el.getAttribute('data-ch'));
     else if (act === 'type-ok') submitLine();
-    else if (act === 'quit') go(quiz && quiz.mode === 'review' ? 'notebook' : 'levels');
-    else if (act === 'retry') { startLevelQuiz(quiz.li); viewQuiz(); window.scrollTo(0, 0); }
+    else if (act === 'peek') {
+      if (!st || st.kind !== 'type') return;
+      S.peek = true;
+      var inp = $('#type-input'), v = inp.value;
+      refreshTyping('答案显示出来了。照着打一遍，下次争取不看。', '');
+      inp.value = v; if (v) liveTyping();
+      inp.focus();
+    }
+    else if (act === 'quit') go(S && S.li >= 0 ? 'level-' + (S.li + 1) : 'notebook');
+    else if (act === 'retry') { if (S) go('quiz-' + (S.li + 1)); }
     else if (act === 'review-one') { pendingReview = [el.getAttribute('data-id')]; go('review'); }
     else if (act === 'review-these') {
-      pendingReview = quiz.items.filter(function (x) { return !x.ok; }).map(function (x) { return x.q.id; });
+      if (!S) return;
+      var seen = {};
+      pendingReview = S.steps.filter(function (x) {
+        if (x.kind !== 'q' || !x.done || x.ok || seen[x.q.id]) return false;
+        seen[x.q.id] = 1; return true;
+      }).map(function (x) { return x.q.id; });
       go('review', true);
     }
+    else if (act === 'sound') { state.sound = !state.sound; save(); viewMe(); sfx('ok'); }
     else if (act === 'reset-ask') { resetAsk = true; viewMe(); }
     else if (act === 'reset-no') { resetAsk = false; viewMe(); }
-    else if (act === 'reset-yes') { state = freshState(); save(); resetAsk = false; quiz = null; typing = null; viewMe(); window.scrollTo(0, 0); toast('进度已清空'); }
+    else if (act === 'reset-yes') { state = freshState(); save(); resetAsk = false; S = null; viewMe(); window.scrollTo(0, 0); toast('进度已清空'); }
     else if (act === 'share') {
       var url = location.href.split('#')[0];
       if (navigator.share) navigator.share({ title: 'Python 蟒蛇闯关', text: '从零开始学 Python 的闯关小游戏，打开就能玩', url: url }).catch(function () {});
       else copyText(url, '链接已复制，发给朋友吧');
     }
   });
-  // 点符号键时不让输入框失去焦点，键盘就不会收起
+  // 点符号键和确定键时不让输入框失去焦点，键盘就不会收起
   document.addEventListener('mousedown', function (e) { if (e.target.closest && e.target.closest('.key, [data-keepfocus]')) e.preventDefault(); });
   function onFillInput() {
-    var el = $('#fill'), it = quiz && quiz.items[quiz.pos];
-    if (!el || !it || it.done) return;
-    it.input = el.value;
-    var c = $('#confirm'); if (c) c.disabled = !canConfirm(it);
+    var el = $('#fill'), st = S && !S.done ? S.steps[S.pos] : null;
+    if (!el || !st || st.kind !== 'q' || st.done) return;
+    st.input = el.value;
+    var c = $('#check'); if (c) c.disabled = !canCheck(st);
   }
   function insertKey(ch) {
     var el = $('#fill') || $('#type-input');
@@ -4246,7 +4897,7 @@ var TypeCheck = (function () {
   document.addEventListener('compositionend', function (e) { if (e.target && e.target.id === 'type-input') liveTyping(); });
   document.addEventListener('keydown', function (e) {
     if (e.key !== 'Enter' || !e.target) return;
-    if (e.target.id === 'fill') { e.preventDefault(); e.target.blur(); confirmAnswer(); }
+    if (e.target.id === 'fill') { e.preventDefault(); e.target.blur(); checkStep(); }
     else if (e.target.id === 'type-input' && !e.isComposing && e.keyCode !== 229) { e.preventDefault(); submitLine(); }
   });
   // 手打环节不能粘贴
