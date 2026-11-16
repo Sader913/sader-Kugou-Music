@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Python 蟒蛇闯关</title>
-<meta name="description" content="从零开始学 Python 的闯关小游戏：26 关、125 道题，每关一张图示，语法和例子都要亲手打一遍才能通关。">
+<meta name="description" content="从零开始学 Python 的闯关小游戏：32 关、154 道题，每关一张图示，语法和例子都要亲手打一遍；还有 16 个要自己写程序的实战任务。">
 <meta name="theme-color" content="#EEF3FA" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#0B1322" media="(prefers-color-scheme: dark)">
 <meta name="mobile-web-app-capable" content="yes">
@@ -93,7 +93,9 @@ body {
 }
 body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 30; background: var(--bg); }
 button { font: inherit; color: inherit; background: none; border: 0; padding: 0; margin: 0; cursor: pointer; touch-action: manipulation; }
-button:focus-visible, input:focus-visible, a:focus-visible { outline: 3px solid var(--blue); outline-offset: 2px; }
+/* 输入框不继承 body 的字体设置，要单独关掉连字，否则 == 会显示成一个长等号 */
+input, textarea { font-variant-ligatures: none; font-feature-settings: "liga" 0, "calt" 0; }
+button:focus-visible, input:focus-visible, textarea:focus-visible, a:focus-visible { outline: 3px solid var(--blue); outline-offset: 2px; }
 h1, h2, h3, p, ul, ol, figure { margin: 0; }
 ul, ol { padding: 0; list-style: none; }
 .ic { width: 1.25em; height: 1.25em; flex: none; display: block; }
@@ -125,7 +127,7 @@ ul, ol { padding: 0; list-style: none; }
 
 /* ---------- 底部固定条 ---------- */
 .tabbar, .actionbar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 25; background: var(--surface); border-top: 1.5px solid var(--line); padding-bottom: env(safe-area-inset-bottom, 0px); }
-.tabbar .bar-in { display: grid; grid-template-columns: repeat(3, 1fr); }
+.tabbar .bar-in { display: grid; grid-template-columns: repeat(4, 1fr); }
 .tab { position: relative; min-height: 64px; display: grid; justify-items: center; align-content: center; gap: 2px; font-size: 13px; font-weight: 700; color: var(--ink-3); line-height: 1.2; }
 .tab .ic { width: 26px; height: 26px; }
 .tab.is-on { color: var(--blue-text); }
@@ -508,6 +510,44 @@ body.has-sheet .app { padding-bottom: 58vh; }
 .type-target.flash { animation: flashOk .4s ease; }
 @keyframes flashOk { 0% { box-shadow: 0 0 0 0 rgba(47, 179, 126, .8); border-color: #2FB37E; } 100% { box-shadow: 0 0 0 12px rgba(47, 179, 126, 0); } }
 .peek { margin-top: -6px; }
+
+/* ---------- 实战 ---------- */
+.task-list { display: grid; gap: 12px; margin-top: 16px; }
+.task-big { font-style: normal; font-size: 12px; font-weight: 800; color: var(--on-yellow); background: var(--yellow); border-radius: 6px; padding: 2px 6px; margin-left: 8px; vertical-align: 2px; }
+.task { display: grid; gap: 16px; padding-top: 6px; }
+.task-desc { display: grid; gap: 8px; }
+.task-desc p { font-size: 17px; line-height: 1.65; }
+.io { display: grid; gap: 10px; background: var(--surface); border: 1.5px solid var(--line); border-radius: 16px; padding: 12px 14px; }
+.io-tag { display: block; font-size: 13px; font-weight: 800; line-height: 1.4; color: var(--ink-2); margin-bottom: 2px; }
+.io pre { margin: 0; font-family: var(--font-mono); font-size: 15px; line-height: 1.6; white-space: pre-wrap; overflow-wrap: anywhere; }
+.io pre.code { font-size: 13px; padding: 8px 10px; border-radius: 10px; white-space: pre; overflow-wrap: normal; }
+.editor { display: flex; background: var(--code-bg); border-radius: 16px; overflow: hidden; border: 2px solid var(--code-bg); }
+.editor:focus-within { border-color: var(--yellow); }
+.ed-gutter { flex: none; width: 40px; padding: 12px 8px 12px 0; text-align: right; font-family: var(--font-mono); font-size: 16px; line-height: 1.7; color: var(--code-dim); white-space: pre; background: var(--code-bg-2); -webkit-user-select: none; user-select: none; }
+.ed-area { flex: 1; min-width: 0; min-height: 190px; margin: 0; padding: 12px; border: 0; outline: none; resize: none; background: transparent; color: var(--code-fg); caret-color: var(--yellow); font-family: var(--font-mono); font-size: 16px; line-height: 1.7; white-space: pre; overflow-x: auto; overflow-y: hidden; tab-size: 4; }
+.ed-area::placeholder { color: var(--code-dim); font-family: var(--font-body); }
+.task-actions { display: grid; grid-template-columns: 1fr 1.5fr; gap: 10px; }
+.console { background: var(--code-bg); border-radius: 16px; padding: 12px 14px; display: grid; gap: 8px; }
+.con-label { font-size: 13px; font-weight: 700; line-height: 1.4; color: var(--code-dim); }
+.con-out { margin: 0; min-height: 1.7em; font-family: var(--font-mono); font-size: 15px; line-height: 1.7; color: var(--code-fg); white-space: pre-wrap; overflow-wrap: anywhere; }
+.con-out .typed { color: var(--code-str); font-weight: 700; }
+.con-dim { font-size: 15px; line-height: 1.5; color: var(--code-dim); }
+.con-in { display: flex; gap: 8px; }
+.con-input { flex: 1; min-width: 0; height: 54px; padding: 0 12px; border-radius: 14px; border: 2px solid var(--yellow); background: #1C2B4E; color: var(--code-fg); font-family: var(--font-mono); font-size: 17px; }
+.con-input::placeholder { color: var(--code-dim); font-family: var(--font-body); font-size: 15px; }
+.con-in .type-enter { width: 58px; height: 54px; }
+.con-err { background: var(--bad-bg); color: var(--ink); border-radius: 12px; padding: 10px 12px; }
+.con-err pre, .t-card pre { margin: 4px 0 0; padding: 8px 10px; border-radius: 10px; background: var(--surface); color: var(--ink); font-family: var(--font-mono); font-size: 14px; line-height: 1.6; white-space: pre-wrap; overflow-wrap: anywhere; }
+.con-err .fb-label.is-why { color: var(--bad); }
+.t-card { border-radius: 18px; padding: 16px; display: grid; gap: 12px; }
+.t-card.good { background: var(--good-bg); }
+.t-card.bad { background: var(--bad-bg); }
+.t-card.good .fb-head { color: var(--good); }
+.t-card.bad .fb-head, .t-card.bad .fb-label.is-why { color: var(--bad); }
+.t-help { display: grid; gap: 8px; }
+.t-hints { display: grid; gap: 8px; }
+.t-hint-item { background: var(--surface); border: 1.5px solid var(--line); border-radius: 14px; padding: 10px 14px; font-size: 16px; line-height: 1.6; }
+.t-hint-item .code { margin-top: 8px; font-size: 13px; }
 
 /* ---------- 开关、彩纸 ---------- */
 .switch-row { width: 100%; min-height: 48px; display: flex; align-items: center; justify-content: space-between; gap: 12px; text-align: left; font-size: 17px; font-weight: 700; }
@@ -2943,7 +2983,7 @@ for name, scores in grades.items():
         print(name, avg, "继续加油")`,
     out: '小明 85.0 优秀\n小红 82.5 继续加油',
   },
-  tip: '通关之后，最好的练习是自己动手写：做一个记账本、一个猜数字游戏，或者一个待办清单。',
+  tip: '光会看、会照着打还不够，要自己动手写。猜数字、记账本、待办清单这三个小项目，就在底部的“实战”里。',
   questions: [
     {
       id: 'final-1', type: 'output', q: OUT_Q,
@@ -3027,6 +3067,612 @@ print("-".join(parts))`,
   ],
 });
 
+
+/* ===== 关卡内容（第七章 更进一步）===== */
+CHAPTERS.push({ id: 'c7', title: '更进一步', sub: '入门之后最常用的几样本领' });
+
+L({
+  id: 'comp', ch: 'c7', title: '列表推导式', hook: '一行代码，从旧列表造出新列表',
+  syntax: py`[表达式 for 变量 in 列表]
+[表达式 for 变量 in 列表 if 条件]`,
+  how: [
+    '写在方括号里。最前面是“要放进新列表的东西”，后面跟一个 for。',
+    '它和“先建空列表，再用 for 循环一个个 append”做的是同一件事，只是写成了一行。',
+    '末尾加上 `if 条件`，就只留下满足条件的元素。',
+    '原来的列表不会被改动，得到的是一个新列表。',
+  ],
+  mean: '推导式就是把“对每个元素做同样的加工”这句话，直接写成代码：`[n * 2 for n in nums]` 读作“对 nums 里的每个 n，取 n * 2”。',
+  use: '把一组数据整体加工一遍（全部乘 2、全部转成大写），或者筛选（只留下及格的分数）。写得短，也容易一眼看懂。',
+  example: {
+    code: py`nums = [1, 2, 3, 4, 5]
+doubled = [n * 2 for n in nums]
+print(doubled)
+evens = [n for n in nums if n % 2 == 0]
+print(evens)
+names = ["tom", "amy"]
+print([s.upper() for s in names])`,
+    out: "[2, 4, 6, 8, 10]\n[2, 4]\n['TOM', 'AMY']",
+  },
+  tip: '推导式适合简单的加工。如果里面要写好几个判断，还是用普通的 for 循环更清楚。',
+  questions: [
+    {
+      id: 'comp-1', type: 'output', q: OUT_Q,
+      code: py`print([x + 1 for x in [1, 2, 3]])`,
+      opts: [
+        { t: '[2, 3, 4]', ok: true },
+        { t: '[1, 2, 3]', why: '最前面的 `x + 1` 是放进新列表的东西，每个元素都加了 1。' },
+        { t: '[1, 2, 3, 1]', why: '`x + 1` 是对每个元素加 1，不是往列表末尾加一个 1。' },
+        { t: '9', why: '推导式得到的是一个新列表，不是把结果加起来。' },
+      ],
+      explain: '对 1、2、3 分别加 1，得到新列表 [2, 3, 4]。',
+    },
+    {
+      id: 'comp-2', type: 'output', q: OUT_Q,
+      code: py`nums = [5, 12, 8, 20]
+print([n for n in nums if n > 10])`,
+      opts: [
+        { t: '[12, 20]', ok: true },
+        { t: '[5, 8]', why: '`if n > 10` 留下的是大于 10 的，5 和 8 被筛掉了。' },
+        { t: '[False, True, False, True]', why: '这是 `[n > 10 for n in nums]` 的结果。这里 if 写在最后，是用来筛选的，放进新列表的是 n 本身。' },
+        { t: '[5, 12, 8, 20]', why: '末尾的 if 会筛掉不满足条件的元素。' },
+      ],
+      explain: '末尾的 `if n > 10` 只留下大于 10 的元素：12 和 20。',
+    },
+    {
+      id: 'comp-3', type: 'fill', q: '补全推导式，得到每个数的平方',
+      code: py`squares = [n * n ____ n in [1, 2, 3]]
+print(squares)`,
+      answers: ['for'], expect: '[1, 4, 9]',
+      hints: {
+        'in': 'in 已经在后面了。这里缺的是 for。',
+        'if': 'if 是用来筛选的，要写在最后。这里缺的是 for。',
+        'while': '推导式里用的是 for。',
+      },
+      explain: '推导式的写法是 `[表达式 for 变量 in 列表]`。',
+    },
+    {
+      id: 'comp-4', type: 'output', q: OUT_Q,
+      code: py`words = ["a", "bb", "ccc"]
+print([len(w) for w in words])`,
+      opts: [
+        { t: '[1, 2, 3]', ok: true },
+        { t: "['a', 'bb', 'ccc']", why: '放进新列表的是 `len(w)`，也就是每个单词的长度，不是单词本身。' },
+        { t: '6', why: '得到的是由三个长度组成的列表，没有把它们加起来。' },
+        { t: '3', why: '3 是 words 的元素个数。这里是对每个单词分别求长度。' },
+      ],
+      explain: '对每个单词求长度：1、2、3。',
+    },
+    {
+      id: 'comp-5', type: 'output', q: OUT_Q,
+      code: py`print(len([i for i in range(10) if i % 3 == 0]))`,
+      opts: [
+        { t: '4', ok: true },
+        { t: '3', why: 'range(10) 从 0 开始，0 除以 3 的余数也是 0，所以 0 也算。' },
+        { t: '10', why: '末尾的 if 只留下能被 3 整除的数。' },
+        { t: '[0, 3, 6, 9]', why: '这是推导式得到的列表。外面还套了 len，显示的是它的长度。' },
+      ],
+      explain: '0 到 9 里能被 3 整除的有 0、3、6、9，一共 4 个。',
+    },
+  ],
+});
+
+L({
+  id: 'nest', ch: 'c7', title: '嵌套的数据', hook: '列表里放字典，字典里放列表',
+  syntax: py`students = [
+    {"name": "小明", "score": 90},
+    {"name": "小红", "score": 85},
+]
+students[0]["name"]     # 第 1 个学生的名字
+for s in students:      # 一个一个处理`,
+  how: [
+    '列表的元素可以是字典，字典的值也可以是列表。容器可以一层套一层。',
+    '取值时一层一层来：`students[0]` 先取出第一个字典，再用 `["name"]` 取出里面的值。',
+    '遍历时，循环变量拿到的是里面的那个字典，可以接着用键取值。',
+    '列表太长时可以分成几行写，每个元素占一行。',
+  ],
+  mean: '真实的数据很少是一排数字。一个班的学生是“很多个人”，每个人又有“好几项信息”，这就是列表套字典。',
+  use: '通讯录、商品列表、聊天记录，从网上拿到的数据几乎都是这种形状。会一层层取值，就能读懂它们。',
+  example: {
+    code: py`students = [
+    {"name": "小明", "score": 90},
+    {"name": "小红", "score": 85},
+]
+print(students[0]["name"])
+print(len(students))
+for s in students:
+    print(s["name"], s["score"])
+students[1]["score"] = 95
+print(students[1])`,
+    out: "小明\n2\n小明 90\n小红 85\n{'name': '小红', 'score': 95}",
+  },
+  tip: '取不到值的时候，先 print 外面那一层看看它到底是什么，再决定下一步用索引还是用键。',
+  questions: [
+    {
+      id: 'nest-1', type: 'output', q: OUT_Q,
+      code: py`data = [{"a": 1}, {"a": 2}]
+print(data[1]["a"])`,
+      opts: [
+        { t: '2', ok: true },
+        { t: '1', why: '`data[1]` 是第二个字典（索引从 0 开始），它里面 "a" 对应的是 2。' },
+        { t: "{'a': 2}", why: '`data[1]` 才是这个字典。后面还有 `["a"]`，又取出了里面的值。' },
+        { err: true, why: '先用索引取出字典，再用键取值，这是正确的写法。' },
+      ],
+      explain: '`data[1]` 取出第二个字典 {"a": 2}，再用 `["a"]` 取出 2。',
+    },
+    {
+      id: 'nest-2', type: 'output', q: OUT_Q,
+      code: py`d = {"nums": [3, 6, 9]}
+print(d["nums"][0])`,
+      opts: [
+        { t: '3', ok: true },
+        { t: '[3, 6, 9]', why: '`d["nums"]` 是整个列表。后面还有 `[0]`，取出了列表的第一个元素。' },
+        { t: '9', why: '`[0]` 取的是第一个元素。最后一个要用 `[-1]`。' },
+        { t: 'nums', why: '`d["nums"]` 取出的是键对应的值，不是键的名字。' },
+      ],
+      explain: '`d["nums"]` 取出列表 [3, 6, 9]，再用 `[0]` 取出第一个元素 3。',
+    },
+    {
+      id: 'nest-3', type: 'fill', q: '填上键，取出第一只宠物的名字（显示 旺财）',
+      code: py`pets = [{"name": "旺财"}]
+print(pets[0][____])`,
+      answers: ['"name"', "'name'"], expect: '旺财',
+      hints: {
+        'name': '键是字符串，要加引号："name"。',
+        '0': '`pets[0]` 已经取出了字典。字典要用键来取值："name"。',
+        '"旺财"': '方括号里写的是键，不是值。',
+      },
+      explain: '`pets[0]` 是字典 {"name": "旺财"}，再用键 "name" 取出值。',
+    },
+    {
+      id: 'nest-4', type: 'output', q: OUT_Q,
+      code: py`team = [{"n": "a", "s": 3}, {"n": "b", "s": 5}]
+total = 0
+for p in team:
+    total += p["s"]
+print(total)`,
+      opts: [
+        { t: '8', ok: true },
+        { t: '5', why: '5 只是最后一个人的 s。total 把每个人的 s 都加了进去。' },
+        { t: '2', why: '2 是 team 里字典的个数。这里加的是每个字典里 "s" 的值。' },
+        { err: true, why: '循环时 p 是一个字典，`p["s"]` 可以正常取值。' },
+      ],
+      explain: '循环里 p 依次是两个字典，`p["s"]` 是 3 和 5，加起来是 8。',
+    },
+  ],
+});
+
+L({
+  id: 'func2', ch: 'c7', title: '函数进阶', hook: '作用域、任意多个参数、一行的小函数',
+  syntax: py`def f():
+    x = 1            # 局部变量，只在函数里有效
+
+def total(*nums):    # *nums 接住任意多个参数
+    return sum(nums)
+
+double = lambda n: n * 2   # 一行的小函数`,
+  how: [
+    '在函数里创建的变量叫局部变量，函数结束就没了，外面用不到。',
+    '函数里可以读到外面的变量。但在函数里给同名变量赋值，只会新建一个局部变量，改不到外面的。',
+    '参数前面加 `*`，可以接住任意多个参数，它们会被收成一个元组。',
+    '`lambda 参数: 表达式` 是没有名字的小函数，冒号后面的结果会自动返回。',
+    '`sorted(列表, key=函数)` 按函数算出来的值排序，这里最常用 lambda。',
+  ],
+  mean: '每个函数都有自己的“小房间”。房间里的变量外面看不见，所以不同函数里可以放心用同一个名字。',
+  use: '作用域让函数互不干扰。`*args` 让函数不用限定参数个数（print 就是这样）。lambda 用在只需要一个简单规则的地方，比如“按长度排序”。',
+  example: {
+    code: py`def total(*nums):
+    return sum(nums)
+
+print(total(1, 2))
+print(total(1, 2, 3, 4))
+
+double = lambda n: n * 2
+print(double(5))
+
+words = ["banana", "fig", "apple"]
+print(sorted(words, key=len))
+print(sorted(words, key=lambda w: w[-1]))`,
+    out: "3\n10\n10\n['fig', 'apple', 'banana']\n['banana', 'apple', 'fig']",
+  },
+  tip: '想让函数改变外面的数据，最稳妥的办法是用 return 把新值交回来，再在外面赋值。',
+  questions: [
+    {
+      id: 'func2-1', type: 'output', q: OUT_Q,
+      code: py`x = 1
+def f():
+    x = 5
+
+f()
+print(x)`,
+      opts: [
+        { t: '1', ok: true },
+        { t: '5', why: '函数里的 `x = 5` 新建了一个局部变量 x，它和外面的 x 是两个东西。外面的 x 没有变。' },
+        { err: true, why: '函数里外用同一个名字是允许的，不会报错。' },
+        { t: 'None', why: 'print 的是外面的变量 x，它的值一直是 1。' },
+      ],
+      explain: '函数里赋值只会创建局部变量。外面的 x 还是 1。',
+    },
+    {
+      id: 'func2-2', type: 'output', q: OUT_Q,
+      code: py`def f():
+    y = 3
+
+f()
+print(y)`,
+      opts: [
+        { err: true, ok: true },
+        { t: '3', why: 'y 是函数里的局部变量，函数结束后就没了，外面用不到。' },
+        { t: 'None', why: '外面根本没有 y 这个变量，Python 会报 NameError。' },
+        { t: '0', why: '没有定义过的变量不会有默认值。' },
+      ],
+      explain: 'y 只在函数 f 里存在。在外面用它会报 NameError。',
+    },
+    {
+      id: 'func2-3', type: 'output', q: OUT_Q,
+      code: py`def count(*a):
+    return len(a)
+
+print(count(7, 8, 9))`,
+      opts: [
+        { t: '3', ok: true },
+        { t: '24', why: '函数返回的是 `len(a)`，是参数的个数，不是它们的和。' },
+        { t: '(7, 8, 9)', why: '`a` 确实是元组 (7, 8, 9)，但函数返回的是它的长度。' },
+        { err: true, why: '`*a` 可以接住任意多个参数，传 3 个没有问题。' },
+      ],
+      explain: '`*a` 把 7、8、9 收成元组 (7, 8, 9)，长度是 3。',
+    },
+    {
+      id: 'func2-4', type: 'fill', q: '补全代码，写一个把两个数相加的小函数',
+      code: py`add = ____ a, b: a + b
+print(add(2, 3))`,
+      answers: ['lambda'], expect: '5',
+      hints: {
+        'def': 'def 要另起一行写函数体。写在一行里的小函数用 lambda。',
+        'function': 'Python 里一行的小函数用 lambda。',
+        'Lambda': 'Python 区分大小写，要全部小写：lambda。',
+      },
+      explain: '`lambda a, b: a + b` 接收 a 和 b，返回它们的和。',
+    },
+    {
+      id: 'func2-5', type: 'output', q: OUT_Q,
+      code: py`nums = [3, 1, 2]
+print(sorted(nums, key=lambda n: -n))`,
+      opts: [
+        { t: '[3, 2, 1]', ok: true },
+        { t: '[1, 2, 3]', why: 'key 把每个数变成了它的相反数再比较：-3 最小，所以 3 排在最前面。' },
+        { t: '[-3, -2, -1]', why: 'key 只决定排序的依据，列表里放的还是原来的数。' },
+        { err: true, why: 'key 后面可以直接写一个 lambda，这是常见的写法。' },
+      ],
+      explain: '按 -n 从小到大排：-3、-2、-1，对应原来的 3、2、1。',
+    },
+  ],
+});
+
+L({
+  id: 'inherit', ch: 'c7', title: '继承', hook: '在已有的类上加功能，不用从头写',
+  syntax: py`class 子类(父类):
+    def __init__(self, 参数):
+        super().__init__(参数)   # 先做父类的初始化
+        self.新属性 = ...
+
+    def 方法名(self):            # 同名方法会盖掉父类的
+        ...`,
+  how: [
+    '定义类时在括号里写上另一个类，就是继承它。被继承的叫父类，新的叫子类。',
+    '子类自动拥有父类的全部属性和方法，不用再写一遍。',
+    '子类里写一个和父类同名的方法，调用时用的就是子类的，这叫“重写”。',
+    '`super()` 代表父类。`super().__init__(...)` 用来先执行父类的初始化。',
+    '`pass` 表示“这里什么都不做”，用来占位。',
+  ],
+  mean: '继承像“在原图纸上改图”。狗和猫都是动物：先画一张“动物”的图纸，再在它的基础上画“狗”，只写狗特别的地方。',
+  use: '几个类有很多相同的地方时，把相同的部分放进父类，只在子类里写不同的部分。以后要改相同的部分，只改一处。',
+  example: {
+    code: py`class Animal:
+    def __init__(self, name):
+        self.name = name
+
+    def speak(self):
+        print(self.name, "发出声音")
+
+class Dog(Animal):
+    def speak(self):
+        print(self.name, "汪汪")
+
+class Cat(Animal):
+    pass
+
+Dog("旺财").speak()
+Cat("咪咪").speak()`,
+    out: '旺财 汪汪\n咪咪 发出声音',
+  },
+  tip: '子类自己写了 `__init__`，父类的 `__init__` 就不会自动执行了。要用 `super().__init__(...)` 手动叫它一下。',
+  questions: [
+    {
+      id: 'inherit-1', type: 'output', q: OUT_Q,
+      code: py`class A:
+    def hi(self):
+        print("A")
+
+class B(A):
+    pass
+
+B().hi()`,
+      opts: [
+        { t: 'A', ok: true },
+        { t: 'B', why: 'B 自己没有写 hi 方法，用的是从 A 继承来的，里面 print 的是 "A"。' },
+        { err: true, why: 'B 继承了 A，自动拥有 A 的 hi 方法，可以正常调用。' },
+        { none: true, why: 'B 继承来的 hi 方法会执行 print("A")。' },
+      ],
+      explain: 'B 什么都没写，但它继承了 A 的 hi 方法。',
+    },
+    {
+      id: 'inherit-2', type: 'output', q: OUT_Q,
+      code: py`class A:
+    def hi(self):
+        print("A")
+
+class B(A):
+    def hi(self):
+        print("B")
+
+B().hi()`,
+      opts: [
+        { t: 'B', ok: true },
+        { t: 'A', why: 'B 自己写了同名的 hi 方法，它盖掉了从 A 继承来的那个。' },
+        { t: 'A\nB', why: '重写之后只执行子类的方法，父类的不会自动执行。' },
+        { err: true, why: '子类写同名方法是允许的，这叫重写。' },
+      ],
+      explain: '子类写了同名方法，调用时用子类的。',
+    },
+    {
+      id: 'inherit-3', type: 'fill', q: '补全代码，让 Puppy 继承 Dog（显示 汪）',
+      code: py`class Dog:
+    def bark(self):
+        print("汪")
+
+class Puppy(____):
+    pass
+
+Puppy().bark()`,
+      answers: ['Dog'], expect: '汪',
+      hints: {
+        'self': 'self 是方法的第一个参数。类名后面的括号里写的是父类。',
+        'dog': '类名是 Dog，首字母大写。',
+        'object': '这样 Puppy 就没有 bark 方法了。要继承 Dog。',
+      },
+      explain: '`class Puppy(Dog):` 让 Puppy 继承 Dog，所以它也能 bark。',
+    },
+    {
+      id: 'inherit-4', type: 'output', q: OUT_Q,
+      code: py`class A:
+    def __init__(self):
+        self.x = 1
+
+class B(A):
+    def __init__(self):
+        super().__init__()
+        self.y = 2
+
+b = B()
+print(b.x, b.y)`,
+      opts: [
+        { t: '1 2', ok: true },
+        { err: true, why: '`super().__init__()` 执行了 A 的初始化，所以 b 身上有 x。如果少了这一行才会报错。' },
+        { t: '2', why: 'print 里有两个内容：b.x 和 b.y。' },
+        { t: '1', why: 'B 的 `__init__` 里还设置了 `self.y = 2`。' },
+      ],
+      explain: '`super().__init__()` 先设置了 x，接着 B 自己设置了 y。',
+    },
+    {
+      id: 'inherit-5', type: 'choice', q: '子类里写了一个和父类同名的方法。用子类的对象调用它，执行哪一个？',
+      opts: [
+        { t: '子类的', ok: true },
+        { t: '父类的', why: '子类的同名方法会盖掉父类的。想用父类的，要在子类方法里写 `super().方法名()`。' },
+        { t: '两个都执行，先父类后子类', why: '只执行子类的。父类的那个不会自动执行。' },
+        { t: '会报错，方法不能重名', why: '子类和父类的方法重名是允许的，这正是“重写”。' },
+      ],
+      explain: 'Python 先在子类里找方法，找到了就用，找不到才去父类找。',
+    },
+  ],
+});
+
+L({
+  id: 'json', ch: 'c7', title: 'JSON 和第三方库', hook: '把数据变成文字保存，安装别人写的库',
+  syntax: py`import json
+text = json.dumps(data)    # 数据 → 文字
+data = json.loads(text)    # 文字 → 数据
+
+# 在电脑的终端里运行，不是 Python 代码：
+# pip install 库名`,
+  how: [
+    'JSON 是一种通用的数据格式，长得很像 Python 的字典和列表。不同语言、不同程序之间常用它来交换数据。',
+    '`json.dumps(数据)` 把字典或列表变成一个字符串，这样才能写进文件或发到网上。',
+    '`json.loads(字符串)` 把这样的字符串变回字典或列表。',
+    '`pip` 是 Python 的安装工具。在终端里运行 `pip install requests`，装好之后就能在代码里 `import requests`。',
+    '`math`、`random`、`json` 是 Python 自带的，不用安装。',
+  ],
+  mean: '字典只活在运行着的程序里。想存进文件，得先把它“拍扁”成一段文字（dumps），用的时候再还原（loads）。',
+  use: '保存游戏存档和设置、读取从网上拿到的数据，几乎都要用 JSON。会用 pip，就能用上别人写好的成千上万个库。',
+  example: {
+    code: py`import json
+
+data = {"name": "Tom", "tags": ["a", "b"]}
+text = json.dumps(data)
+print(text)
+print(type(text))
+
+back = json.loads(text)
+print(back["tags"][0])
+print(type(back))`,
+    out: "{\"name\": \"Tom\", \"tags\": [\"a\", \"b\"]}\n<class 'str'>\na\n<class 'dict'>",
+  },
+  tip: 'dumps 和 loads 末尾的 s 是 string（字符串）的意思。数据里有中文时，写成 `json.dumps(data, ensure_ascii=False)` 才会原样保留中文。',
+  checks: [
+    { code: py`import json
+print(json.dumps({"n": "小明"}))
+print(json.dumps({"n": "小明"}, ensure_ascii=False))`, out: '{"n": "\\u5c0f\\u660e"}\n{"n": "小明"}' },
+  ],
+  questions: [
+    {
+      id: 'json-1', type: 'choice', q: '`json.dumps(data)` 得到的结果是什么类型？',
+      opts: [
+        { t: 'str（字符串）', ok: true },
+        { t: 'dict（字典）', why: 'dumps 做的正是把字典变成字符串。变回字典要用 loads。' },
+        { t: 'list（列表）', why: '不管 data 是字典还是列表，dumps 得到的都是一个字符串。' },
+        { t: '文件', why: 'dumps 只是得到一个字符串，不会创建文件。要存进文件还得自己 write。' },
+      ],
+      explain: 'dumps 把数据变成字符串（末尾的 s 就是 string）。',
+      checks: [{ code: py`import json
+print(type(json.dumps([1, 2])))`, out: "<class 'str'>" }],
+    },
+    {
+      id: 'json-2', type: 'output', q: OUT_Q,
+      code: py`import json
+d = json.loads('{"a": 1}')
+print(d["a"] + 1)`,
+      opts: [
+        { t: '2', ok: true },
+        { t: '11', why: 'loads 之后，"a" 对应的值是数字 1，不是字符串。1 + 1 是加法。' },
+        { t: '{"a": 1}', why: 'loads 已经把字符串变成了字典，`d["a"]` 取出的是里面的值。' },
+        { err: true, why: '这个字符串是正确的 JSON，可以正常转换。' },
+      ],
+      explain: 'loads 把字符串变回字典。`d["a"]` 是数字 1，加 1 得 2。',
+    },
+    {
+      id: 'json-3', type: 'fill', q: '补全代码，把列表变成 JSON 字符串',
+      code: py`import json
+s = json.____([1, 2])
+print(s)`,
+      answers: ['dumps'], expect: '[1, 2]',
+      hints: {
+        'loads': 'loads 是把字符串变回数据。这里是把数据变成字符串，用 dumps。',
+        'dump': 'dump（没有 s）是直接写进文件用的。变成字符串要用 dumps。',
+        'load': 'load 是从文件读数据用的。这里用 dumps。',
+        'str': 'json 模块里把数据变成字符串的函数叫 dumps。',
+      },
+      explain: '`json.dumps()` 把数据变成 JSON 字符串。',
+    },
+    {
+      id: 'json-4', type: 'choice', q: '想在自己的电脑上使用别人写的 requests 库，第一步做什么？',
+      opts: [
+        { t: '在终端里运行 `pip install requests`', ok: true },
+        { t: '直接在代码里写 `import requests`', why: '没安装就 import 会报错：ModuleNotFoundError（找不到模块）。要先安装。' },
+        { t: '在 Python 代码里写 `install requests`', why: 'Python 里没有 install 这个写法。安装要在终端里用 pip 命令。' },
+        { t: '把 requests 的源代码抄进自己的文件', why: '不用抄。pip 会自动下载并装好，之后 import 就能用。' },
+      ],
+      explain: '第三方库要先用 `pip install 库名` 安装，然后才能 import。',
+      checks: [{ code: py`import a_library_that_is_not_installed`, err: 'ModuleNotFoundError' }],
+    },
+    {
+      id: 'json-5', type: 'output', q: OUT_Q,
+      code: py`import json
+print(json.dumps({"ok": True}))`,
+      opts: [
+        { t: '{"ok": true}', ok: true },
+        { t: '{"ok": True}', why: 'JSON 有自己的写法：真和假写成小写的 true 和 false。dumps 会自动换过去。' },
+        { t: "{'ok': True}", why: '这是直接 print 字典的样子。dumps 得到的 JSON 字符串里一律用双引号，True 也变成了 true。' },
+        { err: true, why: '布尔值可以正常转换成 JSON。' },
+      ],
+      explain: 'JSON 里字符串用双引号，True 写作 true。loads 的时候会再变回 True。',
+    },
+  ],
+});
+
+L({
+  id: 'debug', ch: 'c7', title: '读报错和调试', hook: '报错不是坏事，它在告诉你哪里错了',
+  syntaxTag: '报错长什么样',
+  syntax: py`Traceback (most recent call last):
+  File "main.py", line 3, in <module>
+    print(total / count)
+ZeroDivisionError: division by zero`,
+  how: [
+    '先看最后一行：冒号前面是错误类型，后面是原因。',
+    '再看它上面两行：哪个文件、第几行，以及出错的那一行代码。',
+    '`NameError` 多半是名字拼错或忘了引号；`SyntaxError` 是括号、引号、冒号没写对；`IndentationError` 是缩进不对。',
+    '`TypeError` 是类型用错（比如字符串加数字）；`IndexError` 和 `KeyError` 是取了不存在的位置或键。',
+    '程序没报错但结果不对时，在可疑的地方加一行 print，看看变量到底是多少。',
+    '`except 错误类型 as e:` 可以把错误接住并存进 e，`type(e).__name__` 是它的类型名。',
+  ],
+  mean: '写程序出错是家常便饭。区别在于会不会看报错：报错信息已经写明了错在哪一行、是哪种错。',
+  use: '会读报错，大部分问题一分钟就能自己找到。看不懂的时候，把最后一行复制下来去搜索，通常都有人遇到过。',
+  example: {
+    code: py`nums = [3, 0, 2]
+for n in nums:
+    try:
+        print(12 / n)
+    except ZeroDivisionError as e:
+        print("出错类型：", type(e).__name__)
+        print("出错原因：", e)`,
+    out: '4.0\n出错类型： ZeroDivisionError\n出错原因： division by zero\n6.0',
+  },
+  tip: '一次只改一处，改完就运行。同时改好几处，出了新错就分不清是哪一处造成的。',
+  questions: [
+    {
+      id: 'debug-1', type: 'choice', q: '程序报了一大段错。应该先看哪里？',
+      opts: [
+        { t: '最后一行', ok: true },
+        { t: '第一行 `Traceback (most recent call last):`', why: '这一行每次报错都一样，只是说“下面是出错的经过”，没有具体信息。' },
+        { t: '中间随便找一行', why: '中间是出错的位置，有用，但要先知道是什么错。错误类型和原因在最后一行。' },
+        { t: '不用看，直接重写', why: '报错已经写明了错在哪里。看懂它比重写快得多。' },
+      ],
+      explain: '最后一行写着错误类型和原因。看完它，再往上找是第几行。',
+    },
+    {
+      id: 'debug-2', type: 'choice', q: '本来想写 `print(name)`，结果写成了 `print(nmae)`。会报哪种错？',
+      opts: [
+        { t: 'NameError', ok: true },
+        { t: 'SyntaxError', why: '这行代码的写法没有问题，括号都对。问题是 nmae 这个名字不存在。' },
+        { t: 'TypeError', why: 'TypeError 是类型用错。这里是名字找不到。' },
+        { t: '不报错，显示 nmae', why: '没有引号，Python 会把 nmae 当成变量名去找，找不到就报错。' },
+      ],
+      explain: '用到没定义的名字，报 NameError。拼写错误是最常见的原因。',
+      checks: [{ code: py`name = "小明"
+print(nmae)`, err: 'NameError' }],
+    },
+    {
+      id: 'debug-3', type: 'choice', q: '报错的最后一行是 `TypeError: can only concatenate str (not "int") to str`。最可能是哪里错了？',
+      opts: [
+        { t: '把字符串和数字用 + 相加了', ok: true },
+        { t: '变量名拼错了', why: '名字拼错报的是 NameError。' },
+        { t: 'if 后面少了冒号', why: '少冒号报的是 SyntaxError。' },
+        { t: '除以了 0', why: '除以 0 报的是 ZeroDivisionError。' },
+      ],
+      explain: '这句话的意思是“字符串只能和字符串拼接，不能和整数”。把数字用 str() 转一下就好。',
+      checks: [{ code: py`print("年龄" + 18)`, err: 'TypeError: can only concatenate str (not "int") to str' }],
+    },
+    {
+      id: 'debug-4', type: 'choice', q: '这段代码会报哪种错？',
+      code: py`x = 5
+if x > 3
+    print(x)`,
+      opts: [
+        { t: 'SyntaxError', ok: true },
+        { t: 'NameError', why: 'x 已经定义了。问题出在 if 那一行的写法上。' },
+        { t: 'IndentationError', why: '缩进是对的。问题是 if 这一行的末尾少了冒号。' },
+        { t: '不报错，显示 5', why: 'if 后面少了冒号，Python 读不懂这一行，程序根本不会开始运行。' },
+      ],
+      explain: 'if 这一行末尾少了冒号，属于写法错误：SyntaxError。',
+      checks: [{ code: py`x = 5
+if x > 3
+    print(x)`, err: 'SyntaxError' }],
+    },
+    {
+      id: 'debug-5', type: 'output', q: OUT_Q,
+      code: py`try:
+    a = [1, 2]
+    print(a[2])
+except IndexError as e:
+    print(type(e).__name__)`,
+      opts: [
+        { t: 'IndexError', ok: true },
+        { t: 'list index out of range', why: '这是错误的原因，直接 `print(e)` 才会显示它。这里 print 的是类型的名字。' },
+        { t: '2', why: '列表只有索引 0 和 1，`a[2]` 会出错，不会显示任何元素。' },
+        { err: true, why: '错误被 except 接住了，程序不会崩溃。' },
+      ],
+      explain: '`a[2]` 超出范围，被 except 接住。`type(e).__name__` 是错误类型的名字。',
+    },
+  ],
+});
 
 /* ===== 语法练习 =====
    每一关把“怎么写”里的语法拆成几句小任务：say 是要做的事，code 是对应的 Python。
@@ -3253,7 +3899,295 @@ finally:
     { say: '如果 total([1, 2]) 大于 2，就显示 大于 2', code: py`if total([1, 2]) > 2:
     print("大于 2")` },
   ],
+  comp: [
+    { say: '把 1、2、3 放进列表 nums', code: py`nums = [1, 2, 3]` },
+    { say: '用推导式把 nums 里每个数乘以 2，显示新列表', code: py`print([n * 2 for n in nums])`, key: true },
+    { say: '用推导式只留下 nums 里大于 1 的数，显示出来', code: py`print([n for n in nums if n > 1])` },
+    { say: '用推导式把 nums 里每个数变成字符串，存进 texts', code: py`texts = [str(n) for n in nums]` },
+  ],
+  nest: [
+    { say: '创建列表 bag，里面有一个字典：n 是 笔，p 是 2', code: py`bag = [{"n": "笔", "p": 2}]` },
+    { say: '显示 bag 里第一样东西的 n', code: py`print(bag[0]["n"])`, key: true },
+    { say: '把第一样东西的 p 改成 3', code: py`bag[0]["p"] = 3` },
+    { say: '往 bag 里再加一个字典：n 是 书，p 是 9', code: py`bag.append({"n": "书", "p": 9})` },
+    { say: '把 bag 里每样东西 x 的 n 和 p 显示出来', code: py`for x in bag:
+    print(x["n"], x["p"])` },
+  ],
+  func2: [
+    { say: '定义函数 total：用 *nums 接住任意多个参数，返回它们的和', code: py`def total(*nums):
+    return sum(nums)` },
+    { say: '显示 total(1, 2, 3) 的结果', code: py`print(total(1, 2, 3))` },
+    { say: '用 lambda 写一个把 n 乘以 2 的小函数，存进 double', code: py`double = lambda n: n * 2`, key: true },
+    { say: '显示 double(4) 的结果', code: py`print(double(4))` },
+    { say: '把 "bb"、"a"、"ccc" 放进列表 words', code: py`words = ["bb", "a", "ccc"]` },
+    { say: '把 words 按长度排序后显示', code: py`print(sorted(words, key=len))` },
+  ],
+  inherit: [
+    { say: '定义类 Animal：方法 speak 显示 声音', code: py`class Animal:
+    def speak(self):
+        print("声音")` },
+    { say: '定义类 Dog，继承 Animal，把 speak 改成显示 汪汪', code: py`class Dog(Animal):
+    def speak(self):
+        print("汪汪")` },
+    { say: '定义类 Cat，继承 Animal，里面什么都不写', code: py`class Cat(Animal):
+    pass`, key: true },
+    { say: '创建一个 Dog，让它 speak', code: py`Dog().speak()` },
+    { say: '创建一个 Cat，让它 speak', code: py`Cat().speak()` },
+  ],
+  json: [
+    { say: '导入 json 模块', code: py`import json` },
+    { say: '把字典 {"a": 1} 变成 JSON 字符串，存进 text', code: py`text = json.dumps({"a": 1})`, key: true },
+    { say: '显示 text', code: py`print(text)` },
+    { say: '把 text 变回数据，存进 data', code: py`data = json.loads(text)` },
+    { say: '显示 data 里 a 对应的值', code: py`print(data["a"])` },
+  ],
+  debug: [
+    { say: '把 5 存进 x', code: py`x = 5` },
+    { say: '调试时看变量的值：显示 "x 现在是" 和 x', code: py`print("x 现在是", x)`, key: true },
+    { say: '尝试显示 1 / 0；出现 ZeroDivisionError 时把错误存进 e，显示它的类型名和原因', code: py`try:
+    print(1 / 0)
+except ZeroDivisionError as e:
+    print(type(e).__name__)
+    print(e)` },
+  ],
 };
+
+/* ===== 实战任务 =====
+   不给例子，只给要求：自己从空白写出整段程序，真的运行，再用测试检查。
+   after：通过哪一关之后解锁。tests 里的 in 是依次喂给 input() 的内容，out 是期望显示的结果，
+   after 是接在你的代码后面一起运行的代码（用来检查函数和类）。solution 用真实 Python 校验过。 */
+var TASKS = [
+  {
+    id: 'intro', after: 'print', title: '自我介绍', goal: '用 print 显示三行文字',
+    desc: ['写一个程序，在屏幕上显示下面三行。文字和标点要一样。'],
+    sample: [{ out: '我叫小蟒\n今年 3 岁\n我爱写代码' }],
+    tests: [{ out: '我叫小蟒\n今年 3 岁\n我爱写代码' }],
+    hints: ['一行文字用一个 `print`，三行就写三个。', '文字要用引号包起来，比如 `print("我叫小蟒")`。'],
+    solution: py`print("我叫小蟒")
+print("今年 3 岁")
+print("我爱写代码")`,
+  },
+  {
+    id: 'age', after: 'var', title: '五年以后', goal: '用变量保存数据，再拿它计算',
+    desc: ['小明今年 12 岁。先把 12 存进变量 `age`，再显示他 5 年以后的年龄。', '要用 `age` 来计算，不要直接写出答案。'],
+    sample: [{ out: '17' }],
+    tests: [{ out: '17' }],
+    must: [{ re: '\\bage\\s*=\\s*12\\b', msg: '先把 12 存进变量 age：`age = 12`。' }, { re: 'age\\s*\\+|\\+\\s*age|age\\s*\\+=', msg: '用 age 加上 5 来计算，不要直接写 17。' }],
+    hints: ['第一行：`age = 12`。', '显示计算结果：`print(age + 5)`。'],
+    solution: py`age = 12
+print(age + 5)`,
+  },
+  {
+    id: 'time', after: 'arith', title: '分钟换算', goal: '用 // 和 % 把分钟换成小时和分钟',
+    desc: ['把 135 存进变量 `minutes`，算出它是几小时几分钟，然后显示出来。', '要用 `//` 和 `%` 来算。'],
+    sample: [{ out: '2 小时 15 分钟' }],
+    tests: [{ out: '2 小时 15 分钟' }],
+    must: [{ re: '//', msg: '用 `//` 算出有几个完整的小时。' }, { re: '%', msg: '用 `%` 算出剩下几分钟。' }],
+    hints: ['`minutes // 60` 是小时数，`minutes % 60` 是剩下的分钟数。', '一个 print 可以显示多个内容：`print(h, "小时", m, "分钟")`。'],
+    solution: py`minutes = 135
+h = minutes // 60
+m = minutes % 60
+print(h, "小时", m, "分钟")`,
+  },
+  {
+    id: 'hello', after: 'input', title: '问名字', goal: '读入用户的输入，再用它拼出一句话',
+    desc: ['先问用户叫什么名字，再向他问好。', '比如用户输入 小明，就显示 `你好，小明！`。'],
+    sample: [{ in: ['小明'], out: '你好，小明！' }],
+    tests: [{ in: ['小明'], out: '你好，小明！' }, { in: ['Python'], out: '你好，Python！' }],
+    hints: ['用 `input()` 读入名字，存进一个变量。', '用 `+` 把三段文字拼起来：`"你好，" + name + "！"`。'],
+    solution: py`name = input("你叫什么名字？")
+print("你好，" + name + "！")`,
+  },
+  {
+    id: 'sum2', after: 'input', title: '两数相加', goal: '把输入的文字转成数字再计算',
+    desc: ['读入两个整数（分两次输入），显示它们的和。'],
+    sample: [{ in: ['3', '5'], out: '8' }],
+    tests: [{ in: ['3', '5'], out: '8' }, { in: ['10', '-4'], out: '6' }, { in: ['120', '80'], out: '200' }],
+    hints: ['`input()` 读进来的是字符串。直接相加会变成拼接，3 和 5 会得到 35。', '先用 `int()` 转成整数：`a = int(input())`。'],
+    solution: py`a = int(input("第一个数："))
+b = int(input("第二个数："))
+print(a + b)`,
+  },
+  {
+    id: 'grade', after: 'if', title: '成绩等级', goal: '用 if / elif / else 分三种情况',
+    desc: ['读入一个分数（整数）。90 分及以上显示 `优秀`，60 分及以上显示 `及格`，其余显示 `不及格`。'],
+    sample: [{ in: ['95'], out: '优秀' }, { in: ['75'], out: '及格' }],
+    tests: [{ in: ['95'], out: '优秀' }, { in: ['90'], out: '优秀' }, { in: ['75'], out: '及格' }, { in: ['60'], out: '及格' }, { in: ['59'], out: '不及格' }],
+    hints: ['先把输入转成整数：`score = int(input())`。', '从高到低判断：先 `if score >= 90:`，再 `elif score >= 60:`，最后 `else:`。', '正好 90 分也算优秀，所以要用 `>=`，不是 `>`。'],
+    solution: py`score = int(input("分数："))
+if score >= 90:
+    print("优秀")
+elif score >= 60:
+    print("及格")
+else:
+    print("不及格")`,
+  },
+  {
+    id: 'even', after: 'if', title: '奇数还是偶数', goal: '用 % 判断能不能被 2 整除',
+    desc: ['读入一个整数。是偶数就显示 `偶数`，是奇数就显示 `奇数`。'],
+    sample: [{ in: ['4'], out: '偶数' }, { in: ['7'], out: '奇数' }],
+    tests: [{ in: ['4'], out: '偶数' }, { in: ['7'], out: '奇数' }, { in: ['0'], out: '偶数' }, { in: ['101'], out: '奇数' }],
+    hints: ['一个数除以 2 的余数是 0，它就是偶数。', '判断写成 `if n % 2 == 0:`。'],
+    solution: py`n = int(input("整数："))
+if n % 2 == 0:
+    print("偶数")
+else:
+    print("奇数")`,
+  },
+  {
+    id: 'total', after: 'for', title: '从 1 加到 n', goal: '用循环把一串数加起来',
+    desc: ['读入一个正整数 n，显示 1 + 2 + … + n 的结果。', '要用循环来做。'],
+    sample: [{ in: ['3'], out: '6' }, { in: ['10'], out: '55' }],
+    tests: [{ in: ['3'], out: '6' }, { in: ['10'], out: '55' }, { in: ['1'], out: '1' }, { in: ['100'], out: '5050' }],
+    must: [{ re: '\\b(for|while)\\b', msg: '这个任务要用 for 或 while 循环来做。' }],
+    hints: ['先准备一个变量存总和：`total = 0`。', '`range(1, n + 1)` 产生 1 到 n。注意 range 不包含结尾，所以要写 n + 1。', '循环里每次把 i 加进去：`total += i`，循环结束后再 print。'],
+    solution: py`n = int(input("n："))
+total = 0
+for i in range(1, n + 1):
+    total += i
+print(total)`,
+  },
+  {
+    id: 'stairs', after: 'for', title: '星星台阶', goal: '循环加上字符串乘法',
+    desc: ['读入一个正整数 n，显示 n 行星号：第 1 行 1 个，第 2 行 2 个，一直到第 n 行 n 个。'],
+    sample: [{ in: ['3'], out: '*\n**\n***' }],
+    tests: [{ in: ['3'], out: '*\n**\n***' }, { in: ['1'], out: '*' }, { in: ['5'], out: '*\n**\n***\n****\n*****' }],
+    hints: ['字符串可以乘以数字：`"*" * 3` 得到 `***`。', '让 i 从 1 走到 n，每次显示 `"*" * i`。'],
+    solution: py`n = int(input("n："))
+for i in range(1, n + 1):
+    print("*" * i)`,
+  },
+  {
+    id: 'guess', after: 'brk', title: '猜数字', big: true, goal: '第一个小项目：循环、判断、计数、break 一起用',
+    desc: ['答案是 7，把它存在变量 `secret` 里。', '反复读入用户猜的整数：比答案大就显示 `大了`，比答案小就显示 `小了`。', '猜中时显示 `猜对了，一共猜了 N 次`（N 是猜的次数），然后结束。'],
+    sample: [{ in: ['9', '3', '7'], out: '大了\n小了\n猜对了，一共猜了 3 次' }],
+    tests: [{ in: ['9', '3', '7'], out: '大了\n小了\n猜对了，一共猜了 3 次' }, { in: ['7'], out: '猜对了，一共猜了 1 次' }, { in: ['1', '2', '10', '8', '7'], out: '小了\n小了\n大了\n大了\n猜对了，一共猜了 5 次' }],
+    must: [{ re: '\\bwhile\\b', msg: '不知道要猜几次，所以要用 while 循环。' }],
+    hints: ['用 `while True:` 一直循环，猜中时用 `break` 跳出来。', '准备一个计数的变量 `count = 0`，每读入一次就加 1。', '循环里：读入 → 计数 → 用 if / elif / else 判断大了、小了还是猜中。', '想真的玩，可以把 `secret = 7` 换成 `secret = random.randint(1, 100)`（先 `import random`）。'],
+    solution: py`secret = 7
+count = 0
+while True:
+    guess = int(input("猜一个数："))
+    count += 1
+    if guess > secret:
+        print("大了")
+    elif guess < secret:
+        print("小了")
+    else:
+        print("猜对了，一共猜了", count, "次")
+        break`,
+  },
+  {
+    id: 'maxnum', after: 'listm', title: '找最大值', goal: '把读入的数存进列表，再找出最大的',
+    desc: ['先读入个数 n，再读入 n 个整数（每次输入一个）。显示其中最大的数。'],
+    sample: [{ in: ['3', '5', '9', '2'], out: '9' }],
+    tests: [{ in: ['3', '5', '9', '2'], out: '9' }, { in: ['2', '-4', '-9'], out: '-4' }, { in: ['4', '7', '7', '3', '1'], out: '7' }, { in: ['1', '42'], out: '42' }],
+    hints: ['先建一个空列表 `nums = []`，循环 n 次，每次 `nums.append(int(input()))`。', 'Python 自带 `max(nums)`，可以直接得到列表里最大的数。', '如果自己比大小，别把“目前最大”一开始设成 0：全是负数时会出错。可以先设成列表的第一个数。'],
+    solution: py`n = int(input("个数："))
+nums = []
+for i in range(n):
+    nums.append(int(input("数字：")))
+print(max(nums))`,
+  },
+  {
+    id: 'area', after: 'ret', title: '写一个函数', goal: '定义带参数和返回值的函数',
+    desc: ['写一个函数 `area(w, h)`，返回长为 w、宽为 h 的长方形的面积。', '只需要定义函数，不用自己调用。检查时会调用你的函数。要用 `return`，不要在函数里 print。'],
+    sample: [{ after: 'print(area(3, 4))', out: '12' }],
+    tests: [{ after: 'print(area(3, 4))', out: '12' }, { after: 'print(area(5, 5) + 1)', out: '26' }, { after: 'x = area(2, 10)\nprint(x * 2)', out: '40' }],
+    must: [{ re: '\\bdef\\s+area\\s*\\(', msg: '要定义一个名叫 area 的函数：`def area(w, h):`。' }, { re: '\\breturn\\b', msg: '要用 `return` 把结果交回来。' }],
+    hints: ['第一行：`def area(w, h):`。', '函数里只要一行：`return w * h`，记得缩进。'],
+    solution: py`def area(w, h):
+    return w * h`,
+  },
+  {
+    id: 'count', after: 'strm', title: '数单词', goal: '用 split 切开文字，用字典计数',
+    desc: ['读入一行用空格隔开的单词。按每个单词第一次出现的顺序，显示它和它出现的次数，一个单词一行。'],
+    sample: [{ in: ['to be or not to be'], out: 'to 2\nbe 2\nor 1\nnot 1' }],
+    tests: [{ in: ['to be or not to be'], out: 'to 2\nbe 2\nor 1\nnot 1' }, { in: ['a b a'], out: 'a 2\nb 1' }, { in: ['hi'], out: 'hi 1' }, { in: ['x y z x x'], out: 'x 3\ny 1\nz 1' }],
+    hints: ['`words = input().split()` 把一行文字按空格切成列表。', '用字典计数：单词是键，次数是值。先建空字典 `count = {}`。', '循环每个单词：已经在字典里就加 1，否则设成 1。', '最后 `for w in count:` 再 `print(w, count[w])`。'],
+    solution: py`words = input("一行单词：").split()
+count = {}
+for w in words:
+    if w in count:
+        count[w] += 1
+    else:
+        count[w] = 1
+for w in count:
+    print(w, count[w])`,
+  },
+  {
+    id: 'ledger', after: 'strm', title: '记账本', big: true, goal: '第二个小项目：按命令处理收入和支出',
+    desc: ['一开始余额是 0。反复读入一行命令：', '`收入 100` 表示余额增加 100。', '`支出 30` 表示余额减少 30；如果余额不够，就显示 `余额不足`，并且不扣钱。', '`结束` 表示显示 `余额：N`（N 是现在的余额），然后停止。'],
+    sample: [{ in: ['收入 100', '支出 30', '结束'], out: '余额：70' }, { in: ['支出 5', '结束'], out: '余额不足\n余额：0' }],
+    tests: [{ in: ['收入 100', '支出 30', '结束'], out: '余额：70' }, { in: ['支出 5', '收入 20', '支出 20', '结束'], out: '余额不足\n余额：0' }, { in: ['结束'], out: '余额：0' },
+      { in: ['收入 50', '收入 25', '支出 100', '支出 70', '结束'], out: '余额不足\n余额：5' }],
+    must: [{ re: '\\bwhile\\b', msg: '不知道会有多少条命令，所以要用 while 循环。' }],
+    hints: ['用 `while True:` 循环读入，读到 `结束` 时显示余额并 `break`。', '先判断是不是 `结束`。不是的话，用 `parts = line.split()` 切开：`parts[0]` 是 收入 或 支出，`parts[1]` 是金额。', '金额是字符串，要 `int(parts[1])` 才能计算。', '支出时先判断 `if money > balance:`，不够就显示 余额不足，够才减。'],
+    solution: py`balance = 0
+while True:
+    line = input("命令：")
+    if line == "结束":
+        print("余额：" + str(balance))
+        break
+    parts = line.split()
+    money = int(parts[1])
+    if parts[0] == "收入":
+        balance += money
+    elif money > balance:
+        print("余额不足")
+    else:
+        balance -= money`,
+  },
+  {
+    id: 'todo', after: 'strm', title: '待办清单', big: true, goal: '第三个小项目：用列表保存事项，按命令增、删、看',
+    desc: ['用一个列表保存待办事项。反复读入一行命令：', '`加 买菜` 表示把 买菜 加到清单最后。', '`完成 1` 表示把清单里第 1 项删掉（从 1 开始数）。', '`看` 表示显示整个清单，每项一行，写成 `1. 买菜` 这样；清单是空的就显示 `空的`。', '`退出` 表示显示 `再见`，然后停止。'],
+    sample: [{ in: ['加 买菜', '加 写作业', '看', '完成 1', '看', '退出'], out: '1. 买菜\n2. 写作业\n1. 写作业\n再见' }],
+    tests: [{ in: ['加 买菜', '加 写作业', '看', '完成 1', '看', '退出'], out: '1. 买菜\n2. 写作业\n1. 写作业\n再见' }, { in: ['看', '退出'], out: '空的\n再见' },
+      { in: ['加 a', '加 b', '加 c', '完成 2', '看', '完成 1', '完成 1', '看', '退出'], out: '1. a\n2. c\n空的\n再见' }, { in: ['退出'], out: '再见' }],
+    must: [{ re: '\\bwhile\\b', msg: '不知道会有多少条命令，所以要用 while 循环。' }],
+    hints: ['先建空列表 `todos = []`，再用 `while True:` 循环读入命令。', '`看` 和 `退出` 是整行命令，直接用 `==` 判断。其余的用 `parts = line.split()` 切成两段。', '`完成 1` 里的 1 是从 1 开始数的，列表的索引从 0 开始，所以要删的是 `todos.pop(int(parts[1]) - 1)`。', '显示清单时用 `for i in range(len(todos)):`，再 `print(str(i + 1) + ". " + todos[i])`。'],
+    solution: py`todos = []
+while True:
+    line = input("命令：")
+    if line == "退出":
+        print("再见")
+        break
+    if line == "看":
+        if len(todos) == 0:
+            print("空的")
+        for i in range(len(todos)):
+            print(str(i + 1) + ". " + todos[i])
+    else:
+        parts = line.split()
+        if parts[0] == "加":
+            todos.append(parts[1])
+        else:
+            todos.pop(int(parts[1]) - 1)`,
+  },
+  {
+    id: 'account', after: 'class', title: '写一个类', goal: '定义带属性和方法的类',
+    desc: ['写一个类 `Account`（账户）：', '创建时给出户主的名字，存进属性 `owner`；属性 `balance`（余额）一开始是 0。', '方法 `deposit(n)`：余额增加 n。', '方法 `withdraw(n)`：余额够就减少 n；不够就显示 `余额不足`，不扣钱。', '只需要定义类，检查时会创建对象来试。'],
+    sample: [{ after: 'a = Account("小明")\na.deposit(100)\na.withdraw(30)\nprint(a.owner, a.balance)', out: '小明 70' }],
+    tests: [{ after: 'a = Account("小明")\na.deposit(100)\na.withdraw(30)\nprint(a.owner, a.balance)', out: '小明 70' },
+      { after: 'a = Account("Amy")\na.deposit(20)\na.withdraw(50)\nprint(a.balance)', out: '余额不足\n20' },
+      { after: 'a = Account("A")\nb = Account("B")\na.deposit(5)\nprint(a.balance, b.balance)', out: '5 0' }],
+    must: [{ re: '\\bclass\\s+Account\\b', msg: '要定义一个名叫 Account 的类：`class Account:`。' }, { re: '__init__', msg: '用 `__init__` 方法设置 owner 和 balance。' }],
+    hints: ['`def __init__(self, owner):` 里写 `self.owner = owner` 和 `self.balance = 0`。', '每个方法的第一个参数都是 `self`，比如 `def deposit(self, n):`。', '方法里要改的是这个对象自己的余额：`self.balance += n`。', 'withdraw 里先判断 `if n > self.balance:`。'],
+    solution: py`class Account:
+    def __init__(self, owner):
+        self.owner = owner
+        self.balance = 0
+
+    def deposit(self, n):
+        self.balance += n
+
+    def withdraw(self, n):
+        if n > self.balance:
+            print("余额不足")
+        else:
+            self.balance -= n`,
+  },
+];
 
 /* ===== 每一关的图示（内联 SVG，颜色全部走主题变量）===== */
 var DIAGRAMS = (function () {
@@ -3688,6 +4622,92 @@ var DIAGRAMS = (function () {
     })()),
   };
 
+  D.comp = {
+    cap: '推导式对每个元素做同样的加工，得到一个新列表。原来的列表不变。',
+    svg: make(154, '列表推导式把 1 到 5 每个数乘以 2，得到新列表 2、4、6、8、10', (function () {
+      var o = tx(170, 14, '[n * 2 for n in nums]', 'tm t-blue');
+      o += cells(60, 26, ['1', '2', '3', '4', '5'], { w: 44, h: 32, tcls: 'tl' });
+      for (var i = 0; i < 5; i++) o += arrow(82 + i * 44, 60, 82 + i * 44, 100, 'blue');
+      o += rect(60, 68, 220, 20, 'box-soft', 10) + tx(170, 82, '每个都 × 2', 'ts t-ink');
+      o += cells(60, 104, ['2', '4', '6', '8', '10'], { w: 44, h: 32, tcls: 'tl', hi: [0, 1, 2, 3, 4] });
+      o += tx(52, 47, 'nums', 'tm', 'end') + tx(52, 125, '新列表', 'ts', 'end');
+      return o;
+    })()),
+  };
+
+  D.nest = {
+    cap: '一层一层取：先用索引取出字典，再用键取出里面的值。',
+    svg: make(162, '列表里有两个字典，students[0]["name"] 先取出第一个字典，再取出名字', (function () {
+      var o = '';
+      [['小明', '90'], ['小红', '85']].forEach(function (r, i) {
+        var x = 14 + i * 162;
+        o += tx(x + 75, 16, 'students[' + i + ']', 'tm' + (i === 0 ? ' tb t-blue' : ''));
+        o += rect(x, 24, 150, 76, i === 0 ? 'box box-hi' : 'box', 8);
+        o += rect(x + 8, 34, 62, 24, 'box box-yel', 12) + tx(x + 39, 51, '"name"', 'tm on-yel') + arrow(x + 72, 46, x + 90, 46, i === 0 ? 'blue' : '') + tx(x + 118, 51, '"' + r[0] + '"', 'tm' + (i === 0 ? ' tb' : ''));
+        o += rect(x + 8, 66, 62, 24, 'box box-yel', 12) + tx(x + 39, 83, '"score"', 'tm on-yel') + arrow(x + 72, 78, x + 90, 78) + tx(x + 118, 83, r[1], 'tm');
+      });
+      o += tx(170, 126, 'students[0]["name"]', 'tm tb') + tx(170, 146, '先取出第 0 个字典，再用键 "name" 取出 "小明"', 'ts');
+      return o;
+    })()),
+  };
+
+  D.func2 = {
+    cap: '函数里面的变量外面看不到。里外同名的两个 x，是两个不同的变量。',
+    svg: make(158, '函数里的局部变量 x 和函数外的全局变量 x 是两个不同的变量', [
+      rect(8, 8, 324, 142, 'box', 10), tx(20, 28, '函数外面', 'ts', 'start'),
+      tx(22, 52, 'x = 1', 'tm tb', 'start'), tx(22, 74, 'f()', 'tm', 'start'), tx(22, 96, 'print(x)', 'tm', 'start'), tx(96, 96, '→ 显示 1', 'ts t-good', 'start'),
+      tx(22, 124, '外面的 x 没有被改动', 'ts', 'start'),
+      rect(170, 22, 150, 114, 'box box-hi', 10), tx(182, 42, '函数 f 里面', 'ts t-blue', 'start'),
+      tx(184, 68, 'x = 5', 'tm tb', 'start'),
+      tx(184, 92, '这是新建的局部变量', 'ts', 'start'), tx(184, 110, '函数结束就消失', 'ts', 'start'),
+    ].join('')),
+  };
+
+  D.inherit = {
+    cap: '子类自动拥有父类的属性和方法；自己写了同名方法，就用自己的。',
+    svg: make(196, 'Dog 和 Cat 都继承 Animal：Dog 重写了 speak，Cat 用父类的 speak', [
+      rect(95, 6, 150, 60, 'box-blue', 8), tx(170, 28, 'class Animal', 'tm tb on-blue'), tx(170, 50, 'name、speak()', 'ts on-blue'),
+      arrow(88, 106, 138, 70, 'blue'), arrow(252, 106, 202, 70, 'blue'), tx(92, 86, '继承', 'ts t-blue', 'end'), tx(248, 86, '继承', 'ts t-blue', 'start'),
+      rect(12, 110, 152, 58, 'box', 8), tx(88, 130, 'class Dog(Animal)', 'tm tb'), tx(88, 152, '自己写了 speak()', 'ts'),
+      rect(176, 110, 152, 58, 'box', 8), tx(252, 130, 'class Cat(Animal)', 'tm tb'), tx(252, 152, '什么都没写', 'ts'),
+      tx(88, 188, '用自己的：汪汪', 'ts t-good'), tx(252, 188, '用父类的：发出声音', 'ts t-good'),
+    ].join('')),
+  };
+
+  D.json = {
+    cap: 'dumps 把数据变成文字，loads 把文字变回数据。第三方库要先安装，再导入。',
+    svg: make(176, 'json.dumps 把字典变成字符串，json.loads 把字符串变回字典；第三方库先 pip install 再 import', [
+      tx(75, 18, '字典 dict', 'ts'), rect(10, 26, 130, 56, 'box', 8), tx(75, 60, '{"a": 1}', 'tm tb'),
+      tx(265, 18, '字符串 str', 'ts'), rect(200, 26, 130, 56, 'box-code', 8), tx(265, 60, "'{\"a\": 1}'", 'tc'),
+      arrow(144, 42, 196, 42, 'blue'), tx(170, 34, 'dumps', 'tm t-blue'),
+      arrow(196, 66, 144, 66, 'good'), tx(170, 82, 'loads', 'tm t-good'),
+      line(10, 104, 330, 104, 'ln ln-faint'),
+      rect(10, 118, 92, 30, 'box-soft', 15), tx(56, 138, '网上的库', 'ts t-ink'),
+      arrow(106, 133, 120, 133),
+      rect(124, 118, 92, 30, 'box box-yel', 15), tx(170, 138, 'pip install', 'tm on-yel'),
+      arrow(220, 133, 234, 133),
+      rect(238, 118, 92, 30, 'box-soft', 15), tx(284, 138, 'import 使用', 'ts t-ink'),
+      tx(170, 168, '第三方库：先安装，再导入', 'ts'),
+    ].join('')),
+  };
+
+  D.debug = {
+    cap: '读报错从最后一行开始：先看是什么错，再看错在第几行。',
+    svg: make(170, '报错信息的读法：先看最后一行的错误类型和原因，再看文件和行号，最后看出错的那行代码', (function () {
+      var o = rect(8, 6, 324, 92, 'box-code', 8);
+      o += tx(40, 26, 'Traceback (most recent call last):', 'tc tc-dim', 'start');
+      o += tx(40, 46, '  File "a.py", line 3, in <module>', 'tc', 'start');
+      o += tx(40, 66, '    print(total / count)', 'tc', 'start');
+      o += tx(40, 86, 'ZeroDivisionError: division by zero', 'tc tc-key', 'start');
+      [[82, '1'], [42, '2'], [62, '3']].forEach(function (b) { o += circle(24, b[0], 9, 'dot-yel') + tx(24, b[0] + 4, b[1], 'ts tb on-yel'); });
+      [['1', '先看最后一行：错误类型和原因'], ['2', '再看哪个文件、第几行'], ['3', '最后看出错的那行代码']].forEach(function (r, i) {
+        var y = 118 + i * 20;
+        o += circle(24, y, 9, 'dot-yel') + tx(24, y + 4, r[0], 'ts tb on-yel') + tx(42, y + 4, r[1], 'ts t-ink', 'start');
+      });
+      return o;
+    })()),
+  };
+
   return D;
 })();
 
@@ -3829,10 +4849,10 @@ var TypeCheck = (function () {
   var STANDALONE = true;
   var HEARTS = 3;
   var RANKS = [
-    { xp: 0, name: 'Python 萌新' }, { xp: 150, name: '打印学徒' }, { xp: 350, name: '变量收纳师' },
-    { xp: 650, name: '判断小能手' }, { xp: 1000, name: '循环骑士' }, { xp: 1450, name: '列表管家' },
-    { xp: 2000, name: '函数工匠' }, { xp: 2650, name: '排错侦探' }, { xp: 3400, name: '对象建筑师' },
-    { xp: 4200, name: 'Python 高手' },
+    { xp: 0, name: 'Python 萌新' }, { xp: 150, name: '打印学徒' }, { xp: 400, name: '变量收纳师' },
+    { xp: 750, name: '判断小能手' }, { xp: 1200, name: '循环骑士' }, { xp: 1750, name: '列表管家' },
+    { xp: 2400, name: '函数工匠' }, { xp: 3200, name: '排错侦探' }, { xp: 4200, name: '对象建筑师' },
+    { xp: 5400, name: 'Python 高手' },
   ];
   var CN = ['一', '二', '三', '四', '五', '六', '七', '八', '九', '十'];
   var TYPE_NAME = { choice: '选择题', output: '看代码选结果', fill: '填空题' };
@@ -3853,7 +4873,7 @@ var TypeCheck = (function () {
 
   /* ---------- 存档 ---------- */
   function freshState() {
-    return { v: 1, xp: 0, streak: 0, best: 0, levels: {}, wrong: {}, learned: {}, syn: {}, spos: {}, typed: {}, tpos: {},
+    return { v: 1, xp: 0, streak: 0, best: 0, levels: {}, wrong: {}, learned: {}, syn: {}, spos: {}, typed: {}, tpos: {}, tasks: {}, code: {}, peek: {},
       answered: 0, correct: 0, day: '', days: 0, last: '', sound: true };
   }
   var saveOk = true;
@@ -4028,6 +5048,7 @@ var TypeCheck = (function () {
     flag: svgIcon('<path d="M6 21V4"' + SK + '/><path d="M6 4.5h12l-2.6 4 2.6 4H6z" fill="currentColor"/>'),
     book: svgIcon('<path d="M5 5a2 2 0 0 1 2-2h12v15H7a2 2 0 0 0-2 2z"' + SK + '/><path d="M5 20a2 2 0 0 0 2 1h12M9.5 8h5.5"' + SK + '/>'),
     user: svgIcon('<circle cx="12" cy="8" r="4.2" fill="currentColor"/><path d="M4 20.5c.9-4 4-6 8-6s7.1 2 8 6z" fill="currentColor"/>'),
+    code: svgIcon('<path d="M8.5 7l-5 5 5 5M15.5 7l5 5-5 5"' + SK + '/>'),
     enter: svgIcon('<path d="M19 5v7a3 3 0 0 1-3 3H6M10 10.5 5.5 15l4.5 4.5"' + SK + '/>'),
     redo: svgIcon('<path d="M19 12a7 7 0 1 1-2.3-5.2"' + SK + '/><path d="M19.5 3.5v4.2h-4.2"' + SK + '/>'),
     share: svgIcon('<path d="M12 15V4M8 7.5l4-4 4 4M5 12v7.5h14V12"' + SK + '/>'),
@@ -4088,6 +5109,8 @@ var TypeCheck = (function () {
     if (h === 'notebook') return { v: 'book' };
     if (h === 'me') return { v: 'me' };
     if (h === 'review') return { v: 'review' };
+    if (h === 'tasks') return { v: 'tasks' };
+    if ((m = /^task-(\d+)$/.exec(h))) return { v: 'task', k: +m[1] - 1 };
     if ((m = /^level-(\d+)$/.exec(h))) return { v: 'hub', i: +m[1] - 1 };
     if ((m = /^(learn|syntax|type|quiz)-(\d+)$/.exec(h))) return { v: m[1], i: +m[2] - 1 };
     return { v: 'map' };
@@ -4110,7 +5133,12 @@ var TypeCheck = (function () {
       if (k != null && !stageOpen(r.i, k)) { go('level-' + (r.i + 1), true); return; }
     }
     resetAsk = false; clearFx(); S = null;
+    if (T && T.stop) T.stop();
+    T = null;
+    if (r.v === 'task' && (!TASKS[r.k] || !taskOpen(TASKS[r.k]))) { go('tasks', true); return; }
     if (r.v === 'map') viewMap();
+    else if (r.v === 'tasks') viewTasks();
+    else if (r.v === 'task') viewTask(r.k);
     else if (r.v === 'book') viewBook();
     else if (r.v === 'me') viewMe();
     else if (r.v === 'hub') viewHub(r.i);
@@ -4147,7 +5175,7 @@ var TypeCheck = (function () {
       return '<button class="tab' + (on === to ? ' is-on' : '') + '" data-act="go" data-to="' + to + '"' + (on === to ? ' aria-current="page"' : '') + '>' + icon +
         '<span>' + label + '</span>' + (badge ? '<span class="tab-badge" aria-label="' + badge + ' 道错题">' + badge + '</span>' : '') + '</button>';
     }
-    return '<nav class="tabbar" aria-label="主导航"><div class="bar-in">' + tab('levels', '闯关', ICON.flag) + tab('notebook', '错题本', ICON.book, wn) + tab('me', '我的', ICON.user) + '</div></nav>';
+    return '<nav class="tabbar" aria-label="主导航"><div class="bar-in">' + tab('levels', '闯关', ICON.flag) + tab('tasks', '实战', ICON.code) + tab('notebook', '错题本', ICON.book, wn) + tab('me', '我的', ICON.user) + '</div></nav>';
   }
   function starRow(n) { var s = ''; for (var i = 0; i < 3; i++) s += i < n ? ICON.star : ICON.starOff; return s; }
   function upCard(r0, r1) {
@@ -4191,7 +5219,7 @@ var TypeCheck = (function () {
     var headIdx = allDone ? LEVELS.length - 1 : cur;
     var fresh = !state.answered && !Object.keys(state.learned).length && !Object.keys(state.typed).length && !Object.keys(state.syn).length;
     var html = topMain();
-    if (fresh) html += '<p class="hello"><b>欢迎来到蟒蛇闯关。</b>每一关四步：看讲解，亲手打语法，亲手打例子，最后答题。点蛇头，从第 1 关开始。</p>';
+    if (fresh) html += '<p class="hello"><b>欢迎来到蟒蛇闯关。</b>每一关四步：看讲解，亲手打语法，亲手打例子，最后答题。底部的“实战”里，可以自己从空白写程序。点蛇头，从第 1 关开始。</p>';
     html += '<div class="map" style="height:' + lay.h + 'px">';
     var n0 = lay.nodes[0];
     html += '<svg class="snake" viewBox="0 0 100 ' + lay.h + '" preserveAspectRatio="none" aria-hidden="true">' +
@@ -4223,7 +5251,7 @@ var TypeCheck = (function () {
         inner + '<span class="node-label"><span class="node-no">第 ' + pad2(n.i + 1) + ' 关</span><span class="node-title">' + esc(lv.title) + '</span>' + extra + '</span></button>';
     });
     html += '</div>';
-    if (allDone) html += '<div class="finish">' + ICON.trophy + '<b>全部通关！</b><span>26 关都拿下了。去错题本清一清，或者回头把每关刷成三星。</span></div>';
+    if (allDone) html += '<div class="finish">' + ICON.trophy + '<b>全部通关！</b><span>' + LEVELS.length + ' 关都拿下了。去“实战”里自己写程序，或者回头把每关刷成三星。</span></div>';
     $view.innerHTML = html;
     $bar.innerHTML = tabbar('levels');
   }
@@ -4312,7 +5340,7 @@ var TypeCheck = (function () {
     return [
       { kind: 'card', html: '<div class="lesson-head"><span class="eyebrow">第 ' + pad2(i + 1) + ' 关 · ' + esc(chapterOf(lv).title) + '</span><h1>' + esc(lv.title) + '</h1>' +
         '<p class="hook">' + fmt(lv.hook) + '</p></div><figure class="fig">' + d.svg + '<figcaption>' + fmt(d.cap) + '</figcaption></figure>' },
-      { kind: 'card', html: sec('怎么写', '<pre class="code" tabindex="0">' + hl(lv.syntax) + '</pre><ul>' + lv.how.map(function (t) { return '<li>' + fmt(t) + '</li>'; }).join('') + '</ul>') },
+      { kind: 'card', html: sec(lv.syntaxTag || '怎么写', '<pre class="code" tabindex="0">' + hl(lv.syntax) + '</pre><ul>' + lv.how.map(function (t) { return '<li>' + fmt(t) + '</li>'; }).join('') + '</ul>') },
       { kind: 'card', html: sec('什么意思', '<p>' + fmt(lv.mean) + '</p>') + sec('有什么用', '<p>' + fmt(lv.use) + '</p>') },
       { kind: 'card', html: sec('试一试', '<div class="demo"><pre class="code" tabindex="0">' + hl(lv.example.code) + '</pre>' +
         '<div class="demo-bar"><button class="demo-btn demo-run" data-act="run" data-i="' + i + '">' + ICON.play + '运行</button>' +
@@ -4750,6 +5778,268 @@ var TypeCheck = (function () {
     });
   }
 
+  /* ---------- 实战：自己写程序，真的运行 ---------- */
+  var SK_BASES = [""];
+  var skLoading = false, skWait = [];
+  function skReady() { return !!(window.Sk && window.Sk.builtinFiles && window.Sk.misceval); }
+  // 解释器比较大，第一次用到时才加载
+  function loadSkulpt(cb) {
+    if (skReady()) { cb(true); return; }
+    skWait.push(cb);
+    if (skLoading) return;
+    skLoading = true;
+    var bi = 0;
+    function done(ok) { skLoading = false; var w = skWait; skWait = []; w.forEach(function (f) { f(ok); }); }
+    function add(src, next, fail) {
+      var s = document.createElement('script');
+      var t = setTimeout(function () { s.onload = s.onerror = null; fail(); }, 25000);
+      s.onload = function () { clearTimeout(t); next(); };
+      s.onerror = function () { clearTimeout(t); fail(); };
+      s.src = src;
+      document.head.appendChild(s);
+    }
+    function tryBase() {
+      if (skReady()) { done(true); return; }
+      if (bi >= SK_BASES.length) { done(false); return; }
+      var base = SK_BASES[bi++];
+      add(base + 'skulpt.min.js', function () { add(base + 'skulpt-stdlib.js', function () { if (skReady()) done(true); else tryBase(); }, tryBase); }, tryBase);
+    }
+    tryBase();
+  }
+  // o.inputs：依次喂给 input() 的内容（提交检查用）；o.ask：向用户要输入（试运行用）；o.onOut：每显示一段就回调
+  function skRun(code, o) {
+    var out = '', ins = (o.inputs || []).slice();
+    Sk.configure({
+      output: function (t) { out += t; if (o.onOut) o.onOut(t); },
+      read: function (x) {
+        if (!Sk.builtinFiles || Sk.builtinFiles.files[x] === undefined) throw "File not found: '" + x + "'";
+        return Sk.builtinFiles.files[x];
+      },
+      inputfun: function (p) {
+        if (o.ask) return o.ask(p).then(function (v) { Sk.execStart = new Date(); return v; });
+        if (!ins.length) throw new Error('NoMoreInput');
+        return ins.shift();
+      },
+      inputfunTakesPrompt: true, __future__: Sk.python3, execLimit: 5000, yieldLimit: 100,
+    });
+    return Sk.misceval.asyncToPromise(function () { return Sk.importMainWithBody('<stdin>', false, code, true); })
+      .then(function () { return { out: out, err: '' }; }, function (e) { return { out: out, err: String(e) }; });
+  }
+  var ERR_CN = {
+    NameError: '用到了一个没有定义的名字。可能是拼错了，或者文字忘了加引号。',
+    SyntaxError: '写法不符合 Python 的规则。检查这一行和上一行的括号、引号、冒号有没有漏、有没有成对。',
+    ParseError: '写法不符合 Python 的规则。检查这一行和上一行的括号、引号、冒号有没有漏、有没有成对。',
+    IndentationError: '缩进不对。同一段代码的缩进要一样，冒号后面的下一行要多缩进 4 个空格。',
+    TypeError: '类型用错了。常见的是把字符串和数字直接相加，或者调用函数时参数个数不对。',
+    ValueError: '值不合适。常见的是把不是数字的文字交给 int() 转换。',
+    ZeroDivisionError: '除数是 0。',
+    IndexError: '索引超出范围。列表没有这么多元素，记得索引从 0 开始。',
+    KeyError: '字典里没有这个键。',
+    AttributeError: '这个数据没有这个方法或属性。检查名字有没有拼错。',
+    TimeLimitError: '程序运行太久，被停下了，多半是死循环。检查循环里有没有让条件变成 False 的代码。',
+  };
+  function errHtml(err, userLines) {
+    if (/Stopped/.test(err)) return '<div class="fb-block"><div class="fb-label">已停止</div></div>';
+    if (/NoMoreInput/.test(err)) return '<div class="fb-block"><div class="fb-label is-why">程序还在等输入</div><p>检查给的输入已经用完了，程序却还在 input()。看看循环有没有在该停的时候停下来。</p></div>';
+    var m = /^(\w+): ([\s\S]*?)(?: on line (\d+))?\s*$/.exec(err) || [], type = m[1] || '出错了', line = +m[3] || 0;
+    var where = !line ? '' : line > userLines ? '（检查时调用你的代码出的错）' : '（第 ' + line + ' 行）';
+    return '<div class="fb-block"><div class="fb-label is-why">出错了：' + esc(type) + where + '</div>' +
+      (ERR_CN[type] ? '<p>' + ERR_CN[type] + '</p>' : '') + '<pre>' + esc(type + ': ' + (m[2] || err)) + '</pre></div>';
+  }
+  // 比较输出时不计较空格和全角半角
+  function normOut(s) {
+    return String(s).split('\n').map(function (l) { var t = l; try { t = t.normalize('NFKC'); } catch (e) {} return t.replace(/[ \t]+/g, ''); }).join('\n').replace(/\n+$/, '');
+  }
+  function stripComments(code) {
+    return code.split('\n').map(function (l) {
+      var q = null;
+      for (var i = 0; i < l.length; i++) {
+        var c = l.charAt(i);
+        if (q) { if (c === '\\') i++; else if (c === q) q = null; } else if (c === '"' || c === "'") q = c; else if (c === '#') return l.slice(0, i);
+      }
+      return l;
+    }).join('\n');
+  }
+  function taskOpen(t) { var i = LEVEL_INDEX[t.after]; return i != null && starsOf(i) > 0; }
+  function tasksDone() { return TASKS.filter(function (t) { return state.tasks[t.id]; }).length; }
+  function viewTasks() {
+    var html = topMain() + '<div class="page-head"><h1>实战</h1><p>这里不给例子，只给要求。自己从空白把程序写出来，真的运行，再提交检查。已通过 <span class="num">' + tasksDone() + '/' + TASKS.length + '</span>。</p></div><div class="task-list">';
+    TASKS.forEach(function (t, k) {
+      var open = taskOpen(t), ok = !!state.tasks[t.id], li = LEVEL_INDEX[t.after];
+      html += '<button class="stage' + (ok ? ' is-done' : '') + (open ? '' : ' is-locked') + '" data-act="task" data-k="' + k + '">' +
+        '<span class="stage-no">' + (ok ? ICON.check : open ? (k + 1) : ICON.lock) + '</span><span class="stage-main"><b>' + esc(t.title) + (t.big ? '<em class="task-big">小项目</em>' : '') + '</b>' +
+        '<span>' + (open ? esc(t.goal) : '通过第 ' + (li + 1) + ' 关“' + esc(LEVELS[li].title) + '”后解锁') + '</span></span>' +
+        '<span class="stage-state">' + (ok ? '已通过' : state.code[t.id] && open ? '写了一半' : '') + '</span></button>';
+    });
+    $view.innerHTML = html + '</div>';
+    $bar.innerHTML = tabbar('tasks');
+  }
+  var T = null, saveTimer;
+  function ioHtml(tc) {
+    return '<div class="io">' + (tc.in ? '<div><span class="io-tag">输入（每行一次）</span><pre>' + esc(tc.in.join('\n')) + '</pre></div>' : '') +
+      (tc.after ? '<div><span class="io-tag">检查时会接着运行</span><pre class="code">' + hl(tc.after) + '</pre></div>' : '') +
+      '<div><span class="io-tag">应该显示</span><pre>' + esc(tc.out) + '</pre></div></div>';
+  }
+  function viewTask(k) {
+    var t = TASKS[k];
+    T = { k: k, t: t, running: false, fails: 0, hints: 0, stop: null, send: null };
+    var html = navTop('tasks', '回到实战列表', '实战 ' + (k + 1) + ' / ' + TASKS.length);
+    html += '<div class="task"><div class="lesson-head"><span class="eyebrow">' + (t.big ? '小项目' : '实战任务') + (state.tasks[t.id] ? ' · 已通过' : '') + '</span><h1>' + esc(t.title) + '</h1></div>' +
+      '<div class="task-desc">' + t.desc.map(function (d) { return '<p>' + fmt(d) + '</p>'; }).join('') + '</div>' +
+      t.sample.map(ioHtml).join('') +
+      '<div class="editor"><div class="ed-gutter" id="ed-gutter" aria-hidden="true">1</div>' +
+      '<textarea class="ed-area" id="ed" wrap="off" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" aria-label="在这里写你的程序" placeholder="在这里写你的程序">' + esc(state.code[t.id] || '') + '</textarea></div>' +
+      '<div class="keys" aria-label="常用符号"><button class="key key-wide" type="button" data-act="key" data-ch="    " aria-label="缩进，输入 4 个空格">缩进</button>' +
+      TYPE_KEYS.map(function (c) { return '<button class="key" type="button" data-act="key" data-ch="' + esc(c) + '" aria-label="输入 ' + esc(c) + '">' + esc(c) + '</button>'; }).join('') + '</div>' +
+      '<div class="task-actions"><button class="btn btn-ghost" id="t-run" data-act="t-run">' + ICON.play + '运行</button><button class="btn" id="t-submit" data-act="t-submit">提交检查</button></div>' +
+      '<div class="console" id="console" hidden></div><div id="t-result"></div>' +
+      '<div class="t-help"><div class="t-hints" id="t-hints"></div><button class="btn-text" id="t-hint" data-act="t-hint">卡住了？看一条提示</button></div></div>';
+    $view.innerHTML = html;
+    $bar.innerHTML = '';
+    syncEditor();
+  }
+  function syncEditor() {
+    var el = $('#ed'), g = $('#ed-gutter');
+    if (!el) return;
+    var n = el.value.split('\n').length, s = '';
+    for (var i = 1; i <= n; i++) s += i + '\n';
+    g.textContent = s;
+    el.style.height = 'auto'; el.style.height = Math.max(190, el.scrollHeight + 4) + 'px';
+  }
+  function onEdInput(e) {
+    var el = $('#ed');
+    if (!el || !T || (e && e.isComposing)) return;
+    var v = el.value, fixed = TypeCheck.normQuotes(v), pos = el.selectionStart;
+    if (fixed !== v) { el.value = v = fixed; try { el.setSelectionRange(pos, pos); } catch (x) {} }
+    // 换行时自动保持缩进；上一行以冒号结尾就多缩进一层
+    if (e && (e.inputType === 'insertLineBreak' || e.inputType === 'insertParagraph') && v.charAt(pos - 1) === '\n') {
+      var before = v.slice(0, pos - 1), prev = before.slice(before.lastIndexOf('\n') + 1);
+      var ind = /^ */.exec(prev)[0] + (/:\s*(#.*)?$/.test(prev) ? '    ' : '');
+      if (ind) { el.value = v.slice(0, pos) + ind + v.slice(pos); try { el.setSelectionRange(pos + ind.length, pos + ind.length); } catch (x) {} }
+    }
+    state.code[T.t.id] = el.value;
+    clearTimeout(saveTimer); saveTimer = setTimeout(save, 500);
+    syncEditor();
+  }
+  function setBusy(on) {
+    var r = $('#t-run'), s = $('#t-submit');
+    if (r) r.innerHTML = on ? '停止' : ICON.play + '运行';
+    if (s) s.disabled = on;
+  }
+  function conOut(html) { var o = $('#con-out'); if (o) o.insertAdjacentHTML('beforeend', html); }
+  function taskRun() {
+    if (!T) return;
+    if (T.running) { if (T.stop) T.stop(); return; }
+    var code = $('#ed').value;
+    if (!code.trim()) { toast('先写点代码再运行'); return; }
+    var con = $('#console'), my = T;
+    T.running = true; setBusy(true); sfx('tap');
+    $('#t-result').innerHTML = '';
+    con.hidden = false;
+    con.innerHTML = '<div class="con-label">运行结果</div><pre class="con-out" id="con-out" aria-live="polite"></pre>';
+    function finish(html) {
+      if (T !== my) return;
+      var row = $('#con-in'); if (row) row.parentNode.removeChild(row);
+      my.running = false; my.stop = my.send = null; setBusy(false);
+      if (html) con.insertAdjacentHTML('beforeend', html);
+    }
+    loadSkulpt(function (ok) {
+      if (T !== my) return;
+      if (!ok) { finish('<div class="con-err"><div class="fb-block"><div class="fb-label is-why">运行环境没有加载成功</div><p>检查网络后再点一次“运行”。</p></div></div>'); return; }
+      skRun(code, {
+        onOut: function (t) { if (T === my) conOut(esc(t)); },
+        ask: function (p) {
+          return new Promise(function (resolve, reject) {
+            if (T !== my) { reject(new Error('Stopped')); return; }
+            conOut(esc(p));
+            con.insertAdjacentHTML('beforeend', '<div class="con-in" id="con-in"><input class="con-input" id="con-input" type="text" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="send" aria-label="程序在等你输入" placeholder="程序在等你输入，打完按回车">' +
+              '<button class="type-enter is-ready" type="button" data-act="con-send" aria-label="发送">' + ICON.enter + '</button></div>');
+            var inp = $('#con-input');
+            try { inp.focus(); } catch (x) {}
+            my.send = function () {
+              var v = inp.value, row = $('#con-in');
+              if (row) row.parentNode.removeChild(row);
+              my.send = my.stop = null;
+              conOut('<span class="typed">' + esc(v) + '</span>\n');
+              resolve(v);
+            };
+            my.stop = function () { my.send = my.stop = null; reject(new Error('Stopped')); };
+          });
+        },
+      }).then(function (r) {
+        if (r.err) finish('<div class="con-err">' + errHtml(r.err, code.split('\n').length) + '</div>');
+        else finish(r.out ? '' : '<div class="con-dim">程序运行结束，没有显示任何内容。要显示结果，得用 print。</div>');
+      });
+    });
+  }
+  function taskSubmit() {
+    if (!T || T.running) return;
+    var t = T.t, my = T, code = $('#ed').value, box = $('#t-result');
+    if (!code.trim()) { toast('先写点代码再提交'); return; }
+    var need = (t.must || []).filter(function (m) { return !new RegExp(m.re).test(stripComments(code)); })[0];
+    if (need) {
+      T.fails++; sfx('bad');
+      box.innerHTML = '<div class="t-card bad"><div class="fb-head">' + ICON.x + '<span>还差一点</span></div><div class="fb-block"><div class="fb-label is-why">这个任务的要求</div><p>' + fmt(need.msg) + '</p></div></div>';
+      box.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+      return;
+    }
+    T.running = true; $('#t-submit').disabled = true; $('#t-submit').textContent = '检查中…';
+    $('#console').hidden = true;
+    loadSkulpt(function (ok) {
+      if (T !== my) return;
+      function end() { my.running = false; var s = $('#t-submit'); if (s) { s.disabled = false; s.textContent = '提交检查'; } }
+      if (!ok) { end(); box.innerHTML = '<div class="t-card bad"><div class="fb-head">' + ICON.x + '<span>运行环境没有加载成功</span></div><p>检查网络后再提交一次。</p></div>'; return; }
+      var results = [], i = 0;
+      (function next() {
+        if (T !== my) return;
+        if (i >= t.tests.length) { end(); showVerdict(results, code); return; }
+        var tc = t.tests[i++];
+        skRun(code + '\n' + (tc.after || ''), { inputs: tc.in || [] }).then(function (r) {
+          results.push({ tc: tc, out: r.out, err: r.err, ok: !r.err && normOut(r.out) === normOut(tc.out) });
+          next();
+        });
+      })();
+    });
+  }
+  function showVerdict(results, code) {
+    var t = T.t, box = $('#t-result'), bad = results.filter(function (r) { return !r.ok; }), n = results.length;
+    if (!bad.length) {
+      var first = !state.tasks[t.id], g = !first ? 0 : state.peek[t.id] ? 10 : t.big ? 60 : 30, r0 = rankInfo(state.xp).lv;
+      state.tasks[t.id] = true; state.xp += g; touchDay(); save();
+      var nextK = -1;
+      for (var k = 0; k < TASKS.length; k++) if (!state.tasks[TASKS[k].id] && taskOpen(TASKS[k])) { nextK = k; break; }
+      box.innerHTML = '<div class="t-card good">' + mascotRow('<p class="bubble-text"><b>全部通过！</b>' + n + ' 个检查都对了' + (g ? '，+' + g + ' 分' : '') + '。这段程序是你自己写出来的。</p>', 'happy') +
+        upCard(r0, rankInfo(state.xp).lv) +
+        (nextK >= 0 ? '<button class="btn btn-good" data-act="task" data-k="' + nextK + '">下一个任务：' + esc(TASKS[nextK].title) + '</button>' : '') +
+        '<button class="btn-text" data-act="go" data-to="tasks">回到实战列表</button></div>';
+      sfx('win'); confetti();
+    } else {
+      T.fails++; sfx('bad'); buzz([30, 40, 30]);
+      var f = bad[0], html = '<div class="t-card bad"><div class="fb-head">' + ICON.x + '<span>还没通过</span><span class="fb-gain">' + (n - bad.length) + '/' + n + '</span></div>';
+      if (f.tc.in) html += '<div class="fb-block"><div class="fb-label">这次检查的输入</div><pre>' + esc(f.tc.in.join('\n')) + '</pre></div>';
+      if (f.tc.after) html += '<div class="fb-block"><div class="fb-label">检查时接着运行的代码</div><pre>' + esc(f.tc.after) + '</pre></div>';
+      if (f.err) html += errHtml(f.err, code.split('\n').length);
+      html += '<div class="fb-block"><div class="fb-label is-why">你的程序显示</div><pre>' + (f.out.replace(/\n+$/, '') ? esc(f.out.replace(/\n+$/, '')) : '（什么都没显示）') + '</pre></div>' +
+        '<div class="fb-block"><div class="fb-label">应该显示</div><pre>' + esc(f.tc.out) + '</pre></div>';
+      if (T.fails >= 3 && !state.tasks[t.id]) html += '<p class="fb-note">试了几次还没过？先看下面的提示。提示都看完还不行，可以看参考答案。</p>';
+      box.innerHTML = html + '</div>';
+    }
+    box.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+  }
+  function taskHint() {
+    if (!T) return;
+    var t = T.t, box = $('#t-hints'), btn = $('#t-hint');
+    if (T.hints < t.hints.length) {
+      box.insertAdjacentHTML('beforeend', '<div class="t-hint-item"><b>提示 ' + (T.hints + 1) + '：</b>' + fmt(t.hints[T.hints]) + '</div>');
+      T.hints++;
+      btn.textContent = T.hints < t.hints.length ? '再看一条提示（' + T.hints + '/' + t.hints.length + '）' : '提示都看完了，看参考答案';
+    } else {
+      state.peek[t.id] = true; save();
+      box.insertAdjacentHTML('beforeend', '<div class="t-hint-item"><b>参考答案</b>（写法不止一种。看懂之后，把它盖住，自己再写一遍）<pre class="code">' + hl(t.solution) + '</pre></div>');
+      btn.hidden = true;
+    }
+  }
+
   /* ---------- 错题本 ---------- */
   function viewBook() {
     var ids = wrongIds();
@@ -4785,7 +6075,7 @@ var TypeCheck = (function () {
       '<div class="grid2"><div class="tile"><b>' + state.xp + '</b><span>总积分</span></div><div class="tile"><b>' + totalStars() + '/' + LEVELS.length * 3 + '</b><span>星星</span></div>' +
       '<div class="tile"><b>' + passed + '/' + LEVELS.length + '</b><span>已通关</span></div><div class="tile"><b>' + typed + '/' + LEVELS.length + '</b><span>代码已手打</span></div>' +
       '<div class="tile"><b>' + state.best + '</b><span>最高连胜</span></div><div class="tile"><b>' + dayStreak() + '</b><span>连续学习天数</span></div>' +
-      '<div class="tile"><b>' + acc + '</b><span>正确率（共答 ' + state.answered + ' 题）</span></div><div class="tile"><b>' + wrongIds().length + '</b><span>错题本里的题</span></div></div></div>';
+      '<div class="tile"><b>' + acc + '</b><span>正确率（共答 ' + state.answered + ' 题）</span></div><div class="tile"><b>' + tasksDone() + '/' + TASKS.length + '</b><span>实战已通过</span></div></div></div>';
     html += '<div class="card"><h2>各章进度</h2><div class="chap-rows">' + CHAPTERS.map(function (ch, ci) {
       var ls = LEVELS.filter(function (l) { return l.ch === ch.id; });
       var d = ls.filter(function (l) { return state.levels[l.id] && state.levels[l.id].stars; }).length;
@@ -4841,6 +6131,15 @@ var TypeCheck = (function () {
       else advance();
     }
     else if (act === 'key') insertKey(el.getAttribute('data-ch'));
+    else if (act === 'task') {
+      k = +el.getAttribute('data-k');
+      if (taskOpen(TASKS[k])) go('task-' + (k + 1));
+      else toast('通过第 ' + (LEVEL_INDEX[TASKS[k].after] + 1) + ' 关后解锁这个任务');
+    }
+    else if (act === 't-run') taskRun();
+    else if (act === 't-submit') taskSubmit();
+    else if (act === 't-hint') taskHint();
+    else if (act === 'con-send') { if (T && T.send) T.send(); }
     else if (act === 'type-ok') submitLine();
     else if (act === 'peek') {
       if (!st || st.kind !== 'type') return;
@@ -4881,22 +6180,29 @@ var TypeCheck = (function () {
     var c = $('#check'); if (c) c.disabled = !canCheck(st);
   }
   function insertKey(ch) {
-    var el = $('#fill') || $('#type-input');
+    var el = $('#fill') || $('#type-input') || $('#ed');
     if (!el || el.disabled) return;
     var s = el.selectionStart == null ? el.value.length : el.selectionStart, e2 = el.selectionEnd == null ? s : el.selectionEnd;
     el.value = el.value.slice(0, s) + ch + el.value.slice(e2);
     el.focus();
     try { el.setSelectionRange(s + ch.length, s + ch.length); } catch (x) {}
-    if (el.id === 'fill') onFillInput(); else liveTyping();
+    if (el.id === 'fill') onFillInput(); else if (el.id === 'ed') onEdInput(); else liveTyping();
   }
   document.addEventListener('input', function (e) {
     if (!e.target) return;
     if (e.target.id === 'fill') onFillInput();
+    else if (e.target.id === 'ed') onEdInput(e);
     else if (e.target.id === 'type-input' && !e.isComposing) liveTyping(); // 拼音还没选字时先不检查
   });
-  document.addEventListener('compositionend', function (e) { if (e.target && e.target.id === 'type-input') liveTyping(); });
+  document.addEventListener('compositionend', function (e) {
+    if (!e.target) return;
+    if (e.target.id === 'type-input') liveTyping(); else if (e.target.id === 'ed') onEdInput();
+  });
   document.addEventListener('keydown', function (e) {
-    if (e.key !== 'Enter' || !e.target) return;
+    if (!e.target) return;
+    if (e.key === 'Tab' && e.target.id === 'ed') { e.preventDefault(); insertKey('    '); return; }
+    if (e.key !== 'Enter') return;
+    if (e.target.id === 'con-input' && !e.isComposing && e.keyCode !== 229) { e.preventDefault(); if (T && T.send) T.send(); return; }
     if (e.target.id === 'fill') { e.preventDefault(); e.target.blur(); checkStep(); }
     else if (e.target.id === 'type-input' && !e.isComposing && e.keyCode !== 229) { e.preventDefault(); submitLine(); }
   });
