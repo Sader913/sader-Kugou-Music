@@ -102,6 +102,8 @@ ul, ol { padding: 0; list-style: none; }
 .num { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
 
 .app { max-width: 560px; margin: 0 auto; padding-left: var(--gutter-l); padding-right: var(--gutter-r); padding-block: 0 112px; }
+/* 切换步骤时内容会从右侧滑入；裁掉滑入时多出来的部分，免得手机上页面临时变宽、左右晃动（clip 不影响吸顶的顶栏） */
+.app { overflow-x: clip; }
 .bar-in { max-width: 560px; margin: 0 auto; padding-left: var(--gutter-l); padding-right: var(--gutter-r); }
 
 /* ---------- 顶部状态条 ---------- */
@@ -548,6 +550,33 @@ body.has-sheet .app { padding-bottom: 58vh; }
 .t-hints { display: grid; gap: 8px; }
 .t-hint-item { background: var(--surface); border: 1.5px solid var(--line); border-radius: 14px; padding: 10px 14px; font-size: 16px; line-height: 1.6; }
 .t-hint-item .code { margin-top: 8px; font-size: 13px; }
+
+/* ---------- 存档 ---------- */
+.cloud-slot { display: contents; }
+.cloud-ic { flex: none; width: 34px; height: 34px; margin-left: -4px; display: grid; place-items: center; border-radius: 10px; color: var(--ink-3); }
+.cloud-ic .ic { width: 26px; height: 26px; }
+.cloud-ic.is-on { color: var(--good); }
+.cloud-ic.is-checking, .cloud-ic.is-saving { color: var(--blue); animation: cloudPulse 1.2s ease-in-out infinite; }
+.cloud-ic.is-error { color: var(--bad); }
+@keyframes cloudPulse { 50% { opacity: .45; } }
+.cloud-row { display: flex; gap: 12px; align-items: flex-start; }
+.cloud-badge { flex: none; width: 46px; height: 46px; border-radius: 14px; display: grid; place-items: center; background: var(--tint); color: var(--ink-3); }
+.cloud-badge .ic { width: 28px; height: 28px; }
+.cloud-badge.is-on { background: var(--good-bg); color: var(--good); }
+.cloud-badge.is-checking, .cloud-badge.is-saving { background: var(--blue-soft); color: var(--blue-text); }
+.cloud-badge.is-error { background: var(--bad-bg); color: var(--bad); }
+.cloud-main { flex: 1; min-width: 0; display: grid; gap: 4px; justify-items: start; }
+.cloud-main b { font-size: 17px; line-height: 1.3; }
+.cloud-main p { font-size: 15px; line-height: 1.6; color: var(--ink-2); }
+.save-block { display: grid; gap: 8px; padding-top: 14px; border-top: 1.5px dashed var(--line); justify-items: stretch; }
+.save-block h3 { font-size: 16px; font-weight: 800; line-height: 1.3; margin: 0; }
+.save-block p { font-size: 15px; line-height: 1.6; color: var(--ink-2); }
+.save-block .btn-sm { justify-self: start; }
+.backup-out { display: grid; gap: 8px; }
+.backup-code { width: 100%; min-height: 92px; padding: 10px 12px; border-radius: 12px; border: 2px solid var(--line); background: var(--tint); color: var(--ink); font-family: var(--font-mono); font-size: 13px; line-height: 1.5; word-break: break-all; resize: vertical; }
+.backup-code:focus { outline: none; border-color: var(--blue); }
+.save-note { font-size: 14px; line-height: 1.55; color: var(--ink-2); }
+.save-note.bad { color: var(--bad); font-weight: 700; }
 
 /* ---------- 开关、彩纸 ---------- */
 .switch-row { width: 100%; min-height: 48px; display: flex; align-items: center; justify-content: space-between; gap: 12px; text-align: left; font-size: 17px; font-weight: 700; }
@@ -4874,26 +4903,34 @@ var TypeCheck = (function () {
   /* ---------- 存档 ---------- */
   function freshState() {
     return { v: 1, xp: 0, streak: 0, best: 0, levels: {}, wrong: {}, learned: {}, syn: {}, spos: {}, typed: {}, tpos: {}, tasks: {}, code: {}, peek: {},
-      answered: 0, correct: 0, day: '', days: 0, last: '', sound: true };
+      fixed: {}, answered: 0, correct: 0, day: '', days: 0, last: '', sound: true, t: 0, r: 0 };
   }
   var saveOk = true;
+  // 把读到的存档（本地、云端或进度码）整理成标准的样子，字段类型不对的就丢掉
+  function normState(s) {
+    if (!s || typeof s !== 'object' || s.v !== 1) return null;
+    var st = freshState();
+    Object.keys(st).forEach(function (k) { if (s[k] !== undefined && s[k] !== null && typeof s[k] === typeof st[k]) st[k] = s[k]; });
+    Object.keys(st.wrong).forEach(function (id) { var w = st.wrong[id]; if (!Q_INDEX[id] || !w || typeof w !== 'object') delete st.wrong[id]; });
+    Object.keys(st.levels).forEach(function (id) { var l = st.levels[id]; if (!l || typeof l !== 'object' || typeof l.stars !== 'number') delete st.levels[id]; });
+    Object.keys(st.code).forEach(function (id) { if (typeof st.code[id] !== 'string') delete st.code[id]; });
+    return st;
+  }
   function load() {
     try {
       var raw = localStorage.getItem(STORE_KEY);
-      if (raw) {
-        var s = JSON.parse(raw);
-        if (s && s.v === 1) {
-          var st = freshState();
-          Object.keys(st).forEach(function (k) { if (s[k] !== undefined && typeof s[k] === typeof st[k]) st[k] = s[k]; });
-          Object.keys(st.wrong).forEach(function (id) { if (!Q_INDEX[id]) delete st.wrong[id]; });
-          return st;
-        }
-      }
+      if (raw) { var st = normState(JSON.parse(raw)); if (st) return st; }
     } catch (e) { saveOk = false; }
     return freshState();
   }
-  function save() {
+  function saveLocal() {
     try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); saveOk = true; } catch (e) { saveOk = false; }
+  }
+  // 每次进度有变化都调用：记下时间，存本地，再安排写云端
+  function save() {
+    state.t = Date.now();
+    saveLocal();
+    scheduleCloud();
   }
   var state = load();
 
@@ -5163,7 +5200,8 @@ var TypeCheck = (function () {
       '<button class="rank" data-act="go" data-to="me" aria-label="等级 ' + r.lv + '，' + esc(r.name) + '，积分 ' + state.xp + '">' + rankBadge(r.lv) +
       '<span class="rank-main"><span class="rank-name">' + esc(r.name) + ' · <span class="num">' + state.xp + '</span> 分</span>' +
       '<span class="xpbar"><i style="width:' + r.pct + '%"></i></span></span></button>' +
-      '<span class="stat stat-star" role="img" aria-label="星星 ' + totalStars() + ' 颗">' + ICON.star + '<span>' + totalStars() + '</span></span>' + flameStat() + '</header>';
+      '<span class="stat stat-star" role="img" aria-label="星星 ' + totalStars() + ' 颗">' + ICON.star + '<span>' + totalStars() + '</span></span>' + flameStat() +
+      '<span class="cloud-slot">' + cloudBadge() + '</span></header>';
   }
   function navTop(to, label, title) {
     return '<header class="top top-nav"><button class="icon-btn" data-act="go" data-to="' + to + '" aria-label="' + label + '">' + ICON.back + '</button>' +
@@ -5219,7 +5257,8 @@ var TypeCheck = (function () {
     var headIdx = allDone ? LEVELS.length - 1 : cur;
     var fresh = !state.answered && !Object.keys(state.learned).length && !Object.keys(state.typed).length && !Object.keys(state.syn).length;
     var html = topMain();
-    if (fresh) html += '<p class="hello"><b>欢迎来到蟒蛇闯关。</b>每一关四步：看讲解，亲手打语法，亲手打例子，最后答题。底部的“实战”里，可以自己从空白写程序。点蛇头，从第 1 关开始。</p>';
+    if (fresh && cloud.status === 'checking') html += '<p class="hello">正在读取你的云端存档…</p>';
+    else if (fresh) html += '<p class="hello"><b>欢迎来到蟒蛇闯关。</b>每一关四步：看讲解，亲手打语法，亲手打例子，最后答题。底部的“实战”里，可以自己从空白写程序。点蛇头，从第 1 关开始。</p>';
     html += '<div class="map" style="height:' + lay.h + 'px">';
     var n0 = lay.nodes[0];
     html += '<svg class="snake" viewBox="0 0 100 ' + lay.h + '" preserveAspectRatio="none" aria-hidden="true">' +
@@ -5665,7 +5704,7 @@ var TypeCheck = (function () {
       st.bonus = st.retry ? 0 : Math.min((state.streak - 1) * 2, 10);
       st.gain = (S.mode === 'review' || st.retry ? 5 : 10) + st.bonus;
       state.xp += st.gain; S.gain += st.gain; S.right++;
-      if (S.mode === 'review') { delete state.wrong[q.id]; S.cleared++; }
+      if (S.mode === 'review') { delete state.wrong[q.id]; state.fixed[q.id] = Date.now(); S.cleared++; }
     } else {
       state.streak = 0; S.missed++;
       var w = state.wrong[q.id] || { n: 0, t: 0 };
@@ -5917,7 +5956,7 @@ var TypeCheck = (function () {
       var ind = /^ */.exec(prev)[0] + (/:\s*(#.*)?$/.test(prev) ? '    ' : '');
       if (ind) { el.value = v.slice(0, pos) + ind + v.slice(pos); try { el.setSelectionRange(pos + ind.length, pos + ind.length); } catch (x) {} }
     }
-    state.code[T.t.id] = el.value;
+    state.code[T.t.id] = el.value.length > 20000 ? el.value.slice(0, 20000) : el.value;
     clearTimeout(saveTimer); saveTimer = setTimeout(save, 500);
     syncEditor();
   }
@@ -6063,6 +6102,18 @@ var TypeCheck = (function () {
   }
 
   /* ---------- 我的 ---------- */
+  // “我的”页面里的存档卡片：云端存档状态、进度码、清空进度
+  function saveCardHtml() {
+    return '<div class="card" id="save-card"><h2>存档</h2><div class="cloud-row" id="cloud-row">' + cloudRowHtml() + '</div>' +
+      '<div class="save-block"><h3>进度码</h3><p>把进度变成一串文字。复制下来存好（比如发给自己），换设备或者清了浏览器数据，粘贴回来就能恢复。</p>' +
+      '<button class="btn btn-ghost" data-act="backup-make">生成进度码</button>' +
+      '<div class="backup-out" id="backup-out" hidden><textarea class="backup-code" id="backup-code" readonly aria-label="你的进度码"></textarea>' +
+      '<button class="btn btn-sm" data-act="backup-copy">复制进度码</button></div></div>' +
+      '<div class="save-block"><h3>用进度码恢复</h3><textarea class="backup-code" id="backup-in" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" aria-label="粘贴进度码" placeholder="把进度码粘贴到这里"></textarea>' +
+      '<button class="btn btn-sm btn-ghost" data-act="backup-restore">恢复进度</button><p class="save-note" id="backup-msg">恢复时会和现在的进度合并，两边完成过的内容都会保留。</p></div>' +
+      '<div class="save-block">' + (resetAsk ? '<div class="confirm"><p><b>确定清空全部进度吗？</b>积分、星星、错题本和云端存档都会清空。没有提前生成进度码的话，无法恢复。</p><div class="confirm-row"><button class="btn btn-sm btn-ghost" data-act="reset-no">取消</button><button class="btn btn-sm btn-bad" data-act="reset-yes">确定清空</button></div></div>'
+        : '<button class="btn-text" data-act="reset-ask" style="color:var(--bad)">清空进度，从头开始</button>') + '</div></div>';
+  }
   function viewMe() {
     var r = rankInfo(state.xp), passed = 0, typed = 0;
     for (var i = 0; i < LEVELS.length; i++) { if (starsOf(i)) passed++; if (handTyped(i)) typed++; }
@@ -6076,6 +6127,7 @@ var TypeCheck = (function () {
       '<div class="tile"><b>' + passed + '/' + LEVELS.length + '</b><span>已通关</span></div><div class="tile"><b>' + typed + '/' + LEVELS.length + '</b><span>代码已手打</span></div>' +
       '<div class="tile"><b>' + state.best + '</b><span>最高连胜</span></div><div class="tile"><b>' + dayStreak() + '</b><span>连续学习天数</span></div>' +
       '<div class="tile"><b>' + acc + '</b><span>正确率（共答 ' + state.answered + ' 题）</span></div><div class="tile"><b>' + tasksDone() + '/' + TASKS.length + '</b><span>实战已通过</span></div></div></div>';
+    html += saveCardHtml();
     html += '<div class="card"><h2>各章进度</h2><div class="chap-rows">' + CHAPTERS.map(function (ch, ci) {
       var ls = LEVELS.filter(function (l) { return l.ch === ch.id; });
       var d = ls.filter(function (l) { return state.levels[l.id] && state.levels[l.id].stars; }).length;
@@ -6083,15 +6135,12 @@ var TypeCheck = (function () {
     }).join('') + '</div></div>';
     html += '<div class="card"><h2>设置</h2><button class="switch-row" data-act="sound" role="switch" aria-checked="' + state.sound + '"><span>音效</span>' +
       '<span class="switch' + (state.sound ? ' is-on' : '') + '"></span></button></div>';
-    html += '<div class="card"><h2>分享给朋友</h2><p>把这个页面的链接发给朋友，对方打开就能玩，不用注册。每个人的进度只保存在自己的手机里，互不影响。</p>' +
+    html += '<div class="card"><h2>分享给朋友</h2><p>把这个页面的链接发给朋友，对方打开就能玩。每个人的进度各存各的，互不影响。</p>' +
       (STANDALONE ? '<button class="btn btn-ghost" data-act="share">' + ICON.share + '分享链接</button>' : '') + '</div>';
     html += '<div class="card"><h2>添加到手机桌面</h2><ol class="steps">' +
       '<li><b>苹果手机：</b>用 Safari 打开本页，点底部的分享按钮，选“添加到主屏幕”。</li>' +
       '<li><b>安卓手机：</b>在浏览器右上角的菜单里，选“添加到主屏幕”或“安装应用”。</li>' +
-      '<li>添加之后，建议一直从桌面图标进入，进度保存在那里。</li></ol></div>';
-    html += '<div class="card"><h2>学习进度</h2><p>进度保存在这台设备的这个浏览器里。换手机、换浏览器或清除浏览器数据后，进度不会跟过去。</p>' +
-      (resetAsk ? '<div class="confirm"><p><b>确定清空全部进度吗？</b>积分、星星和错题本都会删除，无法恢复。</p><div class="confirm-row"><button class="btn btn-sm btn-ghost" data-act="reset-no">取消</button><button class="btn btn-sm btn-bad" data-act="reset-yes">确定清空</button></div></div>'
-        : '<button class="btn-text" data-act="reset-ask" style="color:var(--bad)">清空进度，从头开始</button>') + '</div>';
+      '<li>没有开启云端存档时，进度存在打开它的那个浏览器里，所以添加之后建议一直从桌面图标进入。</li></ol></div>';
     $view.innerHTML = html;
     $bar.innerHTML = tabbar('me');
   }
@@ -6164,7 +6213,23 @@ var TypeCheck = (function () {
     else if (act === 'sound') { state.sound = !state.sound; save(); viewMe(); sfx('ok'); }
     else if (act === 'reset-ask') { resetAsk = true; viewMe(); }
     else if (act === 'reset-no') { resetAsk = false; viewMe(); }
-    else if (act === 'reset-yes') { state = freshState(); save(); resetAsk = false; S = null; viewMe(); window.scrollTo(0, 0); toast('进度已清空'); }
+    else if (act === 'reset-yes') {
+      state = freshState(); state.r = Date.now(); save(); pushCloud();
+      resetAsk = false; S = null; viewMe(); window.scrollTo(0, 0); toast('进度已清空');
+    }
+    else if (act === 'cloud-retry') { if (cloud.ref) cloudSync(); else initCloud(); }
+    else if (act === 'backup-make') {
+      var out = $('#backup-out'), box = $('#backup-code');
+      box.value = makeBackup(); out.hidden = false;
+      try { box.focus(); box.select(); } catch (x) {}
+    }
+    else if (act === 'backup-copy') { var bc = $('#backup-code'); if (bc) { try { bc.select(); } catch (x) {} copyText(bc.value, '进度码已复制，记得存好'); } }
+    else if (act === 'backup-restore') {
+      var inp = $('#backup-in'), got = inp ? readBackup(inp.value) : null, msg = $('#backup-msg');
+      if (!got) { msg.textContent = '这不是有效的进度码。进度码以 PYQ1- 开头，要完整复制，不能少字。'; msg.className = 'save-note bad'; return; }
+      state = mergeStates(state, got); save(); pushCloud();
+      viewMe(); toast('进度已恢复');
+    }
     else if (act === 'share') {
       var url = location.href.split('#')[0];
       if (navigator.share) navigator.share({ title: 'Python 蟒蛇闯关', text: '从零开始学 Python 的闯关小游戏，打开就能玩', url: url }).catch(function () {});
@@ -6211,9 +6276,173 @@ var TypeCheck = (function () {
     if (e.target && e.target.id === 'type-input') { e.preventDefault(); setHint('这里要亲手打，不能粘贴。', 'bad'); }
   });
   document.addEventListener('drop', function (e) { if (e.target && e.target.id === 'type-input') e.preventDefault(); });
+  /* ---------- 存档：本地 + 云端（Claude 账号）+ 进度码 ----------
+     页面先用这台设备上的存档画出来；连上云端后读一次云端存档，和本地合并（两边的进度都保留），
+     之后每次有变化，等 1.5 秒没有新变化再写一次云端。云端存档放在只有本人能读写的 data/users/<id>/ 下。 */
+  var cloud = { status: 'off', reason: 'none', ref: null, ready: false, syncing: false, writing: false, dirty: false,
+    retried: false, tries: 0, timer: null, retryTimer: null, last: '', at: 0 };
+  function hhmm(ts) { var d = new Date(ts); return pad2(d.getHours()) + ':' + pad2(d.getMinutes()); }
+  function withTimeout(p, ms) {
+    return new Promise(function (resolve, reject) {
+      var t = setTimeout(function () { reject({ code: 'timeout' }); }, ms);
+      p.then(function (v) { clearTimeout(t); resolve(v); }, function (e) { clearTimeout(t); reject(e); });
+    });
+  }
+  // 合并两份存档：完成过的都算完成，星星、积分取多的；连胜、设置这类“现在的状态”取较新的一份
+  function mergeStates(a, b) {
+    var n = (a.t || 0) >= (b.t || 0) ? a : b, o = n === a ? b : a;
+    var m = JSON.parse(JSON.stringify(n));
+    if (n.r && n.r >= (o.t || 0)) return m;   // 较新的一份是在另一份之后清空重来的
+    m.xp = Math.max(a.xp, b.xp);
+    m.best = Math.max(a.best, b.best);
+    if (o.answered > m.answered) { m.answered = o.answered; m.correct = o.correct; }
+    Object.keys(o.levels).forEach(function (id) {
+      var x = o.levels[id], y = m.levels[id];
+      m.levels[id] = y ? { stars: Math.max(x.stars || 0, y.stars || 0), plays: Math.max(x.plays || 0, y.plays || 0) } : x;
+    });
+    ['learned', 'syn', 'typed', 'tasks', 'peek'].forEach(function (k) {
+      Object.keys(o[k]).forEach(function (id) { if (o[k][id]) m[k][id] = true; });
+    });
+    ['spos', 'tpos', 'code'].forEach(function (k) {
+      Object.keys(o[k]).forEach(function (id) { if (!(id in m[k])) m[k][id] = o[k][id]; });
+    });
+    Object.keys(m.syn).forEach(function (id) { delete m.spos[id]; });
+    Object.keys(m.typed).forEach(function (id) { delete m.tpos[id]; });
+    Object.keys(o.fixed).forEach(function (id) { m.fixed[id] = Math.max(m.fixed[id] || 0, o.fixed[id] || 0); });
+    Object.keys(o.wrong).forEach(function (id) {
+      var w = o.wrong[id], y = m.wrong[id];
+      m.wrong[id] = y ? { n: Math.max(y.n || 0, w.n || 0), t: Math.max(y.t || 0, w.t || 0) } : w;
+    });
+    // 错题在一边重练掌握了，另一边答错得更早：算掌握
+    Object.keys(m.wrong).forEach(function (id) { if ((m.fixed[id] || 0) >= (m.wrong[id].t || 0)) delete m.wrong[id]; });
+    if (o.day > m.day || (o.day === m.day && o.days > m.days)) { m.day = o.day; m.days = o.days; }
+    return m;
+  }
+  var CLOUD_ICON = '<path d="M7 18.5h10.3a4.2 4.2 0 0 0 .5-8.4A6 6 0 0 0 6.4 9.2 4.7 4.7 0 0 0 7 18.5z"' + SK + '/>';
+  function cloudIcon() {
+    var mark = cloud.status === 'on' ? '<path d="M9.4 13.6l1.9 1.9 3.4-3.4"' + SK + '/>'
+      : cloud.status === 'error' || cloud.status === 'off' ? '<path d="M4 4l16 16"' + SK + '/>'
+      : '<path d="M12 16.2v-4.6M9.9 13.6 12 11.5l2.1 2.1"' + SK + '/>';
+    return svgIcon(CLOUD_ICON + mark);
+  }
+  var CLOUD_LABEL = { checking: '正在连接云端存档', saving: '正在保存到云端', on: '进度已保存到云端', error: '暂时连不上云端存档', off: '没有云端存档' };
+  function cloudBadge() {
+    if (cloud.status === 'off') return '';
+    return '<button class="cloud-ic is-' + cloud.status + '" data-act="go" data-to="me" aria-label="' + CLOUD_LABEL[cloud.status] + '">' + cloudIcon() + '</button>';
+  }
+  function cloudText() {
+    if (cloud.status === 'checking') return '正在连接云端存档…';
+    if (cloud.status === 'saving') return '正在保存到云端…';
+    if (cloud.status === 'on') return '已开启。进度会自动保存到你的 Claude 账号，换手机、换浏览器，登录同一个账号打开这个页面就能接着玩。' + (cloud.at ? '上次保存：' + hhmm(cloud.at) + '。' : '');
+    if (cloud.status === 'error') return '暂时连不上云端。进度先存在这台设备上，连上以后会自动同步。';
+    if (cloud.reason === 'readonly') return '这个链接只能查看，不能把进度存进账号，进度只存在这台设备上。换设备时用下面的进度码。';
+    if (cloud.reason === 'noaccount') return '现在没有连上你的 Claude 账号（可能没有登录），进度只存在这台设备上。登录后重新打开这个页面，就会开启云端存档。';
+    return '从这个网址打开时没有云端存档。进度存在这台设备的浏览器里，换设备时用下面的进度码。';
+  }
+  function cloudRowHtml() {
+    return '<span class="cloud-badge is-' + cloud.status + '">' + cloudIcon() + '</span><div class="cloud-main"><b>云端存档</b><p>' + esc(cloudText()) + '</p>' +
+      (cloud.status === 'error' ? '<button class="btn btn-sm btn-ghost" data-act="cloud-retry">重新连接</button>' : '') + '</div>';
+  }
+  function setCloud(s, reason) {
+    cloud.status = s;
+    if (reason) cloud.reason = reason;
+    Array.prototype.forEach.call(document.querySelectorAll('.cloud-slot'), function (el) { el.innerHTML = cloudBadge(); });
+    var row = $('#cloud-row'); if (row) row.innerHTML = cloudRowHtml();
+  }
+  function refreshView() {
+    var v = route().v;
+    if (v === 'map' || v === 'book' || v === 'me' || v === 'tasks' || v === 'hub') render();
+  }
+  function cloudSync() {
+    if (!cloud.ref || cloud.syncing) return;
+    clearTimeout(cloud.retryTimer);
+    cloud.syncing = true;
+    setCloud('checking');
+    withTimeout(cloud.ref.get(), 10000).then(function (snap) {
+      cloud.syncing = false; cloud.tries = 0;
+      var body = snap && snap.exists ? snap.data() : null;
+      var remote = body ? normState(body.data) : null;
+      var before = JSON.stringify(state), merged = remote ? mergeStates(state, remote) : state, after = JSON.stringify(merged);
+      cloud.ready = true;
+      cloud.last = remote ? JSON.stringify(remote) : '';
+      if (body && body.t) cloud.at = body.t;
+      if (after !== before) {
+        state = merged; saveLocal();
+        toast('已从云端读取你的进度');
+        refreshView();
+      }
+      // 本地有云端没有的进度，就写一次云端；两边一样就不写。旧版本的存档没有时间，看有没有积分或草稿
+      var hasLocal = state.t || state.xp || state.answered || Object.keys(state.code).length;
+      if (after !== cloud.last && (remote || hasLocal)) pushCloud(); else setCloud('on');
+    }, function (e) {
+      cloud.syncing = false;
+      var code = e && e.code;
+      if (code === 'not_granted' || code === 'revoked' || code === 'capability_disabled' || code === 'capability_removed') { setCloud('off', 'noaccount'); return; }
+      setCloud('error');
+      cloud.retryTimer = setTimeout(cloudSync, Math.min(60000, 15000 * (++cloud.tries)));
+    });
+  }
+  function pushCloud() {
+    clearTimeout(cloud.timer);
+    if (!cloud.ready || !cloud.ref) return;
+    if (cloud.writing) { cloud.dirty = true; return; }
+    var body = JSON.stringify(state);
+    if (body === cloud.last) { if (cloud.status !== 'on') setCloud('on'); return; }
+    cloud.writing = true; cloud.dirty = false;
+    setCloud('saving');
+    cloud.ref.set({ v: 1, t: state.t, data: JSON.parse(body) }).then(function () {
+      cloud.writing = false; cloud.retried = false; cloud.last = body; cloud.at = Date.now();
+      setCloud('on');
+      if (cloud.dirty) pushCloud();
+    }, function (e) {
+      cloud.writing = false;
+      var code = e && e.code;
+      if (code === 'unavailable' && !cloud.retried) { cloud.retried = true; cloud.timer = setTimeout(pushCloud, 1000 + Math.random() * 2000); return; }
+      cloud.retried = false;
+      if (code === 'invalid_argument' || code === 'transform_error') { cloud.ready = false; setCloud('off', 'readonly'); return; }
+      if (code === 'not_granted' || code === 'revoked' || code === 'capability_disabled' || code === 'capability_removed') { cloud.ready = false; setCloud('off', 'noaccount'); return; }
+      setCloud('error');   // 下次有变化时会再试
+    });
+  }
+  function scheduleCloud() {
+    if (!cloud.ref) return;
+    if (!cloud.ready) { if (!cloud.syncing && cloud.status === 'error') cloudSync(); return; }
+    clearTimeout(cloud.timer);
+    cloud.timer = setTimeout(pushCloud, 1500);
+  }
+  function initCloud() {
+    var c = window.claude;
+    if (!c || typeof c.use !== 'function') return;   // 不在 Claude 里打开（比如部署到别的网站）：只用本地存档
+    setCloud('checking', 'noaccount');
+    Promise.all([c.use('user'), c.use('db')]).then(function (r) {
+      var user = r[0], db = r[1];
+      if (!user || !db) { setCloud('off', 'noaccount'); return; }
+      return user.id().then(function (id) {
+        if (!id) { setCloud('off', 'noaccount'); return; }
+        cloud.ref = db.doc('data/users/' + id + '/progress');
+        cloudSync();
+      });
+    }).catch(function () { setCloud('off', 'noaccount'); });
+  }
+  document.addEventListener('visibilitychange', function () {
+    if (document.visibilityState === 'hidden') pushCloud();
+    else if (cloud.ref && !cloud.ready && !cloud.syncing) cloudSync();
+  });
+  window.addEventListener('pagehide', pushCloud);
+
+  // 进度码：把整个存档变成一串文字，复制下来，换设备时粘贴恢复
+  var BACKUP_PREFIX = 'PYQ1-';
+  function makeBackup() { return BACKUP_PREFIX + btoa(unescape(encodeURIComponent(JSON.stringify(state)))); }
+  function readBackup(text) {
+    var t = String(text || '').replace(/\s+/g, '');
+    if (t.indexOf(BACKUP_PREFIX) !== 0) return null;
+    try { return normState(JSON.parse(decodeURIComponent(escape(atob(t.slice(BACKUP_PREFIX.length)))))); } catch (e) { return null; }
+  }
+
   window.addEventListener('hashchange', render);
 
   render();
+  initCloud();
 })();
 
 })();
